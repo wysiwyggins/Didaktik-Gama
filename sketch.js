@@ -184,7 +184,7 @@ function draw() {
       } else {
         updatedGrid[i][j] = (val + day) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
       }
-      // If the current tile has a value of 6, set all its neighbors to 6
+      
       if (val == 8 - season) {
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
