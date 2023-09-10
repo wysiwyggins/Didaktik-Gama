@@ -72,8 +72,8 @@ function addConnectingTile(i, j, updatedGrid) {
     if (j+1 < GRID_HEIGHT && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_TOP_LEFT, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL]);
     }
-    if (j-1 >= 0 && !isBoxTile(grid[i][j-1])) {
-      updatedGrid[i][j-1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_BOTTOM_RIGHT, BOX_VERTICAL_HORIZONTAL]);
+    if (j-1 < GRID_HEIGHT && !isBoxTile(grid[i][j+1])) {
+      updatedGrid[i][j+1] = BOX_VERTICAL_HORIZONTAL;
     }
   }
 
