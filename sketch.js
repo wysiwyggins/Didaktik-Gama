@@ -179,8 +179,10 @@ function draw() {
       let val = grid[i][j];
       if ((!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) && !isBoxTile(updatedGrid[i][j])) {
         updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
-      } else {
+      } else if (isBoxTile(val) && season % 2 == 0){
         addConnectingTile(i, j, updatedGrid);
+      } else {
+        updatedGrid[i][j] = (val + day) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
       }
       // If the current tile has a value of 6, set all its neighbors to 6
       if (val == 8 - season) {
@@ -190,6 +192,17 @@ function draw() {
                 let nj = j + dy;
                 if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
                     updatedGrid[ni][nj] = 6;
+                }
+            }
+        }
+      }
+      if (val == year && season % 2 == 0) {
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                let ni = i + dx;
+                let nj = j + dy;
+                if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
+                    updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
                 }
             }
         }
