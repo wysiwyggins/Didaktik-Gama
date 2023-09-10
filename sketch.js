@@ -179,6 +179,8 @@ function draw() {
       let val = grid[i][j];
       if ((!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) && !isBoxTile(updatedGrid[i][j])) {
         updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
+      } else {
+        addConnectingTile(i, j, updatedGrid);
       }
       // If the current tile has a value of 6, set all its neighbors to 6
       if (val == 8 - season) {
@@ -199,7 +201,7 @@ function draw() {
       // Increment the value for the next frame
       if (!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) {
         updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
-        if (i == 0 && j == 0 && (day == 1 || day == 4) ) {
+        if (i == 0 && j == 0 && (day == 1 || day == 4 || day == 6)) {
           let soundIndex = val % 22;
           sounds[soundIndex].play();
         }
