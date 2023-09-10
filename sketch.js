@@ -1,7 +1,7 @@
 let spritesheet;
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;
-const GRID_WIDTH = 40;
+const GRID_WIDTH = 51;
 const GRID_HEIGHT = 40;
 const SPRITESHEET_COLS = 23;
 const SPRITESHEET_ROWS = 11;
