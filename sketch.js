@@ -1,7 +1,7 @@
 let spritesheet;
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;
-const GRID_WIDTH = 40;
+const GRID_WIDTH = 51;
 const GRID_HEIGHT = 40;
 const SPRITESHEET_COLS = 23;
 const SPRITESHEET_ROWS = 11;
@@ -9,6 +9,7 @@ let grid = [];
 let sounds = [];
 let season = 0;
 let day = 0;
+let year = 0;
 
 const BOX_TOP_LEFT = xyToIndex(8, 9);
 const BOX_HORIZONTAL = xyToIndex(11, 8);
@@ -68,7 +69,7 @@ function addConnectingTile(i, j, updatedGrid) {
     }
   }
 
-  if (grid[i][j] === BOX_VERTICAL) {
+  if (grid[i][j] === BOX_VERTICAL && season % 2 == 0) {
     if (j+1 < GRID_HEIGHT && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_TOP_LEFT, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL]);
     }
@@ -134,7 +135,7 @@ function hasBoxTiles() {
 function reseedGrid() {
   for (let i = 0; i < GRID_WIDTH; i++) {
     for (let j = 0; j < GRID_HEIGHT; j++) {
-      if (!isBoxTile(grid[i][j])) {
+      if (!isBoxTile(grid[i][j]) && !canConnect(i, j)) {
         grid[i][j] = floor(random(SPRITESHEET_COLS * SPRITESHEET_ROWS));
      }
     }
@@ -160,8 +161,12 @@ function draw() {
     season += 1;
     day = 0;
   }
-  if (season > 10) {
+  if (season > 20) {
    season = 0;
+   year += 1
+  }
+  if (year > 10) { 
+    year = 0;
   }
   // Create a copy of the grid to store updates, so we aren't reading and writing from the same grid simultaneously.
   
@@ -185,13 +190,13 @@ function draw() {
         updatedGrid[i][j] = (val + day) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
       }
       
-      if (val == 8 - season) {
+      if (val == 8 - season ) {
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 let ni = i + dx;
                 let nj = j + dy;
                 if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
-                    updatedGrid[ni][nj] = 6;
+                    updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
                 }
             }
         }
