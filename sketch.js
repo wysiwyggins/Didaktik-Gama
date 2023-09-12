@@ -184,35 +184,24 @@ function draw() {
       let val = grid[i][j];
       if ((!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) && !isBoxTile(updatedGrid[i][j])) {
         updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
-      } else if (isBoxTile(val) && season % 2 == 0){
+      } else if (isBoxTile(val)){
         addConnectingTile(i, j, updatedGrid);
+      } else if (val > year && season % 2 == 0) {
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                let ni = i + dx;
+                let nj = j + dy;
+                if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
+                    updatedGrid[ni][nj] = 6 + season;
+                } 
+            }
+        }
       } else {
-        updatedGrid[i][j] = (val + day) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
+        updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
       }
       
-      if (val == 8 - season ) {
-        for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-                let ni = i + dx;
-                let nj = j + dy;
-                if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
-                    updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
-                }
-            }
-        }
-      }
-      if (val == year && season % 2 == 0) {
-        for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-                let ni = i + dx;
-                let nj = j + dy;
-                if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
-                    updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
-                }
-            }
-        }
-      }
-
+      
+      
       // Draw the tile on the canvas
       drawTile(i, j, val);
       
