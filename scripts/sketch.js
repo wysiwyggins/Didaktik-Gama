@@ -1,3 +1,9 @@
+/* var capturer = new CCapture( { format: 'gif', 
+                              workersPath: 'scripts/',
+                              framerate: 30,
+                              verbose: true } );
+ */
+let recording = false;                              
 let spritesheet;
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;
@@ -24,10 +30,18 @@ const BOX_LEFT_VERTICAL = xyToIndex(18,7);
 const BOX_RIGHT_VERTICAL = xyToIndex(10,8);
 const BOX_DOWN_HORIZONTAL = xyToIndex(9,8);
 const BOX_HORIZONTAL_HALF = xyToIndex(20,10);
+const FLOOR = xyToIndex(19, 6);
+const WALL = xyToIndex(16, 7);
+const VOID = xyToIndex(9, 9);
+const WALL_TOP = xyToIndex(16, 5);
+const SHADOW_EDGE = xyToIndex(12, 5);
+
+let tmjFrames = [];
 
 function preload() {
-  // Assuming the image is named 'spritesheet.png' and is in the same directory
   spritesheet = loadImage('spritesheet.png');
+  tmjData = loadJSON('saved_maps.tmj');
+  //loadLayerFrames('bird'); // preload any tilemap frames by layer name
   // Load sounds
   for (let i = 1; i <= 22; i++) {
     sounds.push(loadSound('sounds/' + i + '.wav'));
@@ -35,6 +49,10 @@ function preload() {
 }
 
 function setup() {
+  if (!tmjData || !tmjData.tilesets) {
+    console.error("tmjData or tmjData.tilesets is not initialized");
+    return;
+  }
   createCanvas(GRID_WIDTH * TILE_WIDTH, GRID_HEIGHT * TILE_HEIGHT);
   background(255);  // Initialize with white background
   
@@ -47,6 +65,44 @@ function setup() {
   }
 }
 
+function initializeGridFromTMJ(layerName) {
+  // Find the desired layer by name
+  let layerData;
+  for (let layer of tmjData.layers) {
+    if (layer.name === layerName) {
+      layerData = layer.data;
+      break;
+    }
+  }
+
+  // If no layer with the given name is found, exit the function
+  if (!layerData) {
+    console.error("No layer found with the name: ", layerName);
+    return;
+  }
+
+  // Process each tile value from layerData
+  for (let i = 0; i < GRID_WIDTH; i++) {
+    for (let j = 0; j < GRID_HEIGHT; j++) {
+      let tileValue = layerData[j * GRID_WIDTH + i];  // Adjusted indexing here as it seems layerData is 1D.
+      
+      // Subtract 1 from tileValue to make it 0-based.
+      grid[i][j] = tileValue - 1;
+    }
+  }
+}
+
+
+
+function isShadowEdgeTile(val) {
+  return val === SHADOW_EDGE;
+}
+function isVoid(val) {
+  return val === VOID;
+}
+function isWall(val){
+  return val === WALL;
+}
 function xyToIndex(x, y) {
   return y * SPRITESHEET_COLS + x;
 }
@@ -271,6 +327,16 @@ function draw() {
     year = 0;
   }
 
+  /* if (!recording && year == 4) {
+    capturer.capture(document.getElementById('defaultCanvas0'));
+    recording = true;
+  }
+
+  if (recording && year > 4) {
+    capturer.stop();
+    capturer.save();
+    recording = false;
+  } */
 
   // Create a copy of the grid to store updates, so we aren't reading and writing from the same grid simultaneously.
   let updatedGrid = [];
@@ -284,6 +350,7 @@ function draw() {
     for (let j = 0; j < GRID_HEIGHT; j++) {
       let val = grid[i][j];
       if (year > 5 && year < 8){
+
         if ((!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) && !isBoxTile(updatedGrid[i][j])) {
           updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
         } else if (isBoxTile(val)){
@@ -316,7 +383,8 @@ function draw() {
         }
       }
 
-      if (year > 10 ){
+      if (year > 10 && year < 11 && day < 5){
+        initializeGridFromTMJ('bird');
         if (val == season) {
           for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -329,6 +397,56 @@ function draw() {
             }
           }
         }
+      }
+
+      if (year > 15 && year < 20){
+        if (val === WALL) {
+          updatedGrid[i][j] = WALL; // Preserve the wall tile
+          if (j + 1 < GRID_HEIGHT && grid[i][j + 1] !== WALL) {
+            updatedGrid[i][j + 1] = WALL; // Place shadow edge underneath
+          }
+          if (j + 2 < GRID_HEIGHT && grid[i][j + 2] !== SHADOW_EDGE) {
+            updatedGrid[i][j + 2] = SHADOW_EDGE; // Place shadow edge underneath
+          }
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                let ni = i + dx;
+                let nj = j + dy;
+                if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
+                  updatedGrid[ni][nj] = FLOOR;
+              }
+            }
+          }
+        }
+        // If it's a shadow edge, add wall to its right and void tile underneath
+        else if (isShadowEdgeTile(val)) {
+          updatedGrid[i][j] = SHADOW_EDGE; // Preserve the shadow edge tile
+          if (i + 1 < GRID_WIDTH) {
+            updatedGrid[i + 1][j] = WALL; // Place wall tile to the right
+          }
+          if (j + 1 < GRID_HEIGHT) {
+            updatedGrid[i][j + 1] = VOID;
+          }
+        } 
+        if (val === VOID) {
+          updatedGrid[i][j] = VOID;
+          if (j + 1 < GRID_HEIGHT && grid[i][j + 1] !== VOID) {
+            updatedGrid[i][j + 1] = VOID; // Place void
+          }
+        }
+        if (val == year && season % 2 == 0) {
+          for (let dx = -1; dx <= 1; dx++) {
+              for (let dy = -1; dy <= 1; dy++) {
+                  let ni = i + dx;
+                  let nj = j + dy;
+                  if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
+                      updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
+                  }
+              }
+          }
+        }
+  
+  
       }
 
       // Draw the tile on the canvas
@@ -355,4 +473,5 @@ function draw() {
 
   grid = updatedGrid;
   frameRate(30);
+  
 }
