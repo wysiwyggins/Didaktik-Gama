@@ -513,6 +513,7 @@ function displayTileForCharacter(char) {
             case '[': setCurrentTile(LEFT_SQUARE_BRACKET); break;
             case ']': setCurrentTile(RIGHT_SQUARE_BRACKET); break;
             case '»': penColor('1111CC'); break;
+            case '«': penColor(null); break;
 
 
             default: setCurrentTile(BLANK); // Fallback for unmapped characters
