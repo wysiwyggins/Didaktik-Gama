@@ -205,7 +205,7 @@ const BOX_TOP_LEFT = xyToIndex(8, 9);
 const BOX_HORIZONTAL_HALF = xyToIndex(20,10);
 
 function preload() {
-  spriteSheet = loadImage('/public/assets/spritesheets/grotto40x30-cp437.png');
+  spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
   fileText = loadStrings('/public/data/libuse.txt');
 }
 

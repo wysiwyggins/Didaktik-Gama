@@ -12,7 +12,7 @@ let day = 0;
 
 function preload() {
   // Assuming the image is named 'spritesheet.png' and is in the same directory
-  spritesheet = loadImage('spritesheet.png');
+  spritesheet = loadImage("/assets/spritesheets/libuse40x30-cp437.png");
   // Load sounds
   for (let i = 1; i <= 22; i++) {
     sounds.push(loadSound('sounds/' + i + '.wav'));

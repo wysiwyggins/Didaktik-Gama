@@ -13,6 +13,12 @@ let season = 0;
 let day = 0;
 let year = 0;
 
+let xoff = 0;
+const xoffChange = 0.1; // Change in noise offset per frame
+let boatLayerData = null;
+
+const WAVE_TILE_VALUES = [142, 143, 165, 166]; 
+
 const BLANK = xyToIndex(0, 0);
 const OPAQUE_DARK_SMILING_FACE = xyToIndex(1, 0);
 const OPAQUE_WHITE_SMILING_FACE = xyToIndex(2, 0);
@@ -196,7 +202,7 @@ const BOX_TOP_LEFT = xyToIndex(8, 9);
 const BOX_HORIZONTAL_HALF = xyToIndex(20,10);
 
 
-//let tmjFrames = [];
+let tmjFrames = [];
 
 //let socket = io.connect('http://localhost:3000');
 //let potentiometerValue = 0;
@@ -205,9 +211,8 @@ let audioSpriteData;
 let sound;
 
 function preload() {
-  spritesheet = loadImage('spritesheet.png');
-  //tmjData = loadJSON('saved_maps.tmj');
-  //loadLayerFrames('bird'); // preload any tilemap frames by layer name
+  spritesheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
+  tmjData = loadJSON('data/structures.tmj');
 
   // Load sounds
   for (let i = 1; i <= 22; i++) {
@@ -250,24 +255,24 @@ function setup() {
     roomData = data; // Store the room data
   }); */
 
-  /* if (!tmjData || !tmjData.tilesets) {
+  if (!tmjData || !tmjData.tilesets) {
     console.error("tmjData or tmjData.tilesets is not initialized");
     return;
-  } */
+  }
   createCanvas(GRID_WIDTH * TILE_WIDTH, GRID_HEIGHT * TILE_HEIGHT);
   background(255);  // Initialize with white background
   
   // Initialize grid with random values
   for (let i = 0 + season; i < GRID_WIDTH; i++) {
     grid[i] = [];
+    let WAVE_PHASE = floor(WAVE_TILE_VALUES[random(WAVE_TILE_VALUES.length)])
     for (let j = 0; j < GRID_HEIGHT; j++) {
-      grid[i][j] = floor(random(SPRITESHEET_COLS * SPRITESHEET_ROWS));
-      //grid[i][j] = FLOOR;
+      grid[i][j] = WAVE_PHASE;
     }
   }
 }
 
-/* function initializeGridFromTMJ(layerName) {
+function initializeGridFromTMJ(layerName) {
   // Find the desired layer by name
   let layerData;
   for (let layer of tmjData.layers) {
@@ -292,9 +297,31 @@ function setup() {
       grid[i][j] = tileValue - 1;
     }
   }
+  if (layer.name === "boat") {
+    boatLayerData = layer.data;
+    // Optionally, you can process the boat layer data here if needed
 }
- */
+}
 
+function drawBoat() {
+  if (!boatLayerData) return;
+
+  // Calculate the starting position to center the boat
+  const boatWidth = 19; // Assuming the boat is 10 tiles wide
+  const boatHeight = 7;  // Assuming the boat is 5 tiles high
+  const startX = Math.floor((GRID_WIDTH - boatWidth) / 2);
+  const startY = Math.floor((GRID_HEIGHT - boatHeight) / 2);
+
+  // Overlay the boat onto the grid
+  for (let i = 0; i < boatWidth; i++) {
+      for (let j = 0; j < boatHeight; j++) {
+          let tileValue = boatLayerData[j * boatWidth + i];
+          if (tileValue !== 0) { // Assuming 0 represents a transparent tile in the boat layer
+              grid[startX + i][startY + j] = tileValue - 1; // Adjust for 0-based indexing
+          }
+      }
+  }
+}
 
 function isShadowEdgeTile(val) {
   return val === SHADOW_EDGE;
@@ -425,15 +452,15 @@ function charToSpriteLocation(char) {
 let messageDisplayStart = -1;
 let displayDurationFrames = 0;
 
-function displayMessage(message, seconds) {
-  let messages = [message];  // Start with just the original message
+function displayMessage(APIMessage, seconds) {
+  let APIMessages = [APIMessage];  // Start with just the original message
 
   // Check if the message is longer than the grid width
-  if (message.length > GRID_WIDTH) {
-    const splitPoint = message.lastIndexOf(' ', GRID_WIDTH / 2);  // Find the last space before the midpoint
-    messages = [
-      message.substring(0, splitPoint),
-      message.substring(splitPoint + 1)
+  if (APIMessage.length > GRID_WIDTH) {
+    const splitPoint = APIMessage.lastIndexOf(' ', GRID_WIDTH / 2);  // Find the last space before the midpoint
+    APIMessages = [
+      APIMessage.substring(0, splitPoint),
+      APIMessage.substring(splitPoint + 1)
     ];
   }
 
@@ -444,8 +471,8 @@ function displayMessage(message, seconds) {
     }
   }
 
-  for (let line = 0; line < messages.length; line++) {
-    const msg = messages[line];
+  for (let line = 0; line < APIMessages.length; line++) {
+    const msg = APIMessages[line];
     const startX = Math.floor((GRID_WIDTH - msg.length) / 2);  // Center the message
     const startY = Math.floor(GRID_HEIGHT / 2) + line;  // Adjusted for multiple lines
 
@@ -503,90 +530,51 @@ function is3x3BlockAllSix(x, y) {
   return true;
 }
 
+const expansionChance = 0.3; // Chance for a column to expand
+const randomTileChance = 0.05; // Chance for a random tile to appear
+
+
 function draw() {
-  if (year < 1 && season < 10) {
-    displayMessage('2023 Wiley Wiggins', 2);
-  }
-  if (year >= 1 && year < 2 && season < 2) {
-    //displayMessage('Season: ' + season + ' Day: ' + day + ' Year: ' + year, 2);
-    if (roomData) {
-      let message = `Name: ${roomData.name}\nDescription: ${roomData.description}`;
-      displayMessage(message, 2);
-    } else {
-      displayMessage('Waiting for room data...', 2);
-    }
-  }
-  if (messageDisplayStart !== -1 && (frameCount - messageDisplayStart) > displayDurationFrames) {
-      reseedGrid();  // Reseed the grid to remove the message after its duration
-      messageDisplayStart = -1;
-  }
-  
+  background(255); // Clear background each frame
 
-  day +=1;
-  if (day > 30) {
-    season += 1;
-    day = 0;
-  }
-  if (season > 10) {
-   season = 0;
-   year += 1;
-  }
-  if (year > 30) {  
-    year = 0;
-  }
-
-  // Create a copy of the grid to store updates, so we aren't reading and writing from the same grid simultaneously.
-  let updatedGrid = [];
+  // Temporary grid to store the updated state
+  let tempGrid = [];
   for (let i = 0; i < GRID_WIDTH; i++) {
-    updatedGrid[i] = grid[i].slice();
+      tempGrid[i] = [];
+      for (let j = 0; j < GRID_HEIGHT; j++) {
+          tempGrid[i][j] = grid[i][j]; // Copy current state
+      }
   }
 
+  // Iterate over each column
   for (let i = 0; i < GRID_WIDTH; i++) {
-    for (let j = 0; j < GRID_HEIGHT; j++) {
-      let val = grid[i][j];
-      if (year > 2 && year < 8){
-
-        if ((!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) && !isBoxTile(updatedGrid[i][j])) {
-          if (val == FLOOR){
-            updatedGrid[i][j] = FLOOR;
-            updatedGrid[i+1][j] = FLOOR;
-          }  else {
-            updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
-          }
-          
-        } else if (isBoxTile(val)){
-          addConnectingTile(i, j, updatedGrid);
-        } else if (val > year && season % 2 == 0) {
-          for (let dx = -1; dx <= 1; dx++) {
-              for (let dy = -1; dy <= 1; dy++) {
-                  let ni = i + dx;
-                  let nj = j + dy;
-                  if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
-                      updatedGrid[ni][nj] = 6 + season;
-                  } 
-              }
-          }
-        } else {
-          updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
-        }
+      // Randomly decide whether to expand this column to its neighbors
+      if (random() < expansionChance) {
+          let waveTile = random(WAVE_TILE_VALUES);
+          if (i > 0) tempGrid[i - 1].fill(waveTile); // Copy to left neighbor
+          if (i < GRID_WIDTH - 1) tempGrid[i + 1].fill(waveTile); // Copy to right neighbor
       }
 
-
-      // Draw the tile on the canvas
-      drawTile(i, j, val);
-      
-      // Increment the value for the next frame
-      updatedGrid[i][j] = (val + 1) % (SPRITESHEET_COLS * SPRITESHEET_ROWS);
-      
-      /* if (i == 0 && j == 0 && (day == 1 || day == 4) ) {
-        let soundIndex = val % 22;
-        //sounds[soundIndex].play();
-        sound.play(soundIndex);
-      } */
-    }
+      // Randomly replace some tiles with random tiles
+      for (let j = 0; j < GRID_HEIGHT; j++) {
+          if (random() < randomTileChance) {
+              tempGrid[i][j] = floor(random(SPRITESHEET_COLS * SPRITESHEET_ROWS));
+          }
+      }
   }
 
-  grid = updatedGrid;
-  frameRate(30);
+  // Update the grid with the new state
+  grid = tempGrid;
   
+
+  // Draw the grid
+  for (let i = 0; i < GRID_WIDTH; i++) {
+      for (let j = 0; j < GRID_HEIGHT; j++) {
+          drawTile(i, j, grid[i][j]);
+      }
+  }
+  drawBoat();
+
 }
+
+
