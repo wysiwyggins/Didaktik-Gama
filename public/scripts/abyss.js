@@ -14,10 +14,10 @@ let tiledData;
 
 function preload() {
   // Load the spritesheet
-  spritesheet = loadImage("/assets/spritesheets/libuse40x30-cp437.png");
+  spritesheet = loadImage("assets/spritesheets/libuse40x30-cp437.png");
 
   // Load the Tiled data
-  loadJSON("/p5/abyss/assets/maps/ruins.json", function (data) {
+  loadJSON("data/ruins.json", function (data) {
     tiledData = data;
   });
 }
@@ -245,7 +245,7 @@ function draw() {
       }
     }
   }
-  //placeTiledLayer(grid, tiledData); // tiled stuff was responsible for the weirdness
+  // placeTiledLayer(grid, tiledData); // tiled stuff was responsible for the weirdness
   // Second loop to draw the tiles and the backgrounds
   for (let i = 0; i < gridWidth; i++) {
     for (let j = 0; j < gridHeight; j++) {

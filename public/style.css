@@ -8,3 +8,12 @@ canvas#defaultCanvas0 {
   display: block;
   margin: 0 auto;
 }
+
+#game canvas {
+  height: 100vh !important; 
+  width: auto !important; 
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
