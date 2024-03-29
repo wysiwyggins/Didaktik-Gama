@@ -15,7 +15,7 @@ let tiledData;
 function preload() {
   // Load the spritesheet
   spritesheet = loadImage("assets/spritesheets/libuse40x30-cp437.png");
-
+  //noLoop();
   // Load the Tiled data
   loadJSON("data/ruins.json", function (data) {
     tiledData = data;
@@ -38,6 +38,7 @@ function isBoxTile(index) {
 } */
 
 function setup() {
+    
     gridWidth = floor(windowWidth / tileWidth) * 2;
     gridHeight = floor(windowHeight / tileHeight) * 2;
     createCanvas(gridWidth * tileWidth, gridHeight * tileHeight);
@@ -64,20 +65,30 @@ function setup() {
             tiles.push(tile);
         }
     }
-    noLoop();
+    wave1 = new p5.Oscillator();
+    wave1.setType('triangle');
+    wave2 = new p5.Oscillator();
+    wave2.setType('sine');
+    reverb = new p5.Reverb();
+    //noLoop();
 }
 function generateColorPalette(baseColor) {
+  wave1.start();
+  wave2.start(); 
   // Generate two additional colors based on the base color
   let color1 = color(
     (baseColor.levels[0] + 50) % 256,
     baseColor.levels[1],
     baseColor.levels[2]
   );
+  wave1.freq(baseColor.levels[1]);
+  wave2.freq(baseColor.levels[2]);
   let color2 = color(
     baseColor.levels[0],
     (baseColor.levels[1] + 50) % 256,
     baseColor.levels[2]
   );
+
   let colors = []
   colors.push(baseColor);
   colors.push(color1);
@@ -99,11 +110,14 @@ function generateColorPalette(baseColor) {
         colors[2] = lightestColor;
       }
     }
+    reverb.process(wave1, i, 2);
+    reverb.process(wave2, 3, i);
   });
-
+  
   return colors;
 }
 function placeTiledLayer(grid, tiledData) {
+ 
   if (tiledData && tiledData.layers) {
     const layers = tiledData.layers;
     const layer = random(layers); // Randomly select a layer
@@ -134,6 +148,7 @@ function placeTiledLayer(grid, tiledData) {
             const tiledIndex = layer.data[j * layer.width + i] - 1; // Offset the index here
             if (tiledIndex !== -1) {
               grid[offsetX + i][offsetY + j] = tiledIndex;
+              wave2.freq(tiledIndex - i);
             }
           }
         }
@@ -143,12 +158,14 @@ function placeTiledLayer(grid, tiledData) {
   } else {
     console.error("Tiled data or layers not loaded properly.");
   }
+  
 }
 
 function drawTile(tile, x, y, flipHorizontally, flipVertically) {
+  wave1.freq((x * 100) % 400);
   push();
   translate(x + tileWidth / 2, y + tileHeight / 2); // Move origin to the center of the tile
-
+  
   if (flipHorizontally) {
     scale(-1, 1);
   }
@@ -163,6 +180,7 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 }
 
 function draw() {
+  
   background(255);
   noStroke();
   let baseColor = color(random(256), random(256), random(256));
@@ -175,11 +193,12 @@ function draw() {
 
   // First loop to set the tile indices based on the rules
   for (let i = 0; i < gridWidth; i++) {
+
     grid[i] = [];
     for (let j = 0; j < gridHeight; j++) {
       let tileIndex = floor(random(tiles.length));
       grid[i][j] = tileIndex; // Store the tile index in the grid
-
+      wave2.freq(i + tileIndex);
       if (tileIndex === 127) {
         if (i < gridWidth - 1 && grid[i + 1] !== undefined)
           grid[i + 1][j] = 177;
@@ -194,25 +213,31 @@ function draw() {
           grid[i + 1][j + 1] = 127;
       }
     }
+    
+    
   }
   for (let i = 0; i < gridWidth; i++) {
     for (let j = 0; j < gridHeight; j++) {
       if (grid[i][j] === 127) {
         let k = 0;
+        
         // Create the diagonal stripe of tiles with index 127
         while (i + k < gridWidth && j + k < gridHeight) {
           grid[i + k][j + k] = 127;
           k++;
+          wave2.freq(i + k);
         }
 
         // Fill the right side of the stripe with tiles of index 177
         for (let m = j + 1; m < gridHeight; m++) {
           grid[i][m] = 216;
+          wave2.freq(i - m);
         }
 
         // Fill the left side of the stripe with tiles of index 216
         for (let n = i + 1; n < gridWidth; n++) {
           grid[n][j] = 177;
+          wave2.freq(n - j);
         }
       }
     }
@@ -281,4 +306,7 @@ function draw() {
       noTint();
     }
   }
+  wave1.start();
+  wave2.start(); 
+  
 }

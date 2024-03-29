@@ -62,15 +62,25 @@ function complementColor(c, angle) {
 function drawColorPattern() {
     // Use the predefined tileWidth and tileHeight for drawing
     // No need to calculate tileWidth and tileHeight based on canvas size
-  
+    let chance = floor(random(1, 5));
     for (let y = 0; y < gridHeight; y++) {
         for (let x = 0; x < gridWidth; x++) {
         // Alternate color pairs every row, not every two rows
+        
         let colorPair = y % 2; // This will alternate 0, 1, 0, 1, ..., for each row
         // Alternate colors within the row
+        
         let colorIndex = (x % 2) + (colorPair * 2); // This alternates colors within a row and switches pairs every row
+        if (chance === 1) {
+          y - 1 % 2 === 0 ? fill(colors[0]) : fill(colors[1]);
+          colorIndex = (x % 2) + (colorPair * 3); // This alternates colors within a row and switches pairs every row
+        } else if (chance === 2) {
+          colorIndex = (x % 2) + (colorPair * 2); // This alternates colors within a row and switches pairs every row
+        }
         fill(colors[colorIndex % colors.length]); // Use mod to cycle through colors array safely
         noStroke();
+        
+
         rect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
         }
     }
@@ -79,7 +89,7 @@ let boxDrawingTiles = {};
 
 function selectBoxDrawingTiles() {
     // Extract the box-drawing tiles based on the provided indices
-    const boxDrawingKeys = ["BOX_VERTICAL", "BOX_LEFT_VERTICAL", "WHITE_FULL_BLOCK", "BOX_UP_HORIZONTAL", "BOX_DOWN_HORIZONTAL", "BOX_RIGHT_VERTICAL", "BOX_HORIZONTAL", "BOX_VERTICAL_HORIZONTAL", "BOX_BOTTOM_RIGHT", "FULL_BLOCK", "BOX_TOP_LEFT", "BOX_HORIZONTAL_HALF"];
+    const boxDrawingKeys = ["BOX_VERTICAL", "BOX_LEFT_VERTICAL", "BOX_UP_HORIZONTAL", "BOX_DOWN_HORIZONTAL", "BOX_RIGHT_VERTICAL", "BOX_HORIZONTAL", "BOX_VERTICAL_HORIZONTAL", "BOX_BOTTOM_RIGHT", "FULL_BLOCK", "BOX_TOP_LEFT", "BOX_DRAWING_HEAVY_LEFT_LIGHT_RIGHT"];
     boxDrawingKeys.forEach(key => {
         const [col, row] = spritesheetData.tiles[key];
         let tile = spritesheet.get(col * spritesheetData.tilePixelWidth, row * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
@@ -120,6 +130,9 @@ function drawSerpentinePattern() {
             case 'down':
               tile = boxDrawingTiles.BOX_VERTICAL;
               break;
+            case 'up':
+              tile = boxDrawingTiles.BOX_UP_HORIZONTAL;
+              break;
           }
         }
       }
@@ -145,8 +158,6 @@ function drawSerpentinePattern() {
     }
   }
 }
-
-
 
 function selectPatternTiles() {
   let harmonyType = floor(random(3)); // Introduce a third type of harmony
@@ -191,6 +202,7 @@ function extractTilesFromSpritesheet() {
 
 function drawSpritePattern() {
   console.log(`Drawing sprite pattern with ${selectedTiles.length} tiles.`);
+  
   for (let y = 0; y < gridHeight; y++) {
     for (let x = 0; x < gridWidth; x++) {
       let tile = random(selectedTiles);
@@ -198,8 +210,10 @@ function drawSpritePattern() {
         console.error("Selected tile is undefined.");
         continue;
       }
+      tint(colors[1], 127); // Apply a semi-transparent tint
       // Specify the display size to half the original size for sharp rendering
       image(tile, x * tileWidth, y * tileHeight, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
+      noTint();
     }
   }
 }
