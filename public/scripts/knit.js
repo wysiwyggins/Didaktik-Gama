@@ -7,6 +7,8 @@ const gridHeight = 50; // Number of cells vertically
 let baseColor; // Holds the randomly generated base color
 let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
+let wave1;
+let wave2;
 
 
 function preload() {
@@ -18,7 +20,7 @@ function preload() {
 
 function setup() {
   createCanvas(900, 600);
-  noLoop(); // Since we're not animating, no need to loop
+  //noLoop(); // Since we're not animating, no need to loop
 
   // Assuming spritesheetData correctly holds the metadata after preload
   extractTilesFromSpritesheet(); // Make sure this is called after spritesheet is loaded
@@ -27,6 +29,11 @@ function setup() {
 
   // Generate base and complementary colors
   generateBaseAndComplementaryColors();
+  wave1 = new p5.Oscillator();
+  wave1.setType('triangle');
+  wave2 = new p5.Oscillator();
+  wave2.setType('sine');
+  reverb = new p5.Reverb();
 }
 
 function generateBaseAndComplementaryColors() {
@@ -34,11 +41,15 @@ function generateBaseAndComplementaryColors() {
   colors.push(baseColor);
   for (let i = 1; i <= 3; i++) {
     colors.push(complementColor(baseColor, i * 90)); // Generate and push complementary colors
+    
   }
 }
 
 function draw() {
   drawColorPattern();
+  generateBaseAndComplementaryColors();
+  wave1.start();
+  wave2.start();
   let chance = floor(random(1, 5)); // Generates a number between 1 and 4
   if (chance === 1) {
     console.log("Drawing serpentine pattern");
@@ -47,6 +58,10 @@ function draw() {
     console.log("Drawing regular sprite pattern");
     drawSpritePattern(); // This is the existing function that draws regular patterns
   }
+  wave1.freq(baseColor.levels[1] - 80 / chance);
+  wave2.freq(baseColor.levels[2] -100 /chance);
+  reverb.process(wave1, chance, 2);
+  reverb.process(wave2, 3, chance);
 }
 
 function complementColor(c, angle) {

@@ -6,6 +6,7 @@ const columns = 23;
 const rows = 11;
 let gridWidth = 50;
 let gridHeight = 45;
+let socket;
 
 
 const BOX_TILES = [215, 195, 178, 215, 28, 214, 196, 192, 179, 194, 193, 250];
@@ -38,7 +39,7 @@ function isBoxTile(index) {
 } */
 
 function setup() {
-    
+    socket = io.connect(window.location.origin);
     gridWidth = floor(windowWidth / tileWidth) * 2;
     gridHeight = floor(windowHeight / tileHeight) * 2;
     createCanvas(gridWidth * tileWidth, gridHeight * tileHeight);
@@ -114,6 +115,7 @@ function generateColorPalette(baseColor) {
     reverb.process(wave2, 3, i);
   });
   
+  socket.emit('setDMXColor', baseColor);
   return colors;
 }
 function placeTiledLayer(grid, tiledData) {
@@ -272,6 +274,8 @@ function draw() {
   }
   // placeTiledLayer(grid, tiledData); // tiled stuff was responsible for the weirdness
   // Second loop to draw the tiles and the backgrounds
+  wave1.start();
+  wave2.start(); 
   for (let i = 0; i < gridWidth; i++) {
     for (let j = 0; j < gridHeight; j++) {
       let tileIndex = grid[i][j];
@@ -306,7 +310,6 @@ function draw() {
       noTint();
     }
   }
-  wave1.start();
-  wave2.start(); 
+  
   
 }
