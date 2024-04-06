@@ -1,6 +1,7 @@
 let directionUpwards = false;
 let spriteSheet;
 let fileText;
+let toneStarted = false;
 
 let tileMap = [];
 let cursorX = 0;
@@ -206,7 +207,7 @@ const BOX_HORIZONTAL_HALF = xyToIndex(20,10);
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  fileText = loadStrings('/public/data/libuse.txt');
+  fileText = loadStrings('/public/data/mud_which_flows.txt');
 }
 
 function setup() {
@@ -221,13 +222,26 @@ function setup() {
   if (fileText) {
     displayText();
   }
+  wave1 = new p5.Oscillator();
+  wave1.setType('triangle');
+  wave2 = new p5.Oscillator();
+  wave2.setType('triangle');
+  reverb = new p5.Reverb();
 }
 
 function draw() {
-    background(255);
+    if (!toneStarted){
+      wave1.start();
+      wave2.start();
+      toneStarted = true;
+      reverb.process(wave1, 1, 2);
+    }
+    background(195,155,155);
     for (let y = 0; y < CANVAS_ROWS; y++) {
       for (let x = 0; x < CANVAS_COLS; x++) {
+        
         let tileData = tileMap[y][x];
+        
         let sx = (tileData.tile % SPRITESHEET_COLS) * (TILE_WIDTH * 2);
         let sy = Math.floor(tileData.tile / SPRITESHEET_COLS) * (TILE_HEIGHT * 2);
   
@@ -235,7 +249,7 @@ function draw() {
           fill(tileData.bgColor);
           rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
         }
-  
+        
         image(spriteSheet, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, sx, sy, TILE_WIDTH * 2, TILE_HEIGHT * 2);
       }
     }
@@ -262,7 +276,27 @@ function setCurrentTile(tileIndex) {
 }
 
 function advanceCursor() {
-    if (directionUpwards) {
+  if (keyIsDown(CONTROL)) {
+    // Move cursor to the right
+    cursorX++;
+    if (cursorX >= CANVAS_COLS) {
+        cursorX = 0;
+        cursorY++;
+        if (cursorY >= CANVAS_ROWS) {
+            cursorY = 0;  // Optional: Reset to start or stop at the end
+        }
+    }
+} else if (keyIsDown(ALT)) {
+  // Move cursor to the right
+  cursorX--;
+  if (cursorX <= 0) {
+      cursorX = CANVAS_COLS - 1;
+      cursorY--;
+      if (cursorY >= CANVAS_ROWS) {
+          cursorY = 0;  // Optional: Reset to start or stop at the end
+      }
+  }
+} else if (directionUpwards) {
       // Move cursor upwards
       if (cursorY > 0) {
         cursorY--;
@@ -287,7 +321,9 @@ function advanceCursor() {
         }
       }
     }
-  
+    wave1.freq((50 +cursorX * cursorY)% 260);
+    wave2.freq((50 + cursorY - cursorX)%260);
+        
     console.log("Cursor position:", cursorX, cursorY); // Debugging statement
 }
 
@@ -461,13 +497,13 @@ function displayCharacter() {
     if (char !== ' ') {
       displayTileForCharacter(char);
     } else {
-
       setCurrentTile(WHITE_FULL_BLOCK);
-      clearInterval(textTimer);
-      setTimeout(() => { textTimer = setInterval(displayCharacter, 100); }, 500); // Pause for a space
     }
   } else {
-    clearInterval(textTimer); // Clear interval when done
+    // Once we've reached the end of the textArray, reset textIndex to start over
+    textIndex = 0;
+    clearInterval(textTimer);
+    setTimeout(() => { textTimer = setInterval(displayCharacter, 100); }, 500); // Restart the typing effect
   }
 }
 

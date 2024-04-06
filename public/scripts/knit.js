@@ -47,7 +47,7 @@ function generateBaseAndComplementaryColors() {
 
 function draw() {
   drawColorPattern();
-  generateBaseAndComplementaryColors();
+  
   wave1.start();
   wave2.start();
   let chance = floor(random(1, 5)); // Generates a number between 1 and 4
