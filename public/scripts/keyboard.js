@@ -1,6 +1,7 @@
 let directionUpwards = false;
 let spriteSheet;
 let fileText;
+let toneStarted = false;
 
 let tileMap = [];
 let cursorX = 0;
@@ -206,7 +207,7 @@ const BOX_HORIZONTAL_HALF = xyToIndex(20,10);
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  fileText = loadStrings('/public/data/libuse.txt');
+  fileText = loadStrings('/public/data/mud_which_flows.txt');
 }
 
 function setup() {
@@ -221,13 +222,26 @@ function setup() {
   if (fileText) {
     displayText();
   }
+  wave1 = new p5.Oscillator();
+  wave1.setType('triangle');
+  wave2 = new p5.Oscillator();
+  wave2.setType('triangle');
+  reverb = new p5.Reverb();
 }
 
 function draw() {
-    background(255);
+    if (!toneStarted){
+      wave1.start();
+      wave2.start();
+      toneStarted = true;
+      reverb.process(wave1, 1, 2);
+    }
+    background(225);
     for (let y = 0; y < CANVAS_ROWS; y++) {
       for (let x = 0; x < CANVAS_COLS; x++) {
+        
         let tileData = tileMap[y][x];
+        
         let sx = (tileData.tile % SPRITESHEET_COLS) * (TILE_WIDTH * 2);
         let sy = Math.floor(tileData.tile / SPRITESHEET_COLS) * (TILE_HEIGHT * 2);
   
@@ -235,7 +249,7 @@ function draw() {
           fill(tileData.bgColor);
           rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
         }
-  
+        
         image(spriteSheet, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, sx, sy, TILE_WIDTH * 2, TILE_HEIGHT * 2);
       }
     }
@@ -262,7 +276,27 @@ function setCurrentTile(tileIndex) {
 }
 
 function advanceCursor() {
-    if (directionUpwards) {
+  if (keyIsDown(CONTROL)) {
+    // Move cursor to the right
+    cursorX++;
+    if (cursorX >= CANVAS_COLS) {
+        cursorX = 0;
+        cursorY++;
+        if (cursorY >= CANVAS_ROWS) {
+            cursorY = 0;  // Optional: Reset to start or stop at the end
+        }
+    }
+} else if (keyIsDown(ALT)) {
+  // Move cursor to the right
+  cursorX--;
+  if (cursorX <= 0) {
+      cursorX = CANVAS_COLS - 1;
+      cursorY--;
+      if (cursorY >= CANVAS_ROWS) {
+          cursorY = 0;  // Optional: Reset to start or stop at the end
+      }
+  }
+} else if (directionUpwards) {
       // Move cursor upwards
       if (cursorY > 0) {
         cursorY--;
@@ -287,7 +321,9 @@ function advanceCursor() {
         }
       }
     }
-  
+    wave1.freq((50 +cursorX * cursorY)% 260);
+    wave2.freq((50 + cursorY - cursorX)%260);
+        
     console.log("Cursor position:", cursorX, cursorY); // Debugging statement
 }
 
@@ -340,100 +376,95 @@ function keyPressed() {
     // Ctrl + key for symbols
     if (keyIsDown(CONTROL)) {
       switch (key) {
-        case '1': setCurrentTile(BLACK_HEART_SUITE); break;
-        case '2': setCurrentTile(BLACK_DIAMOND_SUITE); break;
-        case '3': setCurrentTile(BLACK_CLUB_SUITE); break;
-        case '4': setCurrentTile(BLACK_SPADE_SUITE); break;
-        case '5': setCurrentTile(BULLET); break;
-        case '6': setCurrentTile(OPAQUE_INVERSE_DIAMOND_SUITE); break;
-        case '7': setCurrentTile(INVERSE_BULLET); break;
-        case '8': setCurrentTile(WHITE_KEY); break;
-        case '9': setCurrentTile(BLACK_KEY); break;
-        case '0': setCurrentTile(DOUBLE_EXCLAMATION_MARK); break;
-        case '-': setCurrentTile(DOWNWARDS_ARROW_ON_LIGHT_SHADE); break;
-        case '=': setCurrentTile(UPWARDS_ARROW_ON_LIGHT_SHADE); break;
-        case 'q': setCurrentTile(UPWARDS_ARROW); break;
-        case 'w': setCurrentTile(DOWNWARDS_ARROW); break;
-        case 'e': setCurrentTile(LEFTWARDS_ARROW); break;
-        case 'r': setCurrentTile(RIGHTWARDS_ARROW); break;
-        case 't': setCurrentTile(BOX_BOTTOM_LEFT); break;
-        case 'y': setCurrentTile(UPWARD_POINTING_TRIANGLE); break;
-        case 'u': setCurrentTile(DOWNWARD_POINTING_TRIANGLE); break;
-        case 'i': setCurrentTile(BOX_TOP_RIGHT); break;
-        case 'o': setCurrentTile(BOX_BOTTOM_RIGHT); break;
-        case 'p': setCurrentTile(BOX_UP_HORIZONTAL); break;
-        case '[': setCurrentTile(BOX_DOWN_HORIZONTAL); break;
-        case ']': setCurrentTile(BOX_LEFT_VERTICAL); break;
-        case '\\': setCurrentTile(BOX_RIGHT_VERTICAL); break;
-        case 'a': setCurrentTile(BOX_HORIZONTAL); break;
-        case 's': setCurrentTile(BOX_VERTICAL); break;
-        case 'd': setCurrentTile(BOX_VERTICAL_HORIZONTAL); break;
-        case 'f': setCurrentTile(FULL_BLOCK); break;
-        case 'g': setCurrentTile(BOX_TOP_LEFT); break;
-        case 'h': setCurrentTile(BOX_HORIZONTAL_HALF); break;
-        case 'j': setCurrentTile(BOX_VERTICAL_HALF); break;
-        case 'k': setCurrentTile(LEFT_HALF_BLOCK_WITH_LIGHT_SHADE_UPPER_RIGHT_AND_MEDIUM_SHADE_LOWER_RIGHT); break;
-        case 'l': setCurrentTile(SKELETON_LEGS); break;
-        case ';': setCurrentTile(SKULL); break;
-        case '\'': setCurrentTile(DOOR_TOP); break;
-        case 'z': setCurrentTile(DOOR_BOTTOM); break;
-        case 'x': setCurrentTile(EMPHASIZED_LATIN_CAPITAL_LETTER_X); break;
-        case 'c': setCurrentTile(EMPHASIZED_EXCLAMATION_MARK); break;
-        case 'v': setCurrentTile(LIGHT_SHADE); break;
-        case 'b': setCurrentTile(WALL); break;
+        case '1': setCurrentTile(BLACK_HEART_SUITE); break; // Similar to ♥
+        case '2': setCurrentTile(BLACK_DIAMOND_SUITE); break; // Similar to ♦
+        case '3': setCurrentTile(BLACK_CLUB_SUITE); break; // Similar to ♣
+        case '4': setCurrentTile(BLACK_SPADE_SUITE); break; // Similar to ♠
+        case '5': setCurrentTile(BULLET); break; // Similar to •
+        case '6': setCurrentTile(OPAQUE_INVERSE_DIAMOND_SUITE); break; // Custom, no direct equivalent
+        case '7': setCurrentTile(INVERSE_BULLET); break; // Custom, similar to reverse •
+        case '8': setCurrentTile(WHITE_KEY); break; // Custom, no direct equivalent
+        case '9': setCurrentTile(BLACK_KEY); break; // Custom, no direct equivalent
+        case '0': setCurrentTile(DOUBLE_EXCLAMATION_MARK); break; // Similar to ‼
+        case '-': setCurrentTile(DOWNWARDS_ARROW_ON_LIGHT_SHADE); break; // Custom, no direct equivalent
+        case '=': setCurrentTile(UPWARDS_ARROW_ON_LIGHT_SHADE); break; // Custom, no direct equivalent
+        case 'q': setCurrentTile(UPWARDS_ARROW); break; // Similar to ↑
+        case 'w': setCurrentTile(DOWNWARDS_ARROW); break; // Similar to ↓
+        case 'e': setCurrentTile(LEFTWARDS_ARROW); break; // Similar to ←
+        case 'r': setCurrentTile(RIGHTWARDS_ARROW); break; // Similar to →
+        case 't': setCurrentTile(UPWARD_POINTING_TRIANGLE); break; // Custom, no direct equivalent
+        case 'y': setCurrentTile(DOWNWARD_POINTING_TRIANGLE); break; // Custom, no direct equivalent
+        case 'u': setCurrentTile(BOX_TOP_RIGHT); break; // Custom, similar to box drawing
+        case 'i': setCurrentTile(BOX_BOTTOM_RIGHT); break; // Custom, similar to box drawing
+        case 'o': setCurrentTile(BOX_UP_HORIZONTAL); break; // Custom, similar to box drawing
+        case 'p': setCurrentTile(BOX_DOWN_HORIZONTAL); break; // Custom, similar to box drawing
+        case '[': setCurrentTile(BOX_LEFT_VERTICAL); break; // Custom, similar to box drawing
+        case ']': setCurrentTile(BOX_RIGHT_VERTICAL); break; // Custom, similar to box drawing
+        case 'a': setCurrentTile(BOX_HORIZONTAL); break; // Custom, similar to box drawing
+        case 's': setCurrentTile(BOX_VERTICAL); break; // Custom, similar to box drawing
+        case 'd': setCurrentTile(BOX_VERTICAL_HORIZONTAL); break; // Custom, similar to box drawing
+        case 'f': setCurrentTile(FULL_BLOCK); break; // Similar to █
+        case 'g': setCurrentTile(BOX_TOP_LEFT); break; // Custom, similar to box drawing
+        case 'h': setCurrentTile(LIGHT_SHADE); break; // Similar to ░
+        case 'j': setCurrentTile(MEDIUM_SHADE); break; // Similar to ▒
+        case 'k': setCurrentTile(DARK_SHADE); break; // Similar to ▓
+        case 'l': setCurrentTile(SKULL); break; // Custom, no direct equivalent but similar to ☠
+        case ';': setCurrentTile(DOOR_TOP); break; // Custom, no direct equivalent
+        case '\'': setCurrentTile(DOOR_BOTTOM); break; // Custom, no direct equivalent
+        case 'z': setCurrentTile(LATIN_SMALL_LETTER_C_WITH_CARON); break; // For "č", using Ctrl might not be standard but logical here
+        case 'x': setCurrentTile(LATIN_SMALL_LETTER_S_WITH_CARON); break; // For "š", using Ctrl might not be standard but logical here
+        case 'c': setCurrentTile(LATIN_SMALL_LETTER_O_WITH_ACUTE); break; // For "ó", using Ctrl might not be standard but logical here
+        case 'v': setCurrentTile(LATIN_SMALL_LETTER_I_WITH_ACUTE); break; // For "í", using Ctrl might not be standard but logical here
+       
 
       }
     }
   
     // Alt + key for other symbols
     if (keyIsDown(ALT)) {
-      switch (key) {
-        case '1': setCurrentTile(OPAQUE_DARK_SMILING_FACE); break;
-        case '2': setCurrentTile(OPAQUE_WHITE_SMILING_FACE); break;
-        case '3': setCurrentTile(FEMALE_SYMBOL); break;
-        case '4': setCurrentTile(BOW_AND_ARROW); break;
-        case '5': setCurrentTile(BEAMED_EIGHTH_NOTES); break;
-        case '6': setCurrentTile(PRISON_WINDOW); break;
-        case '7': setCurrentTile(BLACK_RIGHT_POINTING_TRIANGLE); break;
-        case '8': setCurrentTile(BLACK_LEFT_POINTING_TRIANGLE); break;
-        case '9': setCurrentTile(ROLLING_ON_THE_FLOOR_LAUGHING); break;
-        case '0': setCurrentTile(QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT); break;
-        case '-': setCurrentTile(VERTICAL_LINE); break;
-        case '=': setCurrentTile(LEG); break;
-        case 'q': setCurrentTile(UPWARDS_ARROW_WITH_TIP_LEFTWARDS); break;
-        case 'w': setCurrentTile(BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE); break;
-        case 'e': setCurrentTile(MEDIUM_SHADE); break;
-        case 'r': setCurrentTile(LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE); break;
-        case 't': setCurrentTile(LIGHT_SHADE_LOWER_RIGHT_TRIANGLE_WITH_MEDIUM_SHADE_UPPER_LEFT_TRIANGLE); break;
-        case 'y': setCurrentTile(MEDIUM_LIGHT_SHADE); break;
-        case 'u': setCurrentTile(BLACK_LOWER_LEFT_TRIANGLE); break;
-        case 'i': setCurrentTile(MEDIUM_SHADE_LOWER_LEFT_TRIANGLE); break;
-        case 'o': setCurrentTile(DOTTED_LIGHT_SHADE); break;
-        case 'p': setCurrentTile(ROTATED_LATIN_CAPITAL_LETTER_F_ON_LIGHT_SHADE); break;
-        case '[': setCurrentTile(WHITE_LEG); break;
-        case ']': setCurrentTile(OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT); break;
-        case 'a': setCurrentTile(DARK_SMILING_FACE); break;
-        case 's': setCurrentTile(LATIN_SMALL_LETTER_S_WITH_CARON); break;
-        case 'd': setCurrentTile(INVERTED_EYE_OF_PROVIDENCE); break;
-        case 'f': setCurrentTile(EYE_OF_PROVIDENCE); break;
-        case 'g': setCurrentTile(INVERTED_CHECKER_BOARD); break;
-        case 'h': setCurrentTile(CHECKER_BOARD); break;
-        case 'j': setCurrentTile(CANDLE_STICK); break;
-        case 'k': setCurrentTile(INVERSE_DIAMOND_SUITE); break;
-        case 'l': setCurrentTile(IMPERFECT_DOTTED_LIGHT_SHADE); break;
-        case ';': setCurrentTile(OPQAQUE_DOOR_TOP); break;
-        case '\'': setCurrentTile(OPAQUE_DOOR_BOTTOM); break;
-        case 'z': setCurrentTile(BLACK_LOWER_RIGHT_TRIANGLE_WITH_DARK_SHADE_UPPER_LEFT_TRIANGLE); break;
-        case 'x': setCurrentTile(OPAQUE_PRISON_WINDOW); break;
-        case 'c': setCurrentTile(LATIN_SMALL_LETTER_C_WITH_CARON); break;
-        case 'v': setCurrentTile(SMALL_BLACK_LOWER_RIGHT_TRIANGLE); break;
-        case 'b': setCurrentTile(LIGHT_SHADE_UPPER_LEFT_TRIANGLE); break;
-        case 'n': setCurrentTile(LIGHT_SHADE_UPPER_RIGHT_TRIANGLE); break;
-        case 'm': setCurrentTile(LIGHT_SHADE_LOWER_RIGHT_TRIANGLE); break;
-        case ',': setCurrentTile(FLOOR); break;
-        case '.': setCurrentTile(IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION); break;
-        case '/': setCurrentTile(CYCLOPS_FACE); break;
-
+      if (keyIsDown(ALT)) {
+        switch (key) {
+          case '1': setCurrentTile(OPAQUE_DARK_SMILING_FACE); break; // Custom, no direct equivalent
+          case '2': setCurrentTile(OPAQUE_WHITE_SMILING_FACE); break; // Custom, no direct equivalent
+          case '3': setCurrentTile(FEMALE_SYMBOL); break; // Similar to ♀
+          case '4': setCurrentTile(BOW_AND_ARROW); break; // Custom, no direct equivalent
+          case '5': setCurrentTile(BEAMED_EIGHTH_NOTES); break; // Similar to ♫
+          case '6': setCurrentTile(PRISON_WINDOW); break; // Custom, no direct equivalent
+          case '7': setCurrentTile(BLACK_RIGHT_POINTING_TRIANGLE); break; // Custom, no direct equivalent
+          case '8': setCurrentTile(BLACK_LEFT_POINTING_TRIANGLE); break; // Custom, no direct equivalent
+          case '9': setCurrentTile(ROLLING_ON_THE_FLOOR_LAUGHING); break; // Similar to 🤣
+          case '0': setCurrentTile(QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT); break; // Custom, no direct equivalent
+          case '-': setCurrentTile(LEG); break; // Custom, no direct equivalent
+          case '=': setCurrentTile(UPWARDS_ARROW_WITH_TIP_LEFTWARDS); break; // Custom, no direct equivalent
+          case 'q': setCurrentTile(BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'w': setCurrentTile(MEDIUM_SHADE); break; // Similar to ▒
+          case 'e': setCurrentTile(MEDIUM_LIGHT_SHADE); break; // Custom, no direct equivalent
+          case 'r': setCurrentTile(LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
+          case 't': setCurrentTile(LIGHT_SHADE_LOWER_RIGHT_TRIANGLE_WITH_MEDIUM_SHADE_UPPER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'y': setCurrentTile(BLACK_LOWER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'u': setCurrentTile(MEDIUM_SHADE_LOWER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'i': setCurrentTile(OPAQUE_DOTTED_LIGHT_SHADE); break; // Custom, no direct equivalent
+          case 'o': setCurrentTile(DARK_SMILING_FACE); break; // Similar to 😐 but opaque
+          case 'p': setCurrentTile(EYE_OF_PROVIDENCE); break; // Custom, no direct equivalent
+          case '[': setCurrentTile(INVERTED_EYE_OF_PROVIDENCE); break; // Custom, no direct equivalent
+          case ']': setCurrentTile(INVERTED_CHECKER_BOARD); break; // Custom, no direct equivalent
+          case 'a': setCurrentTile(CHECKER_BOARD); break; // Similar to checkerboard patterns
+          case 's': setCurrentTile(CANDLE_STICK); break; // Custom, no direct equivalent
+          case 'd': setCurrentTile(INVERSE_DIAMOND_SUITE); break; // Custom, no direct equivalent
+          case 'f': setCurrentTile(IMPERFECT_DOTTED_LIGHT_SHADE); break; // Custom, no direct equivalent
+          case 'g': setCurrentTile(OPAQUE_DOOR_TOP); break; // Custom, no direct equivalent
+          case 'h': setCurrentTile(OPAQUE_DOOR_BOTTOM); break; // Custom, no direct equivalent
+          case 'j': setCurrentTile(BLACK_LOWER_RIGHT_TRIANGLE_WITH_DARK_SHADE_UPPER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'k': setCurrentTile(OPAQUE_PRISON_WINDOW); break; // Custom, no direct equivalent
+          case 'l': setCurrentTile(ROTATED_LATIN_CAPITAL_LETTER_F_ON_LIGHT_SHADE); break; // Custom, no direct equivalent
+          case ';': setCurrentTile(SMALL_BLACK_LOWER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
+          case '\'': setCurrentTile(LIGHT_SHADE_UPPER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'z': setCurrentTile(LIGHT_SHADE_UPPER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'x': setCurrentTile(LIGHT_SHADE_LOWER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
+          case 'c': setCurrentTile(FLOOR); break; // Custom, no direct equivalent
+          case 'v': setCurrentTile(IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION); break; // Custom, no direct equivalent
+          case 'b': setCurrentTile(CYCLOPS_FACE); break; // Custom, no direct equivalent
+        }
 
       }
     }
@@ -461,13 +492,13 @@ function displayCharacter() {
     if (char !== ' ') {
       displayTileForCharacter(char);
     } else {
-
       setCurrentTile(WHITE_FULL_BLOCK);
-      clearInterval(textTimer);
-      setTimeout(() => { textTimer = setInterval(displayCharacter, 100); }, 500); // Pause for a space
     }
   } else {
-    clearInterval(textTimer); // Clear interval when done
+    // Once we've reached the end of the textArray, reset textIndex to start over
+    textIndex = 0;
+    clearInterval(textTimer);
+    setTimeout(() => { textTimer = setInterval(displayCharacter, 100); }, 500); // Restart the typing effect
   }
 }
 
