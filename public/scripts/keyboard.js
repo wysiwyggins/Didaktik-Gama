@@ -161,8 +161,12 @@ function drawCursor() {
 }
 
 function setCurrentTile(tileIndex) {
-  tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
-  advanceCursor();
+  if (cursorY >= 0 && cursorY < tileMap.length && cursorX >= 0 && cursorX < tileMap[cursorY].length) {
+    tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
+    advanceCursor();
+  } else {
+    console.log("Cursor position out of bounds:", cursorX, cursorY);
+  }
 }
 
 function advanceCursor() {
@@ -177,7 +181,7 @@ function advanceCursor() {
         }
     }
 } else if (keyIsDown(ALT)) {
-  // Move cursor to the right
+  // Move cursor to the left
   cursorX--;
   if (cursorX <= 0) {
       cursorX = CANVAS_COLS - 1;
