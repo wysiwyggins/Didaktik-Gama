@@ -17,197 +17,10 @@ const TILE_HEIGHT = 15;
 const SPRITESHEET_COLS = 23;
 const SPRITESHEET_ROWS = 11;
 
-// Tiles
-
-const BLANK = xyToIndex(0, 0);
-const OPAQUE_DARK_SMILING_FACE = xyToIndex(1, 0);
-const OPAQUE_WHITE_SMILING_FACE = xyToIndex(2, 0);
-const BLACK_HEART_SUITE = xyToIndex(3, 0);
-const BLACK_DIAMOND_SUITE = xyToIndex(4, 0);
-const BLACK_CLUB_SUITE = xyToIndex(5, 0);
-const BLACK_SPADE_SUITE = xyToIndex(6, 0);
-const BULLET = xyToIndex(7, 0);
-const OPAQUE_INVERSE_DIAMOND_SUITE = xyToIndex(8, 0);
-const INVERSE_BULLET = xyToIndex(9, 0);
-const WHITE_KEY = xyToIndex(11, 0);
-const BLACK_KEY = xyToIndex(12, 0);
-const FEMALE_SYMBOL = xyToIndex(12, 0);
-const BOW_AND_ARROW = xyToIndex(13, 0);
-const BEAMED_EIGHTH_NOTES = xyToIndex(14, 0);
-const PRISON_WINDOW = xyToIndex(15, 0);
-const BLACK_RIGHT_POINTING_TRIANGLE = xyToIndex(16, 0);
-const BLACK_LEFT_POINTING_TRIANGLE = xyToIndex(17, 0);
-const ROLLING_ON_THE_FLOOR_LAUGHING = xyToIndex(18, 0);
-const DOUBLE_EXCLAMATION_MARK = xyToIndex(19, 0);
-const DOWNWARDS_ARROW_ON_LIGHT_SHADE = xyToIndex(20, 0);
-const UPWARDS_ARROW_ON_LIGHT_SHADE = xyToIndex(21, 0);
-const UNDERSCORE = xyToIndex(22, 0);
-const UPWARDS_ARROW = xyToIndex(1, 1);
-const DOWNWARDS_ARROW = xyToIndex(2, 1);
-const LEFTWARDS_ARROW = xyToIndex(3, 1);
-const RIGHTWARDS_ARROW = xyToIndex(4, 1);
-const BOX_BOTTOM_LEFT = xyToIndex(5, 1);
-const UPWARD_POINTING_TRIANGLE = xyToIndex(7, 1);
-const DOWNWARD_POINTING_TRIANGLE = xyToIndex(8, 1);
-const EXCLAMATION_MARK = xyToIndex(10, 1);
-const QUOTATION_MARK = xyToIndex(11, 1);
-const NUMBER_SIGN = xyToIndex(12, 1);
-const DOLLAR_SIGN = xyToIndex(13, 1);
-const PERCENT_SIGN = xyToIndex(14, 1);
-const AMPERSAND = xyToIndex(15, 1);
-const APOSTROPHE = xyToIndex(16, 1);
-const LEFT_PARENTHESIS = xyToIndex(17, 1);
-const RIGHT_PARENTHESIS = xyToIndex(18, 1);
-const ASTERISK = xyToIndex(19, 1);
-const PLUS_SIGN = xyToIndex(20, 1);
-const COMMA = xyToIndex(21, 1);
-const HYPHEN_MINUS = xyToIndex(22, 1);
-const FULL_STOP = xyToIndex(0, 2);
-const SOLIDUS = xyToIndex(1, 2);
-const DIGIT_0 = xyToIndex(2, 2);
-const DIGIT_1 = xyToIndex(3, 2);
-const DIGIT_2 = xyToIndex(4, 2);
-const DIGIT_3 = xyToIndex(5, 2);
-const DIGIT_4 = xyToIndex(6, 2);
-const DIGIT_5 = xyToIndex(7, 2);
-const DIGIT_6 = xyToIndex(9, 2);
-const DIGIT_7 = xyToIndex(9, 2);
-const DIGIT_8 = xyToIndex(10, 2);
-const DIGIT_9 = xyToIndex(12, 2);
-const COLON = xyToIndex(12, 3);
-const SEMICOLON = xyToIndex(13, 2);
-const LESS_THAN_SIGN = xyToIndex(14, 2);
-const EQUALS_SIGN = xyToIndex(15, 2);
-const GREATER_THAN_SIGN = xyToIndex(16, 2);
-const QUESTION_MARK = xyToIndex(17, 2);
-const COMMERCIAL_AT = xyToIndex(18, 2);
-const LATIN_CAPITAL_LETTER_A = xyToIndex(19, 2);
-const LATIN_CAPITAL_LETTER_B = xyToIndex(20, 2);
-const LATIN_CAPITAL_LETTER_C = xyToIndex(21, 2);
-const LATIN_CAPITAL_LETTER_D = xyToIndex(22, 2);
-const LATIN_CAPITAL_LETTER_E = xyToIndex(0, 3);
-const LATIN_CAPITAL_LETTER_F = xyToIndex(1, 3);
-const LATIN_CAPITAL_LETTER_G = xyToIndex(2, 3);
-const LATIN_CAPITAL_LETTER_H = xyToIndex(3, 3);
-const LATIN_CAPITAL_LETTER_I = xyToIndex(4, 3);
-const LATIN_CAPITAL_LETTER_J = xyToIndex(5, 3);
-const LATIN_CAPITAL_LETTER_K = xyToIndex(6, 3);
-const LATIN_CAPITAL_LETTER_L = xyToIndex(7, 3);
-const LATIN_CAPITAL_LETTER_M = xyToIndex(8, 3);
-const LATIN_CAPITAL_LETTER_N = xyToIndex(9, 3);
-const LATIN_CAPITAL_LETTER_O = xyToIndex(10, 3);
-const LATIN_CAPITAL_LETTER_P = xyToIndex(11, 3);
-const LATIN_CAPITAL_LETTER_Q = xyToIndex(12, 3);
-const LATIN_CAPITAL_LETTER_R = xyToIndex(13, 3);
-const LATIN_CAPITAL_LETTER_S = xyToIndex(14, 3);
-const LATIN_CAPITAL_LETTER_T = xyToIndex(15, 3);
-const LATIN_CAPITAL_LETTER_U = xyToIndex(16, 3);
-const LATIN_CAPITAL_LETTER_V = xyToIndex(17, 3);
-const LATIN_CAPITAL_LETTER_W = xyToIndex(18, 3);
-const LATIN_CAPITAL_LETTER_X = xyToIndex(19, 3);
-const LATIN_CAPITAL_LETTER_Y = xyToIndex(20, 3);
-const LATIN_CAPITAL_LETTER_Z = xyToIndex(21, 3);
-const LEFT_SQUARE_BRACKET = xyToIndex(22, 3);
-const REVERSE_SOLIDUS = xyToIndex(0, 4);
-const RIGHT_SQUARE_BRACKET = xyToIndex(1, 4);
-const CIRCUMFLEX_ACCENT = xyToIndex(2, 4);
-const LOW_LINE = xyToIndex(3, 4);
-const FLIPPED_SMALL_BLACK_LOWER_RIGHT_TRIANGLE = xyToIndex(4, 4);
-const LATIN_SMALL_LETTER_A = xyToIndex(5, 4);
-const LATIN_SMALL_LETTER_B = xyToIndex(6, 4);
-const LATIN_SMALL_LETTER_C = xyToIndex(7, 4);
-const LATIN_SMALL_LETTER_D = xyToIndex(8, 4);
-const LATIN_SMALL_LETTER_E = xyToIndex(9, 4);
-const LATIN_SMALL_LETTER_F = xyToIndex(10, 4);
-const LATIN_SMALL_LETTER_G = xyToIndex(11, 4);
-const LATIN_SMALL_LETTER_H = xyToIndex(12, 4);
-const LATIN_SMALL_LETTER_I = xyToIndex(13, 4);
-const LATIN_SMALL_LETTER_J = xyToIndex(14, 4);
-const LATIN_SMALL_LETTER_K = xyToIndex(15, 4);
-const LATIN_SMALL_LETTER_L = xyToIndex(16, 4);
-const LATIN_SMALL_LETTER_M = xyToIndex(17, 4);
-const LATIN_SMALL_LETTER_N = xyToIndex(18, 4);
-const LATIN_SMALL_LETTER_O = xyToIndex(19, 4);
-const LATIN_SMALL_LETTER_P = xyToIndex(20, 4);
-const LATIN_SMALL_LETTER_Q = xyToIndex(21, 4);
-const LATIN_SMALL_LETTER_R = xyToIndex(22, 4);
-const LATIN_SMALL_LETTER_S = xyToIndex(0, 5);
-const LATIN_SMALL_LETTER_T = xyToIndex(1, 5);
-const LATIN_SMALL_LETTER_U = xyToIndex(2, 5);
-const LATIN_SMALL_LETTER_V = xyToIndex(3, 5);
-const LATIN_SMALL_LETTER_W = xyToIndex(4, 5);
-const LATIN_SMALL_LETTER_X = xyToIndex(5, 5);
-const LATIN_SMALL_LETTER_Y = xyToIndex(6, 5);
-const LATIN_SMALL_LETTER_Z = xyToIndex(7, 5);
-const QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT = xyToIndex(8, 5);
-const VERTICAL_LINE = xyToIndex(9, 5);
-const LEG = xyToIndex(10, 5);
-const UPWARDS_ARROW_WITH_TIP_LEFTWARDS = xyToIndex(11, 5);
-const BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE = xyToIndex(12, 5);
-const MEDIUM_SHADE = xyToIndex(13, 5);
-const LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE = xyToIndex(14, 5);
-const LIGHT_SHADE_LOWER_RIGHT_TRIANGLE_WITH_MEDIUM_SHADE_UPPER_LEFT_TRIANGLE = xyToIndex(15, 5);
-const MEDIUM_LIGHT_SHADE = xyToIndex(16, 5);
-const WALL_TOP = xyToIndex(16, 5);
-const BLACK_LOWER_LEFT_TRIANGLE = xyToIndex(17, 5);
-const MEDIUM_SHADE_LOWER_LEFT_TRIANGLE = xyToIndex(18, 5);
-const DOTTED_LIGHT_SHADE = xyToIndex(19, 5);
-const LATIN_SMALL_LETTER_C_WITH_CARON = xyToIndex(20, 5);
-const WHITE_LEG = xyToIndex(21, 5);
-const OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT = xyToIndex(22, 5);
-const DARK_SMILING_FACE = xyToIndex(0, 6);
-const EYE_OF_PROVIDENCE = xyToIndex(1, 6);
-const INVERTED_EYE_OF_PROVIDENCE = xyToIndex(2, 6);
-const BLACK_SQUARE = xyToIndex(3, 6);
-const INVERTED_CHECKER_BOARD = xyToIndex(4, 6);
-const CHECKER_BOARD = xyToIndex(5, 6);
-const CANDLE_STICK = xyToIndex(6, 6);
-const INVERSE_DIAMOND_SUITE = xyToIndex(7, 6);
-const IMPERFECT_DOTTED_LIGHT_SHADE = xyToIndex(8, 6);
-const OPQAQUE_DOOR_TOP = xyToIndex(10, 6);
-const OPAQUE_DOOR_BOTTOM = xyToIndex(11, 6);
-const BLACK_LOWER_RIGHT_TRIANGLE_WITH_DARK_SHADE_UPPER_LEFT_TRIANGLE = xyToIndex(12, 6);
-const OPAQUE_PRISON_WINDOW = xyToIndex(13, 6);
-const ROTATED_LATIN_CAPITAL_LETTER_F_ON_LIGHT_SHADE = xyToIndex(14, 6);
-const SMALL_BLACK_LOWER_RIGHT_TRIANGLE = xyToIndex(15, 6);
-const LIGHT_SHADE_UPPER_LEFT_TRIANGLE = xyToIndex(16, 6);
-const LIGHT_SHADE_UPPER_RIGHT_TRIANGLE = xyToIndex(17, 6);
-const LIGHT_SHADE_LOWER_RIGHT_TRIANGLE = xyToIndex(18, 6);
-const FLOOR = xyToIndex(19, 6);
-const IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION = xyToIndex(20, 6);
-const CYCLOPS_FACE = xyToIndex(21, 6);
-const FLOATING_LEGS = xyToIndex(22, 6);
-const LATIN_SMALL_LETTER_O_WITH_ACUTE = xyToIndex(0, 7);
-const LATIN_SMALL_LETTER_I_WITH_ACUTE = xyToIndex(1, 7);
-const LATIN_SMALL_LETTER_S_WITH_CARON = xyToIndex(2, 7);
-const CARON = xyToIndex(3, 7);
-const BOX_TOP_RIGHT = xyToIndex(6, 8);
-const LEFT_HALF_BLOCK_WITH_LIGHT_SHADE_UPPER_RIGHT_AND_MEDIUM_SHADE_LOWER_RIGHT = xyToIndex(7, 7);
-const SKELETON_LEGS = xyToIndex(8, 7);
-const SKULL = xyToIndex(9, 7);
-const DOOR_TOP = xyToIndex(10, 7);
-const DOOR_BOTTOM = xyToIndex(11, 7);
-const EMPHASIZED_LATIN_CAPITAL_LETTER_X = xyToIndex(12, 7);
-const EMPHASIZED_EXCLAMATION_MARK = xyToIndex(13, 7);
-const LIGHT_SHADE = xyToIndex(14, 7);
-const WALL = xyToIndex(16, 7);
-const BOX_VERTICAL = xyToIndex(17, 7);
-const BOX_LEFT_VERTICAL = xyToIndex(18,7);
-const WHITE_FULL_BLOCK = xyToIndex(21,7);
-
-const BOX_UP_HORIZONTAL = xyToIndex(8,8);
-const BOX_DOWN_HORIZONTAL = xyToIndex(9,8);
-const BOX_RIGHT_VERTICAL = xyToIndex(10,8);
-const BOX_HORIZONTAL = xyToIndex(11, 8);
-const BOX_VERTICAL_HORIZONTAL = xyToIndex(12,8);
-const BOX_BOTTOM_RIGHT = xyToIndex(7, 9);
-const FULL_BLOCK = xyToIndex(9, 9);
-const BOX_TOP_LEFT = xyToIndex(8, 9);
-const BOX_HORIZONTAL_HALF = xyToIndex(20,10);
-
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
   fileText = loadStrings('/public/data/mud_which_flows.txt');
+  spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
 }
 
 function setup() {
@@ -215,7 +28,7 @@ function setup() {
   for (let y = 0; y < CANVAS_ROWS; y++) {
     let currentRow = [];  // Renamed from 'row' to avoid name conflict
     for (let x = 0; x < CANVAS_COLS; x++) {
-      currentRow.push(BLANK);
+      currentRow.push(getTileIndex("BLANK"));
     }
     tileMap.push(currentRow);
   }
@@ -256,6 +69,21 @@ function draw() {
     drawCursor();
 }
 
+function getTileCoords(tileName) {
+  // Retrieve tile coordinates from JSON data
+  let coords = spriteData.tiles[tileName];
+  if (!coords) {
+    console.error("Tile not found:", tileName);
+    return [0, 0]; // Default to BLANK if not found
+  }
+  return coords;
+}
+
+function getTileIndex(tileName) {
+  let [x, y] = getTileCoords(tileName);
+  return xyToIndex(x, y);
+}
+
 function penColor(hexValue) {
 if (hexValue) {
     currentPenColor = color(hexValue);
@@ -271,8 +99,8 @@ function drawCursor() {
 }
 
 function setCurrentTile(tileIndex) {
-    tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: currentPenColor };
-    advanceCursor();
+  tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
+  advanceCursor();
 }
 
 function advanceCursor() {
@@ -334,87 +162,87 @@ function retreatCursor() {
       cursorY = CANVAS_ROWS - 1;
       cursorX--;
     }
-    tileMap[cursorY][cursorX] = BLANK;
+    tileMap[cursorY][cursorX] = getTileIndex("BLANK");
 }
 
 function keyPressed() {
-    // Toggle capsLockActive with Caps Lock key press
-    if (keyCode === 33) { // Page Up key
-        directionUpwards = true;
-        return false;
-      } else if (keyCode === 34) { // Page Down key
-        directionUpwards = false;
-        return false;
-      }
-    
-    if (keyCode === BACKSPACE) {
-        retreatCursor();
-        return false;
-    }
-    if (key === ' ') {
-        setCurrentTile(WHITE_FULL_BLOCK);
-        return false;
-    }
+  if (keyCode === 33) { // Page Up key
+      directionUpwards = true;
+      return false;
+  } else if (keyCode === 34) { // Page Down key
+      directionUpwards = false;
+      return false;
+  }
 
-    if (!keyIsDown(CONTROL) && !keyIsDown(ALT)) {
-      // Check for alphanumeric characters
+  if (keyCode === BACKSPACE) {
+      retreatCursor();
+      return false;
+  }
+  if (key === ' ') {
+      setCurrentTile(getTileIndex("WHITE_FULL_BLOCK"));
+      return false;
+  }
+
+  // Handle alphanumeric characters
+  if (!keyIsDown(CONTROL) && !keyIsDown(ALT)) {
+      let tileName;
       if (key >= '0' && key <= '9') {
-        setCurrentTile(eval('DIGIT_' + key));
-        return false;
+          tileName = 'DIGIT_' + key; // Assumes you have tiles named like DIGIT_1, DIGIT_2, etc.
+      } else if (key >= 'A' && key <= 'Z') {
+          tileName = 'LATIN_CAPITAL_LETTER_' + key; // Assumes tiles named like LATIN_CAPITAL_LETTER_A
+      } else if (key >= 'a' && key <= 'z') {
+          let uppercaseKey = key.toUpperCase();
+          tileName = 'LATIN_SMALL_LETTER_' + uppercaseKey; // Assumes tiles named like LATIN_SMALL_LETTER_A
       }
-      if (key >= 'A' && key <= 'Z') {
-        setCurrentTile(eval('LATIN_CAPITAL_LETTER_' + key));
-        return false;
-      }
-      if (key >= 'a' && key <= 'z') {
-        let uppercaseKey = key.toUpperCase();
-        setCurrentTile(eval('LATIN_SMALL_LETTER_' + uppercaseKey));
-        return false;
+
+      if (tileName && spriteData.tiles[tileName]) {
+          setCurrentTile(getTileIndex(tileName));
+          return false;
       }
     }
   
     // Ctrl + key for symbols
     if (keyIsDown(CONTROL)) {
       switch (key) {
-        case '1': setCurrentTile(BLACK_HEART_SUITE); break; // Similar to ♥
-        case '2': setCurrentTile(BLACK_DIAMOND_SUITE); break; // Similar to ♦
-        case '3': setCurrentTile(BLACK_CLUB_SUITE); break; // Similar to ♣
-        case '4': setCurrentTile(BLACK_SPADE_SUITE); break; // Similar to ♠
-        case '5': setCurrentTile(BULLET); break; // Similar to •
-        case '6': setCurrentTile(OPAQUE_INVERSE_DIAMOND_SUITE); break; // Custom, no direct equivalent
-        case '7': setCurrentTile(INVERSE_BULLET); break; // Custom, similar to reverse •
-        case '8': setCurrentTile(WHITE_KEY); break; // Custom, no direct equivalent
-        case '9': setCurrentTile(BLACK_KEY); break; // Custom, no direct equivalent
-        case '0': setCurrentTile(DOUBLE_EXCLAMATION_MARK); break; // Similar to ‼
-        case '-': setCurrentTile(DOWNWARDS_ARROW_ON_LIGHT_SHADE); break; // Custom, no direct equivalent
-        case '=': setCurrentTile(UPWARDS_ARROW_ON_LIGHT_SHADE); break; // Custom, no direct equivalent
-        case 'q': setCurrentTile(UPWARDS_ARROW); break; // Similar to ↑
-        case 'w': setCurrentTile(DOWNWARDS_ARROW); break; // Similar to ↓
-        case 'e': setCurrentTile(LEFTWARDS_ARROW); break; // Similar to ←
-        case 'r': setCurrentTile(RIGHTWARDS_ARROW); break; // Similar to →
-        case 't': setCurrentTile(UPWARD_POINTING_TRIANGLE); break; // Custom, no direct equivalent
-        case 'y': setCurrentTile(DOWNWARD_POINTING_TRIANGLE); break; // Custom, no direct equivalent
-        case 'u': setCurrentTile(BOX_TOP_RIGHT); break; // Custom, similar to box drawing
-        case 'i': setCurrentTile(BOX_BOTTOM_RIGHT); break; // Custom, similar to box drawing
-        case 'o': setCurrentTile(BOX_UP_HORIZONTAL); break; // Custom, similar to box drawing
-        case 'p': setCurrentTile(BOX_DOWN_HORIZONTAL); break; // Custom, similar to box drawing
-        case '[': setCurrentTile(BOX_LEFT_VERTICAL); break; // Custom, similar to box drawing
-        case ']': setCurrentTile(BOX_RIGHT_VERTICAL); break; // Custom, similar to box drawing
-        case 'a': setCurrentTile(BOX_HORIZONTAL); break; // Custom, similar to box drawing
-        case 's': setCurrentTile(BOX_VERTICAL); break; // Custom, similar to box drawing
-        case 'd': setCurrentTile(BOX_VERTICAL_HORIZONTAL); break; // Custom, similar to box drawing
-        case 'f': setCurrentTile(FULL_BLOCK); break; // Similar to █
-        case 'g': setCurrentTile(BOX_TOP_LEFT); break; // Custom, similar to box drawing
-        case 'h': setCurrentTile(LIGHT_SHADE); break; // Similar to ░
-        case 'j': setCurrentTile(MEDIUM_SHADE); break; // Similar to ▒
-        case 'k': setCurrentTile(DARK_SHADE); break; // Similar to ▓
-        case 'l': setCurrentTile(SKULL); break; // Custom, no direct equivalent but similar to ☠
-        case ';': setCurrentTile(DOOR_TOP); break; // Custom, no direct equivalent
-        case '\'': setCurrentTile(DOOR_BOTTOM); break; // Custom, no direct equivalent
-        case 'z': setCurrentTile(LATIN_SMALL_LETTER_C_WITH_CARON); break; // For "č", using Ctrl might not be standard but logical here
-        case 'x': setCurrentTile(LATIN_SMALL_LETTER_S_WITH_CARON); break; // For "š", using Ctrl might not be standard but logical here
-        case 'c': setCurrentTile(LATIN_SMALL_LETTER_O_WITH_ACUTE); break; // For "ó", using Ctrl might not be standard but logical here
-        case 'v': setCurrentTile(LATIN_SMALL_LETTER_I_WITH_ACUTE); break; // For "í", using Ctrl might not be standard but logical here
+        case '1': setCurrentTile(getTileIndex("BLACK_HEART_SUITE")); break; // Similar to ♥
+        case '2': setCurrentTile(getTileIndex("BLACK_DIAMOND_SUITE")); break; // Similar to ♦
+        case '3': setCurrentTile(getTileIndex("BLACK_CLUB_SUITE")); break; // Similar to ♣
+        case '4': setCurrentTile(getTileIndex("BLACK_SPADE_SUITE")); break; // Similar to ♠
+        case '5': setCurrentTile(getTileIndex("BULLET")); break; // Similar to •
+        case '6': setCurrentTile(getTileIndex("OPAQUE_INVERSE_DIAMOND_SUITE")); break; // Custom, no direct equivalent
+        case '7': setCurrentTile(getTileIndex("INVERSE_BULLET")); break; // Custom, similar to reverse •
+        case '8': setCurrentTile(getTileIndex("WHITE_KEY")); break; // Custom, no direct equivalent
+        case '9': setCurrentTile(getTileIndex("BLACK_KEY")); break; // Custom, no direct equivalent
+        case '0': setCurrentTile(getTileIndex("DOUBLE_EXCLAMATION_MARK")); break; // Similar to ‼
+        case '-': setCurrentTile(getTileIndex("DOWNWARDS_ARROW_ON_LIGHT_SHADE")); break; // Custom, no direct equivalent
+        case '=': setCurrentTile(getTileIndex("UPWARDS_ARROW_ON_LIGHT_SHADE")); break; // Custom, no direct equivalent
+        case 'q': setCurrentTile(getTileIndex("UPWARDS_ARROW")); break; // Similar to ↑
+        case 'w': setCurrentTile(getTileIndex("DOWNWARDS_ARROW")); break; // Similar to ↓
+        case 'e': setCurrentTile(getTileIndex("LEFTWARDS_ARROW")); break; // Similar to ←
+        case 'r': setCurrentTile(getTileIndex("RIGHTWARDS_ARROW")); break; // Similar to →
+        case 't': setCurrentTile(getTileIndex("UPWARD_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
+        case 'y': setCurrentTile(getTileIndex("DOWNWARD_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
+        case 'u': setCurrentTile(getTileIndex("BOX_TOP_RIGHT")); break; // Custom, similar to box drawing
+        case 'i': setCurrentTile(getTileIndex("BOX_BOTTOM_RIGHT")); break; // Custom, similar to box drawing
+        case 'o': setCurrentTile(getTileIndex("BOX_UP_HORIZONTAL")); break; // Custom, similar to box drawing
+        case 'p': setCurrentTile(getTileIndex("BOX_DOWN_HORIZONTAL")); break; // Custom, similar to box drawing
+        case '[': setCurrentTile(getTileIndex("BOX_LEFT_VERTICAL")); break; // Custom, similar to box drawing
+        case ']': setCurrentTile(getTileIndex("BOX_RIGHT_VERTICAL")); break; // Custom, similar to box drawing
+        case 'a': setCurrentTile(getTileIndex("BOX_HORIZONTAL")); break; // Custom, similar to box drawing
+        case 's': setCurrentTile(getTileIndex("BOX_VERTICAL")); break; // Custom, similar to box drawing
+        case 'd': setCurrentTile(getTileIndex("BOX_VERTICAL_HORIZONTAL")); break; // Custom, similar to box drawing
+        case 'f': setCurrentTile(getTileIndex("FULL_BLOCK")); break; // Similar to █
+        case 'g': setCurrentTile(getTileIndex("BOX_TOP_LEFT")); break; // Custom, similar to box drawing
+        case 'h': setCurrentTile(getTileIndex("LIGHT_SHADE")); break; // Similar to ░
+        case 'j': setCurrentTile(getTileIndex("MEDIUM_SHADE")); break; // Similar to ▒
+        case 'k': setCurrentTile(getTileIndex("DARK_SHADE")); break; // Similar to ▓
+        case 'l': setCurrentTile(getTileIndex("SKULL")); break; // Custom, no direct equivalent but similar to ☠
+        case ';': setCurrentTile(getTileIndex("DOOR_TOP")); break; // Custom, no direct equivalent
+        case '\'': setCurrentTile(getTileIndex("DOOR_BOTTOM")); break; // Custom, no direct equivalent
+        case 'z': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_C_WITH_CARON")); break; // For "č", using Ctrl might not be standard but logical here
+        case 'x': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_S_WITH_CARON")); break; // For "š", using Ctrl might not be standard but logical here
+        case 'c': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_O_WITH_ACUTE")); break; // For "ó", using Ctrl might not be standard but logical here
+        case 'v': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_I_WITH_ACUTE")); break; // For "í", using Ctrl might not be standard but logical here
        
 
       }
@@ -424,46 +252,46 @@ function keyPressed() {
     if (keyIsDown(ALT)) {
       if (keyIsDown(ALT)) {
         switch (key) {
-          case '1': setCurrentTile(OPAQUE_DARK_SMILING_FACE); break; // Custom, no direct equivalent
-          case '2': setCurrentTile(OPAQUE_WHITE_SMILING_FACE); break; // Custom, no direct equivalent
-          case '3': setCurrentTile(FEMALE_SYMBOL); break; // Similar to ♀
-          case '4': setCurrentTile(BOW_AND_ARROW); break; // Custom, no direct equivalent
-          case '5': setCurrentTile(BEAMED_EIGHTH_NOTES); break; // Similar to ♫
-          case '6': setCurrentTile(PRISON_WINDOW); break; // Custom, no direct equivalent
-          case '7': setCurrentTile(BLACK_RIGHT_POINTING_TRIANGLE); break; // Custom, no direct equivalent
-          case '8': setCurrentTile(BLACK_LEFT_POINTING_TRIANGLE); break; // Custom, no direct equivalent
-          case '9': setCurrentTile(ROLLING_ON_THE_FLOOR_LAUGHING); break; // Similar to 🤣
-          case '0': setCurrentTile(QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT); break; // Custom, no direct equivalent
-          case '-': setCurrentTile(LEG); break; // Custom, no direct equivalent
-          case '=': setCurrentTile(UPWARDS_ARROW_WITH_TIP_LEFTWARDS); break; // Custom, no direct equivalent
-          case 'q': setCurrentTile(BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'w': setCurrentTile(MEDIUM_SHADE); break; // Similar to ▒
-          case 'e': setCurrentTile(MEDIUM_LIGHT_SHADE); break; // Custom, no direct equivalent
-          case 'r': setCurrentTile(LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
-          case 't': setCurrentTile(LIGHT_SHADE_LOWER_RIGHT_TRIANGLE_WITH_MEDIUM_SHADE_UPPER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'y': setCurrentTile(BLACK_LOWER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'u': setCurrentTile(MEDIUM_SHADE_LOWER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'i': setCurrentTile(OPAQUE_DOTTED_LIGHT_SHADE); break; // Custom, no direct equivalent
-          case 'o': setCurrentTile(DARK_SMILING_FACE); break; // Similar to 😐 but opaque
-          case 'p': setCurrentTile(EYE_OF_PROVIDENCE); break; // Custom, no direct equivalent
-          case '[': setCurrentTile(INVERTED_EYE_OF_PROVIDENCE); break; // Custom, no direct equivalent
-          case ']': setCurrentTile(INVERTED_CHECKER_BOARD); break; // Custom, no direct equivalent
-          case 'a': setCurrentTile(CHECKER_BOARD); break; // Similar to checkerboard patterns
-          case 's': setCurrentTile(CANDLE_STICK); break; // Custom, no direct equivalent
-          case 'd': setCurrentTile(INVERSE_DIAMOND_SUITE); break; // Custom, no direct equivalent
-          case 'f': setCurrentTile(IMPERFECT_DOTTED_LIGHT_SHADE); break; // Custom, no direct equivalent
-          case 'g': setCurrentTile(OPAQUE_DOOR_TOP); break; // Custom, no direct equivalent
-          case 'h': setCurrentTile(OPAQUE_DOOR_BOTTOM); break; // Custom, no direct equivalent
-          case 'j': setCurrentTile(BLACK_LOWER_RIGHT_TRIANGLE_WITH_DARK_SHADE_UPPER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'k': setCurrentTile(OPAQUE_PRISON_WINDOW); break; // Custom, no direct equivalent
-          case 'l': setCurrentTile(ROTATED_LATIN_CAPITAL_LETTER_F_ON_LIGHT_SHADE); break; // Custom, no direct equivalent
-          case ';': setCurrentTile(SMALL_BLACK_LOWER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
-          case '\'': setCurrentTile(LIGHT_SHADE_UPPER_LEFT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'z': setCurrentTile(LIGHT_SHADE_UPPER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'x': setCurrentTile(LIGHT_SHADE_LOWER_RIGHT_TRIANGLE); break; // Custom, no direct equivalent
-          case 'c': setCurrentTile(FLOOR); break; // Custom, no direct equivalent
-          case 'v': setCurrentTile(IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION); break; // Custom, no direct equivalent
-          case 'b': setCurrentTile(CYCLOPS_FACE); break; // Custom, no direct equivalent
+          case '1': setCurrentTile(getTileIndex("OPAQUE_DARK_SMILING_FACE")); break; // Custom, no direct equivalent
+          case '2': setCurrentTile(getTileIndex("OPAQUE_WHITE_SMILING_FACE")); break; // Custom, no direct equivalent
+          case '3': setCurrentTile(getTileIndex("FEMALE_SYMBOL")); break; // Similar to ♀
+          case '4': setCurrentTile(getTileIndex("BOW_AND_ARROW")); break; // Custom, no direct equivalent
+          case '5': setCurrentTile(getTileIndex("BEAMED_EIGHTH_NOTES")); break; // Similar to ♫
+          case '6': setCurrentTile(getTileIndex("PRISON_WINDOW")); break; // Custom, no direct equivalent
+          case '7': setCurrentTile(getTileIndex("BLACK_RIGHT_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
+          case '8': setCurrentTile(getTileIndex("BLACK_LEFT_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
+          case '9': setCurrentTile(getTileIndex("ROLLING_ON_THE_FLOOR_LAUGHING")); break; // Similar to 🤣
+          case '0': setCurrentTile(getTileIndex("QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT")); break; // Custom, no direct equivalent
+          case '-': setCurrentTile(getTileIndex("LEG")); break; // Custom, no direct equivalent
+          case '=': setCurrentTile(getTileIndex("UPWARDS_ARROW_WITH_TIP_LEFTWARDS")); break; // Custom, no direct equivalent
+          case 'q': setCurrentTile(getTileIndex("BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'w': setCurrentTile(getTileIndex("MEDIUM_SHADE")); break; // Similar to ▒
+          case 'e': setCurrentTile(getTileIndex("MEDIUM_LIGHT_SHADE")); break; // Custom, no direct equivalent
+          case 'r': setCurrentTile(getTileIndex("LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 't': setCurrentTile(getTileIndex("LIGHT_SHADE_LOWER_RIGHT_TRIANGLE_WITH_MEDIUM_SHADE_UPPER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'y': setCurrentTile(getTileIndex("BLACK_LOWER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'u': setCurrentTile(getTileIndex("MEDIUM_SHADE_LOWER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'i': setCurrentTile(getTileIndex("OPAQUE_DOTTED_LIGHT_SHADE")); break; // Custom, no direct equivalent
+          case 'o': setCurrentTile(getTileIndex("DARK_SMILING_FACE")); break; // Similar to 😐 but opaque
+          case 'p': setCurrentTile(getTileIndex("EYE_OF_PROVIDENCE")); break; // Custom, no direct equivalent
+          case '[': setCurrentTile(getTileIndex("INVERTED_EYE_OF_PROVIDENCE")); break; // Custom, no direct equivalent
+          case ']': setCurrentTile(getTileIndex("INVERTED_CHECKER_BOARD")); break; // Custom, no direct equivalent
+          case 'a': setCurrentTile(getTileIndex("CHECKER_BOARD")); break; // Similar to checkerboard patterns
+          case 's': setCurrentTile(getTileIndex("CANDLE_STICK")); break; // Custom, no direct equivalent
+          case 'd': setCurrentTile(getTileIndex("INVERSE_DIAMOND_SUITE")); break; // Custom, no direct equivalent
+          case 'f': setCurrentTile(getTileIndex("IMPERFECT_DOTTED_LIGHT_SHADE")); break; // Custom, no direct equivalent
+          case 'g': setCurrentTile(getTileIndex("OPAQUE_DOOR_TOP")); break; // Custom, no direct equivalent
+          case 'h': setCurrentTile(getTileIndex("OPAQUE_DOOR_BOTTOM")); break; // Custom, no direct equivalent
+          case 'j': setCurrentTile(getTileIndex("BLACK_LOWER_RIGHT_TRIANGLE_WITH_DARK_SHADE_UPPER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'k': setCurrentTile(getTileIndex("OPAQUE_PRISON_WINDOW")); break; // Custom, no direct equivalent
+          case 'l': setCurrentTile(getTileIndex("ROTATED_LATIN_CAPITAL_LETTER_F_ON_LIGHT_SHADE")); break; // Custom, no direct equivalent
+          case ';': setCurrentTile(getTileIndex("SMALL_BLACK_LOWER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
+          case '\'': setCurrentTile(getTileIndex("LIGHT_SHADE_UPPER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'z': setCurrentTile(getTileIndex("LIGHT_SHADE_UPPER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'x': setCurrentTile(getTileIndex("LIGHT_SHADE_LOWER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
+          case 'c': setCurrentTile(getTileIndex("FLOOR")); break; // Custom, no direct equivalent
+          case 'v': setCurrentTile(getTileIndex("IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION")); break; // Custom, no direct equivalent
+          case 'b': setCurrentTile(getTileIndex("CYCLOPS_FACE")); break; // Custom, no direct equivalent
         }
 
       }
@@ -492,7 +320,7 @@ function displayCharacter() {
     if (char !== ' ') {
       displayTileForCharacter(char);
     } else {
-      setCurrentTile(WHITE_FULL_BLOCK);
+      setCurrentTile(getTileIndex("WHITE_FULL_BLOCK"));
     }
   } else {
     // Once we've reached the end of the textArray, reset textIndex to start over
@@ -503,51 +331,59 @@ function displayCharacter() {
 }
 
 function displayTileForCharacter(char) {
-    if (char >= '0' && char <= '9') {
-        setCurrentTile(eval('DIGIT_' + char));
-    } else if (char >= 'A' && char <= 'Z') {
-        setCurrentTile(eval('LATIN_CAPITAL_LETTER_' + char));
-    } else if (char >= 'a' && char <= 'z') {
-        let uppercaseChar = char.toUpperCase();
-        setCurrentTile(eval('LATIN_SMALL_LETTER_' + uppercaseChar));
-    } else {
-        // Map non-alphanumeric characters to their corresponding tiles
-        switch (char) {
-            case '!': setCurrentTile(EXCLAMATION_MARK); break;
-            case '@': setCurrentTile(COMMERCIAL_AT); break;
-            case '#': setCurrentTile(NUMBER_SIGN); break;
-            case '$': setCurrentTile(DOLLAR_SIGN); break;
-            case '%': setCurrentTile(PERCENT_SIGN); break;
-            case '^': setCurrentTile(CIRCUMFLEX_ACCENT); break;
-            case '&': setCurrentTile(AMPERSAND); break;
-            case '*': setCurrentTile(ASTERISK); break;
-            case 'š': setCurrentTile(LATIN_SMALL_LETTER_S_WITH_CARON); break;
-            case ' ': setCurrentTile(WHITE_FULL_BLOCK); break;
-            case '(': setCurrentTile(LEFT_PARENTHESIS); break;
-            case ')': setCurrentTile(RIGHT_PARENTHESIS); break;
-            case '-': setCurrentTile(HYPHEN_MINUS); break;
-            case '_': setCurrentTile(LOW_LINE); break;
-            case '+': setCurrentTile(PLUS_SIGN); break;
-            case '=': setCurrentTile(EQUALS_SIGN); break;
-            case '.': setCurrentTile(FULL_STOP); break;
-            case ',': setCurrentTile(COMMA); break;
-            case ':': setCurrentTile(COLON); break;
-            case ';': setCurrentTile(SEMICOLON); break;
-            case '\'': setCurrentTile(APOSTROPHE); break;
-            case '"': setCurrentTile(QUOTATION_MARK); break;
-            case '<': setCurrentTile(LESS_THAN_SIGN); break;
-            case '>': setCurrentTile(GREATER_THAN_SIGN); break;
-            case '?': setCurrentTile(QUESTION_MARK); break;
-            case '/': setCurrentTile(SOLIDUS); break;
-            case '\\': setCurrentTile(REVERSE_SOLIDUS); break;
-            case '|': setCurrentTile(VERTICAL_LINE); break;
-            case '[': setCurrentTile(LEFT_SQUARE_BRACKET); break;
-            case ']': setCurrentTile(RIGHT_SQUARE_BRACKET); break;
-            case '»': penColor('1111CC'); break;
-            case '«': penColor(null); break;
+  let tileName;
+    
+  // Handle numbers
+  if (char >= '0' && char <= '9') {
+      tileName = 'DIGIT_' + char; // Assumes tiles named like DIGIT_1, DIGIT_2, etc. in your JSON
+  } 
+  // Handle uppercase letters
+  else if (char >= 'A' && char <= 'Z') {
+      tileName = 'LATIN_CAPITAL_LETTER_' + char; // Assumes tiles named like LATIN_CAPITAL_LETTER_A
+  } 
+  // Handle lowercase letters
+  else if (char >= 'a' && char <= 'z') {
+      let uppercaseChar = char.toUpperCase();
+      tileName = 'LATIN_SMALL_LETTER_' + uppercaseChar; // Assumes tiles named like LATIN_SMALL_LETTER_A
+  }
 
-
-            default: setCurrentTile(BLANK); // Fallback for unmapped characters
-        }
+  // If tileName was set, look it up and set the tile
+  if (tileName && spriteData.tiles[tileName]) {
+      setCurrentTile(getTileIndex(tileName));
+  } else {
+      // Map non-alphanumeric characters to their corresponding tiles
+      switch (char) {
+        case '!': setCurrentTile(getTileIndex("EXCLAMATION_MARK")); break;
+        case '@': setCurrentTile(getTileIndex("COMMERCIAL_AT")); break;
+        case '#': setCurrentTile(getTileIndex("NUMBER_SIGN")); break;
+        case '$': setCurrentTile(getTileIndex("DOLLAR_SIGN")); break;
+        case '%': setCurrentTile(getTileIndex("PERCENT_SIGN")); break;
+        case '^': setCurrentTile(getTileIndex("CIRCUMFLEX_ACCENT")); break;
+        case '&': setCurrentTile(getTileIndex("AMPERSAND")); break;
+        case '*': setCurrentTile(getTileIndex("ASTERISK")); break;
+        case 'š': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_S_WITH_CARON")); break;
+        case ' ': setCurrentTile(getTileIndex("WHITE_FULL_BLOCK")); break;
+        case '(': setCurrentTile(getTileIndex("LEFT_PARENTHESIS")); break;
+        case ')': setCurrentTile(getTileIndex("RIGHT_PARENTHESIS")); break;
+        case '-': setCurrentTile(getTileIndex("HYPHEN_MINUS")); break;
+        case '_': setCurrentTile(getTileIndex("LOW_LINE")); break;
+        case '+': setCurrentTile(getTileIndex("PLUS_SIGN")); break;
+        case '=': setCurrentTile(getTileIndex("EQUALS_SIGN")); break;
+        case '.': setCurrentTile(getTileIndex("FULL_STOP")); break;
+        case ',': setCurrentTile(getTileIndex("COMMA")); break;
+        case ':': setCurrentTile(getTileIndex("COLON")); break;
+        case ';': setCurrentTile(getTileIndex("SEMICOLON")); break;
+        case '\'': setCurrentTile(getTileIndex("APOSTROPHE")); break;
+        case '"': setCurrentTile(getTileIndex("QUOTATION_MARK")); break;
+        case '<': setCurrentTile(getTileIndex("LESS_THAN_SIGN")); break;
+        case '>': setCurrentTile(getTileIndex("GREATER_THAN_SIGN")); break;
+        case '?': setCurrentTile(getTileIndex("QUESTION_MARK")); break;
+        case '/': setCurrentTile(getTileIndex("SOLIDUS")); break;
+        case '\\': setCurrentTile(getTileIndex("REVERSE_SOLIDUS")); break;
+        case '|': setCurrentTile(getTileIndex("VERTICAL_LINE")); break;
+        case '[': setCurrentTile(getTileIndex("LEFT_SQUARE_BRACKET")); break;
+        case ']': setCurrentTile(getTileIndex("RIGHT_SQUARE_BRACKET")); break;
+        default: setCurrentTile(getTileIndex("BLANK")); // Fallback for unmapped characters
+      }
     }
 }
