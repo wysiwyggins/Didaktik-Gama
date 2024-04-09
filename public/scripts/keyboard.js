@@ -8,6 +8,10 @@ let cursorX = 0;
 let cursorY = 0;
 currentPenColor = null;
 
+//input pause
+let typingPaused = false;
+let lastUserInputTime = 0;
+const pauseDuration = 5000;
 
 // Constants
 const CANVAS_COLS = 65;
@@ -128,7 +132,9 @@ function draw() {
         image(spriteSheet, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, sx, sy, TILE_WIDTH * 2, TILE_HEIGHT * 2);
       }
     }
-    drawCursor();
+    if (!typingPaused) {
+      drawCursor();
+    }
 }
 
 function getTileCoords(tileName) {
@@ -232,6 +238,8 @@ function retreatCursor() {
 }
 
 function keyPressed() {
+  lastUserInputTime = millis();
+  typingPaused = true;
   if (keyCode === 33) { // Page Up key
       directionUpwards = true;
       return false;
@@ -336,6 +344,15 @@ function displayText() {
 }
 
 function displayCharacter() {
+  if (typingPaused) {
+    if (millis() - lastUserInputTime > pauseDuration) {
+        // Enough time has passed, resume typing
+        typingPaused = false;
+    } else {
+        // Still within the pause duration, skip this cycle
+        return;
+    }
+  }
   if (textIndex < textArray.length) {
     let char = textArray[textIndex++];
     if (char !== ' ') {
