@@ -2,6 +2,7 @@ let directionUpwards = false;
 let spriteSheet;
 let fileText;
 let toneStarted = false;
+let soundFiles = [];
 
 let tileMap = [];
 let cursorX = 0;
@@ -86,6 +87,10 @@ function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
   fileText = loadStrings('/public/data/mud_which_flows.txt');
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
+  for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
+    let soundPath = `/public/assets/sound/${i}.wav`;
+    soundFiles.push(loadSound(soundPath));
+  }
 }
 
 
@@ -102,8 +107,10 @@ function setup() {
     displayText();
   }
   wave1 = new p5.Oscillator();
+  wave1.amp(0.5);
   wave1.setType('triangle');
   wave2 = new p5.Oscillator();
+  wave2.amp(0.5);
   wave2.setType('triangle');
   reverb = new p5.Reverb();
 }
@@ -115,7 +122,7 @@ function draw() {
       toneStarted = true;
       reverb.process(wave1, 1, 2);
     }
-    background(225);
+    //background(225);
     for (let y = 0; y < CANVAS_ROWS; y++) {
       for (let x = 0; x < CANVAS_COLS; x++) {
         
@@ -153,11 +160,11 @@ function getTileIndex(tileName) {
 }
 
 function penColor(hexValue) {
-if (hexValue) {
-    currentPenColor = color(hexValue);
-} else {
-    currentPenColor = null; // Reset to no background color
-}
+  if (hexValue) {
+      currentPenColor = color(hexValue);
+  } else {
+      currentPenColor = null; // Reset to no background color
+  }
 }
 
 function drawCursor() {
@@ -169,6 +176,12 @@ function drawCursor() {
 function setCurrentTile(tileIndex) {
   if (cursorY >= 0 && cursorY < tileMap.length && cursorX >= 0 && cursorX < tileMap[cursorY].length) {
     tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
+    if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
+      let randomSoundIndex = Math.floor(Math.random() * soundFiles.length);
+      soundFiles[randomSoundIndex].play();
+      background(random(255), random(255), random(255));
+      
+    }
     advanceCursor();
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
