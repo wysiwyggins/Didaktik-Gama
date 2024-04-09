@@ -17,11 +17,73 @@ const TILE_HEIGHT = 15;
 const SPRITESHEET_COLS = 23;
 const SPRITESHEET_ROWS = 11;
 
+// Map of ALT-modified characters to their corresponding tile names
+const altCharToTileName = {
+  '¡': "DOUBLE_EXCLAMATION_MARK",
+  '™': "LEFT_ONE_FIFTH_BLOCK",
+  '£': "LEG",
+  '¢': "UPWARDS_ARROW_WITH_TIP_LEFTWARDS",
+  '∞': "BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE",
+  '§': "MEDIUM_SHADE",
+  '¶': "MEDIUM_LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE",
+  '•': "MIDDLE_DOT",
+  'ª': "MEDIUM_LIGHT_SHADE",
+  'º': "WALL_TOP",
+  '–': "BLACK_LOWER_LEFT_TRIANGLE",
+  '≠': "MEDIUM_SHADE_LOWER_LEFT_TRIANGLE",
+  'œ': "OPAQUE_DOTTED_LIGHT_SHADE",
+  '∑': "LATIN_SMALL_LETTER_C_WITH_CARON",
+  '´': "WHITE_LEG",
+  '®': "OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT",
+  '†': "DARK_SMILING_FACE",
+  '¥': "EYE_OF_PROVIDENCE",
+  'ˆ': "BLACK_SQUARE",
+  'ø': "INVERTED_CHECKER_BOARD",
+  'π': "FLOATING_LEGS",
+  'å': "LIGHT_SHADE_LOWER_RIGHT_TRIANGLE",
+  'ß': "CHAIN_LINK_VERTICAL",
+  '∂': "CHAIN_LINK_HORIZONTAL",
+  'ƒ': "IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION",
+  '©': "LATIN_SMALL_LETTER_S_WITH_CARON",
+  '˙': "FULL_BLOCK",
+  '∆': "INVERTED_EYE_OF_PROVIDENCE",
+  '˚': "WHITE_FLORETTE",
+  '¬': "BOX_TOP_RIGHT",
+  '…': "BOX_DRAWING_LIGHT_HORIZONTAL",
+  'æ': "CANDLE_STICK",
+  'Ω': "DOOR_TOP",
+  '≈': "DOOR_BOTTOM",
+  'ç': "LATIN_SMALL_LETTER_O_WITH_ACUTE",
+  '√': "BALLOT_BOX_WITH_X",
+  '∫': "BOX_DRAWING_HEAVY_LEFT_LIGHT_RIGHT",
+  '˜': "BOX_BOTTOM_RIGHT",
+  'µ': "LOWER_ONE_HALF_BLOCK",
+  '≤': "LEFT_ONE_HALF_BLOCK",
+  '≥': "RIGHT_ONE_HALF_BLOCK",
+  '÷': "BLACK_SQUARE"
+};
+
+function mapAltCharacterToTileName(char) {
+  return altCharToTileName[char]; 
+}
+
+
+function getTileIndexFromChar(char) {
+  const tileName = mapAltCharacterToTileName(char);
+  if (tileName) {
+      return getTileIndex(tileName);
+  }
+  // Handle case where character does not have a mapping or fallback logic
+  return null;
+}
+
+
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
   fileText = loadStrings('/public/data/mud_which_flows.txt');
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
 }
+
 
 function setup() {
   createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
@@ -152,7 +214,7 @@ function advanceCursor() {
     wave1.freq((50 +cursorX * cursorY)% 260);
     wave2.freq((50 + cursorY - cursorX)%260);
         
-    console.log("Cursor position:", cursorX, cursorY); // Debugging statement
+    //console.log("Cursor position:", cursorX, cursorY); // Debugging statement
 }
 
 function retreatCursor() {
@@ -247,56 +309,11 @@ function keyPressed() {
 
       }
     }
-  
-    // Alt + key for other symbols
-    if (keyIsDown(ALT)) {
-      if (keyIsDown(ALT)) {
-        switch (key) {
-          case '1': setCurrentTile(getTileIndex("OPAQUE_DARK_SMILING_FACE")); break; // Custom, no direct equivalent
-          case '2': setCurrentTile(getTileIndex("OPAQUE_WHITE_SMILING_FACE")); break; // Custom, no direct equivalent
-          case '3': setCurrentTile(getTileIndex("FEMALE_SYMBOL")); break; // Similar to ♀
-          case '4': setCurrentTile(getTileIndex("BOW_AND_ARROW")); break; // Custom, no direct equivalent
-          case '5': setCurrentTile(getTileIndex("BEAMED_EIGHTH_NOTES")); break; // Similar to ♫
-          case '6': setCurrentTile(getTileIndex("PRISON_WINDOW")); break; // Custom, no direct equivalent
-          case '7': setCurrentTile(getTileIndex("BLACK_RIGHT_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
-          case '8': setCurrentTile(getTileIndex("BLACK_LEFT_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
-          case '9': setCurrentTile(getTileIndex("ROLLING_ON_THE_FLOOR_LAUGHING")); break; // Similar to 🤣
-          case '0': setCurrentTile(getTileIndex("QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT")); break; // Custom, no direct equivalent
-          case '-': setCurrentTile(getTileIndex("LEG")); break; // Custom, no direct equivalent
-          case '=': setCurrentTile(getTileIndex("UPWARDS_ARROW_WITH_TIP_LEFTWARDS")); break; // Custom, no direct equivalent
-          case 'q': setCurrentTile(getTileIndex("BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'w': setCurrentTile(getTileIndex("MEDIUM_SHADE")); break; // Similar to ▒
-          case 'e': setCurrentTile(getTileIndex("MEDIUM_LIGHT_SHADE")); break; // Custom, no direct equivalent
-          case 'r': setCurrentTile(getTileIndex("LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 't': setCurrentTile(getTileIndex("LIGHT_SHADE_LOWER_RIGHT_TRIANGLE_WITH_MEDIUM_SHADE_UPPER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'y': setCurrentTile(getTileIndex("BLACK_LOWER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'u': setCurrentTile(getTileIndex("MEDIUM_SHADE_LOWER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'i': setCurrentTile(getTileIndex("OPAQUE_DOTTED_LIGHT_SHADE")); break; // Custom, no direct equivalent
-          case 'o': setCurrentTile(getTileIndex("DARK_SMILING_FACE")); break; // Similar to 😐 but opaque
-          case 'p': setCurrentTile(getTileIndex("EYE_OF_PROVIDENCE")); break; // Custom, no direct equivalent
-          case '[': setCurrentTile(getTileIndex("INVERTED_EYE_OF_PROVIDENCE")); break; // Custom, no direct equivalent
-          case ']': setCurrentTile(getTileIndex("INVERTED_CHECKER_BOARD")); break; // Custom, no direct equivalent
-          case 'a': setCurrentTile(getTileIndex("CHECKER_BOARD")); break; // Similar to checkerboard patterns
-          case 's': setCurrentTile(getTileIndex("CANDLE_STICK")); break; // Custom, no direct equivalent
-          case 'd': setCurrentTile(getTileIndex("INVERSE_DIAMOND_SUITE")); break; // Custom, no direct equivalent
-          case 'f': setCurrentTile(getTileIndex("IMPERFECT_DOTTED_LIGHT_SHADE")); break; // Custom, no direct equivalent
-          case 'g': setCurrentTile(getTileIndex("OPAQUE_DOOR_TOP")); break; // Custom, no direct equivalent
-          case 'h': setCurrentTile(getTileIndex("OPAQUE_DOOR_BOTTOM")); break; // Custom, no direct equivalent
-          case 'j': setCurrentTile(getTileIndex("BLACK_LOWER_RIGHT_TRIANGLE_WITH_DARK_SHADE_UPPER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'k': setCurrentTile(getTileIndex("OPAQUE_PRISON_WINDOW")); break; // Custom, no direct equivalent
-          case 'l': setCurrentTile(getTileIndex("ROTATED_LATIN_CAPITAL_LETTER_F_ON_LIGHT_SHADE")); break; // Custom, no direct equivalent
-          case ';': setCurrentTile(getTileIndex("SMALL_BLACK_LOWER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
-          case '\'': setCurrentTile(getTileIndex("LIGHT_SHADE_UPPER_LEFT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'z': setCurrentTile(getTileIndex("LIGHT_SHADE_UPPER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'x': setCurrentTile(getTileIndex("LIGHT_SHADE_LOWER_RIGHT_TRIANGLE")); break; // Custom, no direct equivalent
-          case 'c': setCurrentTile(getTileIndex("FLOOR")); break; // Custom, no direct equivalent
-          case 'v': setCurrentTile(getTileIndex("IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION")); break; // Custom, no direct equivalent
-          case 'b': setCurrentTile(getTileIndex("CYCLOPS_FACE")); break; // Custom, no direct equivalent
-        }
-
-      }
+    const tileIndex = getTileIndexFromChar(key);
+    if (tileIndex !== null) {
+        setCurrentTile(tileIndex);
+        return false;
     }
-  
     return false; // Prevent default behavior
 }
   
