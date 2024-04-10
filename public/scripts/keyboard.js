@@ -85,6 +85,7 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
+  backgroundImage = loadImage('/public/assets/images/pit.png');
   fileText = loadStrings('/public/data/mud_which_flows.txt');
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
   for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
@@ -106,23 +107,24 @@ function setup() {
   if (fileText) {
     displayText();
   }
-  wave1 = new p5.Oscillator();
+  /* wave1 = new p5.Oscillator();
   wave1.amp(0.5);
   wave1.setType('triangle');
   wave2 = new p5.Oscillator();
   wave2.amp(0.5);
   wave2.setType('triangle');
-  reverb = new p5.Reverb();
+  reverb = new p5.Reverb(); */
 }
 
 function draw() {
-    if (!toneStarted){
+    /* if (!toneStarted){
       wave1.start();
       wave2.start();
       toneStarted = true;
       reverb.process(wave1, 1, 2);
-    }
-    //background(225);
+    } */
+    background(255);
+    image(backgroundImage, 0, 0, width, height);
     for (let y = 0; y < CANVAS_ROWS; y++) {
       for (let x = 0; x < CANVAS_COLS; x++) {
         
@@ -176,12 +178,12 @@ function drawCursor() {
 function setCurrentTile(tileIndex) {
   if (cursorY >= 0 && cursorY < tileMap.length && cursorX >= 0 && cursorX < tileMap[cursorY].length) {
     tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
-    if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
+    /* if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
       let randomSoundIndex = Math.floor(Math.random() * soundFiles.length);
       soundFiles[randomSoundIndex].play();
-      background(random(255), random(255), random(255));
-      
-    }
+      background(random(50, 255), random(50, 255), random(50, 255)); //it was kind of interesting to change the background color at the end of every word but too much after a while
+
+    } */
     advanceCursor();
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -234,8 +236,8 @@ function advanceCursor() {
         }
       }
     }
-    wave1.freq((50 +cursorX * cursorY)% 260);
-    wave2.freq((50 + cursorY - cursorX)%260);
+    //wave1.freq((50 +cursorX * cursorY)% 260);
+    //wave2.freq((50 + cursorY - cursorX)%260);
         
     //console.log("Cursor position:", cursorX, cursorY); // Debugging statement
 }
