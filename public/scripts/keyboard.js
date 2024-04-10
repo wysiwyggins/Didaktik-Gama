@@ -86,7 +86,7 @@ function getTileIndexFromChar(char) {
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
   backgroundImage = loadImage('/public/assets/images/pit.png');
-  fileText = loadStrings('/public/data/mud_which_flows.txt');
+  fileText = loadStrings('/public/data/texts/mud_which_flows.txt');
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
   for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
     let soundPath = `/public/assets/sound/${i}.wav`;
