@@ -85,13 +85,14 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  backgroundImage = loadImage('/public/assets/images/pit.png');
-  fileText = loadStrings('/public/data/texts/mud_which_flows.txt');
+  let fileIndex = floor(random(1, 9));
+  backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
+  fileText = loadStrings(`/public/data/texts/${fileIndex}.txt`);
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
-  for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
+  /* for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
     let soundPath = `/public/assets/sound/${i}.wav`;
     soundFiles.push(loadSound(soundPath));
-  }
+  } */
 }
 
 
@@ -107,22 +108,22 @@ function setup() {
   if (fileText) {
     displayText();
   }
-  /* wave1 = new p5.Oscillator();
+  wave1 = new p5.Oscillator();
   wave1.amp(0.5);
   wave1.setType('triangle');
   wave2 = new p5.Oscillator();
   wave2.amp(0.5);
   wave2.setType('triangle');
-  reverb = new p5.Reverb(); */
+  reverb = new p5.Reverb();
 }
 
 function draw() {
-    /* if (!toneStarted){
+    if (!toneStarted){
       wave1.start();
       wave2.start();
       toneStarted = true;
-      reverb.process(wave1, 1, 2);
-    } */
+      reverb.process(wave1, 2, 3);
+    }
     background(255);
     image(backgroundImage, 0, 0, width, height);
     for (let y = 0; y < CANVAS_ROWS; y++) {
@@ -178,12 +179,13 @@ function drawCursor() {
 function setCurrentTile(tileIndex) {
   if (cursorY >= 0 && cursorY < tileMap.length && cursorX >= 0 && cursorX < tileMap[cursorY].length) {
     tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
-    /* if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
-      let randomSoundIndex = Math.floor(Math.random() * soundFiles.length);
+    if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
+     /*  let randomSoundIndex = Math.floor(Math.random() * soundFiles.length);
       soundFiles[randomSoundIndex].play();
-      background(random(50, 255), random(50, 255), random(50, 255)); //it was kind of interesting to change the background color at the end of every word but too much after a while
-
-    } */
+      background(random(50, 255), random(50, 255), random(50, 255)); //it was kind of interesting to change the background color at the end of every word but too much after a while */
+      wave1.freq(random(50, 160));
+      wave2.freq(random(50, 160));
+    }
     advanceCursor();
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -236,8 +238,8 @@ function advanceCursor() {
         }
       }
     }
-    //wave1.freq((50 +cursorX * cursorY)% 260);
-    //wave2.freq((50 + cursorY - cursorX)%260);
+    wave1.freq((50 +cursorX * cursorY)% random(50, 260));
+    wave2.freq((50 + cursorY - cursorX) / random(50, 260));
         
     //console.log("Cursor position:", cursorX, cursorY); // Debugging statement
 }
@@ -415,7 +417,7 @@ function displayTileForCharacter(char) {
         case '&': setCurrentTile(getTileIndex("AMPERSAND")); break;
         case '*': setCurrentTile(getTileIndex("ASTERISK")); break;
         case 'š': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_S_WITH_CARON")); break;
-        case ' ': setCurrentTile(getTileIndex("WHITE_FULL_BLOCK")); break;
+        case ' ': setCurrentTile(getTileIndex("BLANK")); break;
         case '(': setCurrentTile(getTileIndex("LEFT_PARENTHESIS")); break;
         case ')': setCurrentTile(getTileIndex("RIGHT_PARENTHESIS")); break;
         case '-': setCurrentTile(getTileIndex("HYPHEN_MINUS")); break;
