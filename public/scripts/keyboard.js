@@ -8,6 +8,8 @@ let tileMap = [];
 let cursorX = 0;
 let cursorY = 0;
 currentPenColor = null;
+let tilesDisplayed = 0;
+
 
 //input pause
 let typingPaused = false;
@@ -17,6 +19,7 @@ const pauseDuration = 5000;
 // Constants
 const CANVAS_COLS = 65;
 const CANVAS_ROWS = 60;
+const MAX_TILES = CANVAS_COLS * CANVAS_ROWS;
 const TILE_WIDTH = 20;   // Half size
 const TILE_HEIGHT = 15;
 const SPRITESHEET_COLS = 23;
@@ -171,7 +174,7 @@ function penColor(hexValue) {
 }
 
 function drawCursor() {
-  stroke(255, 255, 0); // Red color for the cursor
+  stroke(10, 10, 10);
   noFill();
   rect(cursorX * TILE_WIDTH, cursorY * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
 }
@@ -187,6 +190,10 @@ function setCurrentTile(tileIndex) {
       wave2.freq(random(50, 160));
     }
     advanceCursor();
+    tilesDisplayed++;
+    if (tilesDisplayed >= MAX_TILES) {
+      window.location.reload();
+    }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
   }
@@ -375,7 +382,7 @@ function displayCharacter() {
     if (char !== ' ') {
       displayTileForCharacter(char);
     } else {
-      setCurrentTile(getTileIndex("WHITE_FULL_BLOCK"));
+      setCurrentTile(getTileIndex("BLANK"));
     }
   } else {
     // Once we've reached the end of the textArray, reset textIndex to start over
