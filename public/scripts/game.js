@@ -386,9 +386,9 @@ class Actor {
         let message = '';
 
         // Check the type of actor and set the message accordingly
-        if (this.type === 'Player') {
+        if (this instanceof Player) {
             message = `You picked up a ${item.name}.`;
-        } else if (this.type === 'Monster') {
+        } else if (this instanceof Monster) {
             message = `The ${this.name} picked up a ${item.name}.`;
         }
 
