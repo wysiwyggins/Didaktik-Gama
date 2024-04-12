@@ -2170,6 +2170,13 @@ class Item {
                 this._objectNumber = 200;
                 this.colorValue = colorValue;
                 break;
+            case ItemType.CRADLE:
+                this._name = 'Cradle';
+                this._type = type;
+                this._tileIndex = {x: 8, y: 0};
+                this._objectNumber = 3;
+                this.colorValue = colorValue;
+                break;
         }
         let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
         this.spriteTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
@@ -2190,16 +2197,22 @@ class Item {
             inspector.hideBox();
             messageList.showBox();
         });
-        if (type === ItemType.KEY) {
-            this.sprite.tint = this.colorValue;
-        }
-
+        
         // Set position, scale, and zIndex of the sprite
         this.sprite.position.set(x * TILE_WIDTH * SCALE_FACTOR, y * TILE_HEIGHT * SCALE_FACTOR);
         this.sprite.scale.set(SCALE_FACTOR);
         this.sprite.zIndex = 2;
-        if (type === ItemType.FLOWER || type === ItemType.KEY) {
+        if (type === ItemType.FLOWER || type === ItemType.KEY ) { 
+            this.sprite.blendMode = PIXI.BLEND_MODES.NORMAL;  
             this.sprite.tint = colorValue;
+           //this.sprite.tint = 0xFF0000
+            
+        }
+        if (type === ItemType.CRADLE) { 
+            this.sprite.blendMode = PIXI.BLEND_MODES.NORMAL;  
+           
+            this.sprite.tint = 0xFFFF00
+            
         }
         // Add sprite to gameContainer
         gameContainer.addChild(this.sprite);
@@ -3335,8 +3348,9 @@ function setup() {
         let basilisk = new Monster(MonsterType.BASILISK, randomTile2.x, randomTile2.y, scheduler, engine, messageList, inspector);
         createMonsterSprite(basilisk);
         scheduler.add(basilisk, true);
-        new Item(ItemType.BOW,randomTile3.x, randomTile3.y, '0xFFFFFF', 1);
-        new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, '0xFFFFFF', 3);
+        new Item(ItemType.BOW,randomTile3.x, randomTile3.y, 0xFFFFFF, 1);
+        new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, 0xFFFFFF, 3);
+        new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
         /* let chimera = new Monster(MonsterType.CHIMERA, randomTile3.x, randomTile3.y, scheduler, engine, messageList);
         createMonsterSprite(chimera);
         scheduler.add(chimera, true); */
