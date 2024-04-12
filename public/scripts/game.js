@@ -31,6 +31,8 @@ let player = null;
 // Add the app view to our HTML document
 document.getElementById('game').appendChild(app.view);
 
+let turnTimeout; // timer for passing turns 
+
 // Set up some constants
 const rect = app.view.getBoundingClientRect();
 const TILE_WIDTH = 40;
@@ -105,6 +107,27 @@ let sound;
 //ticker is a tween thing I use for things that animate in place, like fire and smoke
 createjs.Ticker.framerate = 60;
 createjs.Ticker.addEventListener("tick", createjs.Tween);
+
+
+function passTurn() {
+    // Simulate pressing the spacebar
+    let event = new KeyboardEvent('keydown', {
+        key: ' ',
+        keyCode: 32, // Standard key code for spacebar
+        code: 'Space',
+        which: 32,
+        bubbles: true, // Event will bubble up through the DOM
+        cancelable: true // Event can be canceled
+    });
+    document.dispatchEvent(event);  // Dispatch the event to the document
+
+    console.log('Simulated spacebar press due to player inactivity.');
+}
+
+function resetTurnTimer() {
+    clearTimeout(turnTimeout);  // Clear the existing timer
+    turnTimeout = setTimeout(passTurn, 10000);  // Set a new 10-second timer
+}
 
 //var audio = new Audio('assets/sound/grottoAudiosprite.mp3');
 //audio.play();
@@ -756,10 +779,6 @@ class Player extends Actor{
         }
     }
     
-    
-    
-
-    
 
     updateSprites(newTileX, newTileY) {
         this.sprite.footprint.x = this.x * TILE_WIDTH * SCALE_FACTOR;
@@ -944,6 +963,7 @@ class Player extends Actor{
 
     handleKeydown(event) {
         if (this.isDead) return;
+        resetTurnTimer();
         // If the player is in targeting mode, any keypress should cancel the targeting
         if (this.isTargeting) {
             this.isTargeting = false;
@@ -955,30 +975,46 @@ class Player extends Actor{
         switch (event.key) {
             case 'ArrowUp':
             case 'Numpad8':
+            case '8':
+            case 'w':
                 newDirection = 'up';
                 break;
             case 'ArrowDown':
             case 'Numpad2':
+            case '2':
+            case 's':
                 newDirection = 'down';
                 break;
             case 'ArrowLeft':
             case 'Numpad4':
+            case '4':
+            case 'a':
                 newDirection = 'left';
                 break;
             case 'ArrowRight':
             case 'Numpad6':
+            case '6':
+            case 'd':
                 newDirection = 'right';
                 break;
             case 'Numpad7':
+            case '7':
+            case 'q':
                 newDirection = 'up-left';
                 break;
             case 'Numpad9':
+            case '9':
+            case 'e':
                 newDirection = 'up-right';
                 break;
             case 'Numpad1':
+            case '1':
+            case 'z':
                 newDirection = 'down-left';
                 break;
             case 'Numpad3':
+            case '3':
+            case 'c':
                 newDirection = 'down-right';
                 break;
             default:
@@ -993,9 +1029,9 @@ class Player extends Actor{
         if (this.engine._lock) {
             this.engine.unlock();  // After moving, unlock the engine for the next turn
         }
-        if (event.key === 'a' || event.code === 'KeyA') {
+        if (event.key === 'b' || event.code === 'KeyB') {
             this.handleArrowAim();
-            console.log("arrow attack");
+            console.log("bow attack");
         }
         if (event.key === 'c' || event.code === 'KeyC') {
             this.handleCloseDoor();
@@ -1008,6 +1044,8 @@ class Player extends Actor{
         if (hasBow) {
             this.isTargeting = true;
             this.messageList.addMessage("Aim bow at?");
+        } else {
+            this.messageList.addMessage("You have no bow to shoot with.");
         }
     }
 
@@ -3314,6 +3352,7 @@ function setup() {
         }
  
         engine.start(); // start the engine
+        resetTurnTimer();
     });
 
 }
