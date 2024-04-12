@@ -1,5 +1,5 @@
 let currentSketch = 0;
-const sketches = ['saltwave.js', 'abyss.js', 'game.js', 'keyboard.js']; 
+const sketches = ['knit.js', 'saltwave.js', 'abyss.js', 'game.js', 'keyboard.js']; 
 
 let socket;  // Socket connection
 

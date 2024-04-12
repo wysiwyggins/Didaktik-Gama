@@ -6,21 +6,22 @@ keyboard = KMKKeyboard()
 
 # Now that the keyboard object is defined, append the Layers module.
 keyboard.modules.append(Layers())
-
+_______ = KC.TRNS
+XXXXXXX = KC.NO
 keyboard.keymap = [
     [
-        KC.LALT(KC.A), KC.LALT(KC.B), KC.LALT(KC.C), KC.LALT(KC.D),
-        KC.LALT(KC.E), KC.LALT(KC.F), KC.LALT(KC.G), KC.LALT(KC.H),
-        KC.LALT(KC.M), KC.LALT(KC.N), KC.LALT(KC.O), KC.LALT(KC.P),
-        KC.LALT(KC.Q), KC.LALT(KC.R), KC.LALT(KC.S), KC.LALT(KC.T),
-        KC.NO, KC.TO(1), KC.NO, KC.NO,
-    ],
+        KC.NLCK, KC.PSLS, KC.PAST, KC.PMNS,
+        KC.P7,   KC.P8,   KC.P9,   KC.A,
+        KC.P4,   KC.P5,   KC.P6,   KC.PPLS,
+        KC.P1,   KC.P2,   KC.P3,   KC.SLSH,
+        _______, KC.SPACE, XXXXXXX,   XXXXXXX,
+        ],
     [
-        KC.LCTRL(KC.A), KC.LCTRL(KC.B), KC.LCTRL(KC.C), KC.LCTRL(KC.D),
-        KC.LCTRL(KC.E), KC.LCTRL(KC.F), KC.LCTRL(KC.G), KC.LCTRL(KC.H),
-        KC.LCTRL(KC.M), KC.LCTRL(KC.N), KC.LCTRL(KC.O), KC.LCTRL(KC.P),
-        KC.LCTRL(KC.Q), KC.LCTRL(KC.R), KC.LCTRL(KC.S), KC.LCTRL(KC.T),
-        KC.NO, KC.TO(0), KC.NO, KC.NO,
+        KC.LALT(KC.A), KC.LALT(KC.B), KC.LALT(KC.C), KC.LALT(KC.D),
+        KC.LALT(KC.W), KC.LALT(KC.F), KC.LALT(KC.G), KC.LALT(KC.H),
+        KC.LALT(KC.M), KC.LALT(KC.V), KC.LALT(KC.O), KC.LALT(KC.P),
+        KC.LALT(KC.Q), KC.LALT(KC.R), KC.LALT(KC.S), KC.LALT(KC.T),
+        _______, KC.NO, XXXXXXX, XXXXXXX,
     ],
 ]
 
