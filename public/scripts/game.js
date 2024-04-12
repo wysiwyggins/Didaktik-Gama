@@ -1232,6 +1232,9 @@ class Player extends Actor{
             this.isDead = true;
             this.incinerate();
         }
+        if (this.blood < -300) {
+            window.location.href = 'abyss.html';
+        }
     }
     skeletonize() {
         let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
