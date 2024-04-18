@@ -193,7 +193,7 @@ function setCurrentTile(tileIndex) {
     tilesDisplayed++;
     if (tilesDisplayed >= MAX_TILES) {
       //window.location.reload();
-      window.location.href = 'knit.html';
+      window.location.href = 'automata.html';
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);

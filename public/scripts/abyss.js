@@ -184,7 +184,7 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 
 function draw() {
   if (abysses > 20) {
-    window.location.href = 'saltwave.html';
+    window.location.href = 'keyboard.html';
   }
   background(255);
   noStroke();

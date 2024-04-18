@@ -1495,7 +1495,12 @@ const Attacks = {
     CLAW: function(monster, target) {
         if (monster.isAdjacent(target)) {
             messageList.addMessage(`The ${monster.name} claws at you!`);
-            sound.play('ouch');
+            if (target.isDead = false){
+                sound.play('ouch');
+            } else {
+                playBumpSound();
+            }
+            
             target.takeDamage(5);
         }
     }
@@ -1609,36 +1614,41 @@ class Monster extends Actor{
 
                 
                 this.moveRandomly = function() {
-                    let adjacentTiles = this.getAdjacentTiles();
+                    let attempts = 3;  // Number of attempts to find an unblocked tile
+                    let moved = false;
                 
-                    // Filter out tiles that have a locked door.
-                    adjacentTiles = adjacentTiles.filter(tile => {
-                        let doorOnTile = Door.allDoors.find(door => door.x === tile.x && door.y === tile.y);
-                        if (doorOnTile) {
-                            if (doorOnTile.isLocked) {
-                                return false;
+                    while (attempts-- > 0 && !moved) {
+                        let adjacentTiles = this.getAdjacentTiles();
+                
+                        // Filter out tiles that have a locked door or are blocked.
+                        adjacentTiles = adjacentTiles.filter(tile => {
+                            let door = Door.totalDoors().find(door => door.x === tile.x && door.y === tile.y);
+                            return !door || !this.isLockedDoor(door); // Allow open doors or tiles without doors
+                        }).filter(tile => !this.isBlocked(tile.x, tile.y)); // Ensure the tile is not blocked
+                
+                        if (adjacentTiles.length > 0) {
+                            let randomTile = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
+                            this.x = randomTile.x;
+                            this.y = randomTile.y;
+                
+                            // Open any unlocked door on the tile.
+                            let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
+                            if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
+                                doorOnTile.open();
+                                this.messageList.addMessage("You hear a crashing noise.");
                             }
+                
+                            this.updateSpritePosition();
+                            this.checkForItems(this.x, this.y);
+                            moved = true; // Mark as moved
                         }
-                        return true;
-                    });
+                    }
                 
-                    if(adjacentTiles.length > 0) {
-                        let randomTile = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
-                        this.x = randomTile.x;
-                        this.y = randomTile.y;
-                
-                        // Open any unlocked door on the tile.
-                        let doorOnTile = Door.allDoors.find(door => door.x === this.x && door.y === this.y);
-                        if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
-                            doorOnTile.open();
-                            messageList.addMessage("You hear a crashing noise.");
-                        }
-                
-                        this.updateSpritePosition();
-
-                        this.checkForItems(this.x, this.y);
+                    if (!moved) {
+                        console.log("Skeleton couldn't find an unblocked path to move randomly.");
                     }
                 };
+                
                 this.act = function() {
                     console.log("Basilisk's turn");
                 

@@ -284,7 +284,7 @@ function draw() {
    year += 1;
   }
   if (year > 30) {  
-    window.location.href = 'keyboard.html';
+    window.location.href = 'patterns.html';
     year = 0;
   }
 
