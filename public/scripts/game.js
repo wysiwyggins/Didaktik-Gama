@@ -110,23 +110,44 @@ createjs.Ticker.addEventListener("tick", createjs.Tween);
 
 
 function passTurn() {
-    // Simulate pressing the spacebar
-    let event = new KeyboardEvent('keydown', {
-        key: ' ',
-        keyCode: 32, // Standard key code for spacebar
-        code: 'Space',
-        which: 32,
-        bubbles: true, // Event will bubble up through the DOM
-        cancelable: true // Event can be canceled
-    });
-    document.dispatchEvent(event);  // Dispatch the event to the document
+    console.log('Turn passed due to inactivity.');
 
-    console.log('Simulated spacebar press due to player inactivity.');
+    players.forEach(player => {
+        if (!player.isDead) {
+            player.inactiveTurns++;
+            console.log(`Player inactive turns: ${player.inactiveTurns}`);
+            if (player.inactiveTurns >= 3) {
+                player.zeroPlayerMode = true; // Set zero-player mode
+                console.log("Entering zero-player mode");
+                moveToNearestItem(player);
+            }
+        }
+    });
+
+    // Process the next entity in the scheduler
+    if (engine) {
+        if (!engine.lock) {
+            console.log("Engine is unlocked, processing next turn.");
+            engine.start();  // This method resumes the engine if it was stopped.
+        } else {
+            console.log("Engine is locked, likely waiting for a current action to complete.");
+            if ( player.zeroPlayerMode){
+                engine.unlock();
+            }
+        }
+    } else {
+        console.log("No engine found, make sure it's initialized and referenced correctly.");
+    }
+
+    // Reset the turn timer to wait for another period of inactivity
+    resetTurnTimer();
 }
+
+
 
 function resetTurnTimer() {
     clearTimeout(turnTimeout);  // Clear the existing timer
-    turnTimeout = setTimeout(passTurn, 10000);  // Set a new 10-second timer
+    turnTimeout = setTimeout(passTurn, 5000); //5 sec timer
 }
 
 //var audio = new Audio('assets/sound/grottoAudiosprite.mp3');
@@ -438,10 +459,19 @@ const PlayerType = Object.freeze({
     "PILE": 9
     
 });
-
+function resetPlayerStates() {
+    players.forEach(player => {
+        player.inactiveTurns = 0;
+        player.zeroPlayerMode = false;
+        player.failedMoveAttempts = 0;
+    });
+}
 class Player extends Actor{
     constructor(type, x, y, scheduler, engine, messageList, inspector) {
         super(type, x, y, scheduler, engine, messageList, inspector);
+        this.inactiveTurns = 0;
+        this.zeroPlayerMode = false; // Flag for zero-player mode
+        this.failedMoveAttempts = 0; // Counter for failed move attempts
         this.name = "You";
         this.isSkeletonized = false;
         this.isTargeting = false;
@@ -460,9 +490,12 @@ class Player extends Actor{
         this.footShadowTile.zIndex = 1.5;
 
         window.addEventListener('keydown', (event) => {
+            resetPlayerStates();
             this.handleKeydown(event);
+            
         });
         window.addEventListener('mousedown', (event) => {
+            resetPlayerStates();
             this.handleClick(event);
         });
         window.addEventListener('mousemove', (event) => {
@@ -855,34 +888,33 @@ class Player extends Actor{
     }
     //moveTo implicitly takes turns when the player clicks on a distant spot that can be walked to
     async moveTo(targetX, targetY, stopBefore = false) {
+        let stuckCounter = 0;
         if (targetX === this.x && targetY === this.y) return;
 
         let path = [];
-        let stuckCounter = 0; // add a counter for stuck moves
-
         let passableCallback = (x, y) => {
             let floorTileValue = floorMap[y][x]?.value;
             let objectTileValue = objectMap[y][x]?.value;
             let atmosphereTileValue = atmosphereMap[y][x]?.value;
-            // Tile is considered "unpassable" if it's on fire.
-            if (atmosphereTileValue === 300) {
-                return false;
-            }
             return floorTileValue === 157 && (!objectTileValue);
         }
-
         let astar = new ROT.Path.AStar(targetX, targetY, passableCallback);
-
-        let pathCallback = (x, y) => {
-            path.push({ x, y });
-        }
-
+        let pathCallback = (x, y) => path.push({ x, y });
         astar.compute(this.x, this.y, pathCallback);
 
         if (path.length === 0) {
-            this.messageList.addMessage("You're not sure how to get there.");
+            if (!this.zeroPlayerMode) {
+                this.messageList.addMessage("You're not sure how to get there.");
+            } else {
+                this.failedMoveAttempts++;
+                console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
+                if (this.failedMoveAttempts >= 3) { // If failed 3 times in zero-player mode, change page
+                    window.location.href = 'knit.html';
+                }
+            }
             return;
         }
+        this.failedMoveAttempts = 0;
     
         for (let point of path) {
             let { x, y } = point;
@@ -1397,9 +1429,42 @@ function createPlayerSprite(player) {
 
 }
 
+async function moveToNearestItem(player) {
+    if (engine._lock) {
+        engine.unlock();
+    }
+    let nearestItem = findNearestItem(player.x, player.y);
+    if (nearestItem) {
+        console.log(`Zero-player mode: Moving towards item at ${nearestItem.x}, ${nearestItem.y}`);
+        await player.moveTo(nearestItem.x, nearestItem.y);
+    } else {
+        console.log("No items available for zero-player mode.");
+        player.failedMoveAttempts++;
+        if (player.failedMoveAttempts >= 3) {
+            console.log("No movement possible, redirecting...");
+            window.location.href = 'knit.html';
+        }
+    }
+    player.inactiveTurns = 0; // Reset the counter after attempting to move
+}
+
+function findNearestItem(px, py) {
+    let nearest = null;
+    let minDist = Infinity;
+    activeItems.forEach(item => {
+        let dist = Math.abs(item.x - px) + Math.abs(item.y - py);
+        if (dist < minDist) {
+            nearest = item;
+            minDist = dist;
+        }
+    });
+    return nearest;
+}
+
 const MonsterType = Object.freeze({
     "BASILISK": 0,
     "CHIMERA": 1,
+    "SKELETON": 2,
 });
 
 
@@ -3270,7 +3335,7 @@ class UIBox {
     }
 }
 // This function will run when the spritesheet has finished loading
-function setup() {
+async function setup() {
     dungeonGeneration();
     addFloorsAndVoid();
     evaluateMapAndCreateWalls();
