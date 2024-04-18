@@ -265,7 +265,8 @@ function is3x3BlockAllSix(x, y) {
 }
 
 function draw() {
-  if (year < 1) {
+  console.log(year, season, day);
+  if (year < 1 && season < 3) {
     displayMessage('Photosensitive Epilepsy Warning, Flashing Images', 1);
   }
   if (messageDisplayStart !== -1 && (frameCount - messageDisplayStart) > displayDurationFrames) {
@@ -283,9 +284,10 @@ function draw() {
    season = 0;
    year += 1;
   }
-  if (year > 30) {  
-    window.location.href = 'patterns.html';
+  if (year > 19) {  
     year = 0;
+    window.location.href = 'patterns.html';
+    
   }
 
 
@@ -423,6 +425,6 @@ function draw() {
   }
 
   grid = updatedGrid;
-  frameRate(30);
+  frameRate(24);
   
 }
