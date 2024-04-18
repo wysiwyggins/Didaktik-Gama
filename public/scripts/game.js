@@ -398,6 +398,25 @@ class Actor {
             this.die();
         }
     }
+    die(){
+        this.messageList.addMessage("You are dead!");
+        this.type = PlayerType.SKELETON;
+        this.isDead = true;
+        this.isSkeletonized = true;
+        
+        this.skeletonize();
+        for (let i = this.inventory.length - 1; i >= 0; i--) {
+            const item = this.inventory[i];
+            if (item.type === ItemType.KEY) {
+                // Find an adjacent, walkable tile
+                const adjacentTile = this.findAdjacentWalkableTile();
+                if (adjacentTile) {
+                    // Drop the key on the tile
+                    this.dropItemOnTile(item, adjacentTile.x, adjacentTile.y);
+                }
+            }
+        }
+    }
     checkForItems(x, y) {
         let item = objectMap[y][x]?.item;
         if (item) this.pickUpItem(item, x, y);
@@ -1242,23 +1261,7 @@ class Player extends Actor{
             this.blood --;
         }
         if (this.blood < 1 && this.blood > -100 && this.isSkeletonized == false) {
-            this.messageList.addMessage("You are dead!");
-            this.type = PlayerType.SKELETON;
-            this.isDead = true;
-            this.isSkeletonized = true;
-            
-            this.skeletonize();
-            for (let i = this.inventory.length - 1; i >= 0; i--) {
-                const item = this.inventory[i];
-                if (item.type === ItemType.KEY) {
-                    // Find an adjacent, walkable tile
-                    const adjacentTile = this.findAdjacentWalkableTile();
-                    if (adjacentTile) {
-                        // Drop the key on the tile
-                        this.dropItemOnTile(item, adjacentTile.x, adjacentTile.y);
-                    }
-                }
-            }
+            this.die();
         }
         // Check if player is REALLY dead
         if (this.blood <=-100 && this.isSkeletonized == true) {
