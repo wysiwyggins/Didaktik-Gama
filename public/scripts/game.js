@@ -1495,7 +1495,7 @@ const Attacks = {
     CLAW: function(monster, target) {
         if (monster.isAdjacent(target)) {
             messageList.addMessage(`The ${monster.name} claws at you!`);
-            sound.play('claw_attack'); // Make sure you have this sound available.
+            sound.play('ouch');
             target.takeDamage(5);
         }
     }
