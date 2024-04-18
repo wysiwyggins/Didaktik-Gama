@@ -132,7 +132,9 @@ function passTurn() {
         } else {
             console.log("Engine is locked, likely waiting for a current action to complete.");
             if ( player.zeroPlayerMode){
+
                 engine.unlock();
+                console.log("unlocked the engine");
             }
         }
     } else {
@@ -1487,6 +1489,13 @@ const Attacks = {
         sound.play('fireball');
         messageList.addMessage("The {0} breathes flames!", [monster.name]);
     },
+    CLAW: function(monster, target) {
+        if (monster.isAdjacent(target)) {
+            messageList.addMessage(`The ${monster.name} claws at you!`);
+            sound.play('claw_attack'); // Make sure you have this sound available.
+            target.takeDamage(5);
+        }
+    }
     // Add other attacks here
 }
 
@@ -1500,6 +1509,8 @@ class Monster extends Actor{
         this.prevX = null;
         this.prevY = null;
         this.fireproof;
+        this.firstTilePosition = { x: 0, y: 0 };  // Default values
+        this.secondTilePosition = { x: 0, y: 0 };
         this.secondShadowTile = {x: 14, y: 9};
         this.firstShadowTile = {x: 8, y: 6};
         this.sprite.shadow = null;
@@ -1690,11 +1701,38 @@ class Monster extends Actor{
                         }
                     };
                     break;
+            case MonsterType.SKELETON:
+                this.name = "Skeleton";
+                this.upright = true;
+                this.attacks = ["CLAW"];
+                this.firstTilePosition = {x: 8, y: 7};
+                this.secondTilePosition = {x: 9, y: 7};
+                this.act = function() {
+                    console.log("Skeleton's turn");
+        
+                    // Check for player visibility and proximity
+                    let target = this.findClosestPlayer();
+                    if (target && this.canSeeTarget(target)) {
+                        this.sighted = true;
+                        this.target = target;
+                    }
+        
+                    if (this.sighted && this.target) {
+                        if (this.isAdjacent(this.target)) {
+                            Attacks.CLAW(this, this.target);
+                        } else {
+                            this.followTarget();
+                        }
+                    } else {
+                        this.moveRandomly();
+                    }
+                };
+                break;
             default:
                 this.name = monster;
                 this.upright = true;
-                this.footprintPosition = {x: 10, y: 5};
-                this.headPosition = {x: 1, y: 0};
+                this.firstTilePosition = {x: 8, y: 7};
+                this.secondTilePosition = {x: 9, y: 7};
                 break;
         }
 
@@ -1725,6 +1763,27 @@ class Monster extends Actor{
 
         Monster.allMonsters.push(this);
         
+    }
+    isAdjacent(target) {
+        let dx = Math.abs(this.x - target.x);
+        let dy = Math.abs(this.y - target.y);
+        return (dx <= 1 && dy <= 1 && dx + dy > 0);
+    }
+    isBlocked(x, y) {
+        if (this.isOutOfBounds(x, y)) {
+            return true; // Boundary check
+        }
+        if (!this.isWalkableTile(x, y)) {
+            return true; // Walkability check
+        }
+        let door = Door.totalDoors().find(d => d.x === x && d.y === y);
+        if (door && this.isLockedDoor(door)) {
+            return true; // Check for locked doors
+        }
+        return false; // Tile is not blocked
+    }
+    isValidMove(x, y) {
+        return !this.isBlocked(x, y);
     }
     takeDamage(amount) {
         this.blood -= amount;
@@ -1764,10 +1823,17 @@ class Monster extends Actor{
             this.updateSpritePosition();
         }
     };
-    
-    isValidMove = function(x, y) {
-        return x >= 0 && y >= 0 && x < MAP_WIDTH && y < MAP_HEIGHT && !this.isBlocked(x, y);
-    };
+    isOutOfBounds(x, y) {
+        return x < 0 || y < 0 || x >= MAP_WIDTH || y >= MAP_HEIGHT;
+    }
+
+    isWalkableTile(x, y) {
+        // Assuming floorMap is a globally accessible structure
+        return floorMap[y][x].value === 157; // Only floor tiles are walkable
+    }
+    isLockedDoor(door) {
+        return door && door.isLocked;
+    }
     
     die() {
         this.isDead = true;
@@ -1783,12 +1849,48 @@ class Monster extends Actor{
         this.scheduler.remove(this);
         this.engine._lock();  // This ensures the current turn completes before the monster is removed
     }
+    move(direction) {
+        let [dx, dy] = this.getDeltaXY(direction);
+        let [newTileX, newTileY] = [this.x + dx, this.y + dy];
+
+        if (this.isValidMove(newTileX, newTileY)) {
+            this.x = newTileX;
+            this.y = newTileY;
+            this.updateSpritePosition();
+
+            let door = Door.totalDoors().find(d => d.x === newTileX && d.y === newTileY);
+            if (door && !door.isLocked && !door.isOpen) {
+                door.open(); // Automatically open unlocked doors
+            }
+        }
+    }
     printStats() {
         this.inspector.clearMessages();
         this.inspector.addMessage( "Name: " + this.name);
         this.inspector.addMessage( "Blood: " + this.blood);
     }
 }
+
+Monster.prototype.findClosestPlayer = function() {
+    let closest = null;
+    let minDistance = Infinity;
+    players.forEach(player => {
+        if (!player.isDead) {
+            let distance = Math.sqrt(Math.pow(player.x - this.x, 2) + Math.pow(player.y - this.y, 2));
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = player;
+            }
+        }
+    });
+    return closest;
+};
+
+// Ensure Monster can see the target through direct line of sight
+Monster.prototype.canSeeTarget = function(target) {
+    // Assume line of sight checking function exists; you may need to implement this based on your game's logic
+    return true; // Simplified for example
+};
 
 function createMonsterSprite(monster) {
     activeEntities.push(this);
@@ -3367,7 +3469,9 @@ async function setup() {
     let randomTile3 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile4 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile5 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
-
+    let randomTile6 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
+    let randomTile7 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
+    let randomTile8 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     //add exits, they don't work yet
    /*  let downExitTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let upExitTile;
@@ -3413,6 +3517,15 @@ async function setup() {
         let basilisk = new Monster(MonsterType.BASILISK, randomTile2.x, randomTile2.y, scheduler, engine, messageList, inspector);
         createMonsterSprite(basilisk);
         scheduler.add(basilisk, true);
+        let skeleton1 = new Monster(MonsterType.SKELETON, randomTile6.x, randomTile6.y, scheduler, engine, messageList, inspector);
+        createMonsterSprite(skeleton1);
+        scheduler.add(skeleton1, true);
+        let skeleton2 = new Monster(MonsterType.SKELETON, randomTile7.x, randomTile7.y, scheduler, engine, messageList, inspector);
+        createMonsterSprite(skeleton2);
+        scheduler.add(skeleton2, true);
+        let skeleton3 = new Monster(MonsterType.SKELETON, randomTile8.x, randomTile8.y, scheduler, engine, messageList, inspector);
+        createMonsterSprite(skeleton3);
+        scheduler.add(skeleton3, true);
         new Item(ItemType.BOW,randomTile3.x, randomTile3.y, 0xFFFFFF, 1);
         new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, 0xFFFFFF, 3);
         new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
