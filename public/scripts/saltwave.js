@@ -284,6 +284,7 @@ function draw() {
    year += 1;
   }
   if (year > 30) {  
+    window.location.href = 'keyboard.html';
     year = 0;
   }
 

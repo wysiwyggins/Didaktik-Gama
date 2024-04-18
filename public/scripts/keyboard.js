@@ -192,7 +192,8 @@ function setCurrentTile(tileIndex) {
     advanceCursor();
     tilesDisplayed++;
     if (tilesDisplayed >= MAX_TILES) {
-      window.location.reload();
+      //window.location.reload();
+      window.location.href = 'knit.html';
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);

@@ -7,6 +7,7 @@ const rows = 11;
 let gridWidth = 50;
 let gridHeight = 45;
 let socket;
+let abysses = 0;
 
 
 const BOX_TILES = [215, 195, 178, 215, 28, 214, 196, 192, 179, 194, 193, 250];
@@ -182,7 +183,9 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 }
 
 function draw() {
-  
+  if (abysses > 20) {
+    window.location.href = 'saltwave.html';
+  }
   background(255);
   noStroke();
   let baseColor = color(random(256), random(256), random(256));
@@ -310,6 +313,6 @@ function draw() {
       noTint();
     }
   }
-  
+  abysses++;
   
 }

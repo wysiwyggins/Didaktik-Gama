@@ -9,6 +9,7 @@ let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
 let wave1;
 let wave2;
+let reloads = 0;
 
 
 function preload() {
@@ -46,6 +47,10 @@ function generateBaseAndComplementaryColors() {
 }
 
 function draw() {
+  if (reloads > 40) {
+    window.location.href = 'dungeon.html';
+  }
+
   drawColorPattern();
   
   wave1.start();
@@ -62,6 +67,7 @@ function draw() {
   wave2.freq(baseColor.levels[2] -100 /chance);
   reverb.process(wave1, chance, 2);
   reverb.process(wave2, 3, chance);
+  reloads++;
 }
 
 function complementColor(c, angle) {
