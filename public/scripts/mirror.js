@@ -4,6 +4,7 @@ let fileText;
 let toneStarted = false;
 let soundFiles = [];
 let wordBuffer = "";
+let fileIndex;
 
 let tileMap = [];
 let cursorX = 0;
@@ -89,7 +90,7 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  let fileIndex = floor(random(1, 11));
+  fileIndex = floor(random(1, 11));
   backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
   fileText = loadStrings(`/public/data/texts/${fileIndex}.txt`);
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
@@ -124,6 +125,12 @@ function setup() {
 function speak(text) {
   if (text.trim().length > 0) {
       let utterance = new SpeechSynthesisUtterance(text);
+
+      // Check if the loaded text file is "10.txt" and change the language to Czech
+      if (fileIndex === 10) {
+          utterance.lang = 'cs-CZ'; // Set the language to Czech
+      }
+
       speechSynthesis.speak(utterance);
   }
 }
@@ -200,6 +207,11 @@ function setCurrentTile(tileIndex) {
       }
 
       advanceCursor();
+      tilesDisplayed++;
+      if (tilesDisplayed >= MAX_TILES) {
+        //window.location.reload();
+        window.location.href = 'automata.html';
+      }
   } else {
       console.log("Cursor position out of bounds:", cursorX, cursorY);
   }
@@ -208,14 +220,14 @@ function setCurrentTile(tileIndex) {
 
 function advanceCursor() {
   if (keyIsDown(CONTROL)) {
-    // Move cursor to the right
-    cursorX++;
-    if (cursorX >= CANVAS_COLS) {
-        cursorX = 0;
-        cursorY++;
-        if (cursorY >= CANVAS_ROWS) {
-            cursorY = 0;  // Optional: Reset to start or stop at the end
-        }
+    // Move cursor down
+    cursorY++;
+    if (cursorY >= CANVAS_ROWS) {
+      cursorY = 0;
+      cursorX++;
+      if (cursorX >= CANVAS_COLS) {
+        cursorX = 0;  // Optional: Reset to start or stop at the end
+      }
     }
 } else if (keyIsDown(ALT)) {
   // Move cursor to the left
@@ -242,14 +254,14 @@ function advanceCursor() {
         cursorY = CANVAS_ROWS - 1; // Move to the bottom row
       }
     } else {
-      // Move cursor downwards
-      cursorY++;
-      if (cursorY >= CANVAS_ROWS) {
-        cursorY = 0;
-        cursorX++;
-        if (cursorX >= CANVAS_COLS) {
-          cursorX = 0;  // Optional: Reset to start or stop at the end
-        }
+      // Move cursor right
+      cursorX++;
+      if (cursorX >= CANVAS_COLS) {
+          cursorX = 0;
+          cursorY++;
+          if (cursorY >= CANVAS_ROWS) {
+              cursorY = 0;  // Optional: Reset to start or stop at the end
+          }
       }
     }
     wave1.freq((50 +cursorX * cursorY)% random(50, 260));
