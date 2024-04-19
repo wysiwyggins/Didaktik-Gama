@@ -1,34 +1,38 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const DMX = require('node-dmx');
+//npm install onoff
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const Gpio = require('onoff').Gpio;
+const encoderA = new Gpio(17, 'in', 'both'); // Example pin number
+const encoderB = new Gpio(18, 'in', 'both'); // Example pin number
 
-// Serve files from the public directory
-app.use(express.static('public'));
+let lastEncoded = 0;
+let encoderValue = 0;
 
-// DMX setup
-const dmx = new DMX();
-const universe = dmx.addUniverse('demo', 'enttec-usb-dmx-pro', '/dev/ttyUSB0');
+function updateEncoder() {
+    const MSB = encoderA.readSync();
+    const LSB = encoderB.readSync();
+    const encoded = (MSB << 1) | LSB;
+    const sum = (lastEncoded << 2) | encoded;
 
-io.on('connection', (socket) => {
-  console.log('New client connected');
+    if (sum === 0b1101 || sum === 0b0100 || sum === 0b0010 || sum === 0b1011) encoderValue++;
+    if (sum === 0b1110 || sum === 0b0111 || sum === 0b0001 || sum === 0b1000) encoderValue--;
 
-  socket.on('setDMXColor', (color) => {
-    console.log('Setting DMX color:', color);
-    // Assuming channels 1, 2, 3 are for RGB respectively
-    universe.update({ 1: color.r, 2: color.g, 3: color.b });
-  });
+    lastEncoded = encoded;
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
+    io.emit('changeSketch', encoderValue); // Emitting the change sketch event with the new value
+}
+
+encoderA.watch((err, value) => {
+    if (err) {
+        console.error('There was an error', err);
+        return;
+    }
+    updateEncoder();
 });
 
-const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+encoderB.watch((err, value) => {
+    if (err) {
+        console.error('There was an error', err);
+        return;
+    }
+    updateEncoder();
 });
