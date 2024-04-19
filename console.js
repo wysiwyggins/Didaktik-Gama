@@ -6,6 +6,12 @@ const encoderB = new Gpio(18, 'in', 'both'); // Example pin number
 
 let lastEncoded = 0;
 let encoderValue = 0;
+const open = require('open');
+
+server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+    open(`http://localhost:${PORT}`);  // Automatically opens the default browser
+});
 
 function updateEncoder() {
     const MSB = encoderA.readSync();

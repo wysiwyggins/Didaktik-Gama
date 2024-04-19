@@ -1,16 +1,17 @@
 {
   "name": "console",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "This repository aims to unify several disparate JavaScript projects, envisioning them as different programs on an imaginary (haunted) alternate history computing device. Each sketch utilizes the 'Libuše' tileset in unique ways.",
+  "main": "console.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "dev": "node server.js",
     "postinstall": "npm rebuild"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wysiwyggins/Console"
+    "url": "git+https://github.com/wysiwyggins/Console.git"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +19,6 @@
   "bugs": {
     "url": "https://github.com/wysiwyggins/Console/issues"
   },
-  "homepage": "https://github.com/wysiwyggins/Console#readme",
   "dependencies": {
     "express": "^4.17.1",
     "http": "^0.0.1-security",
@@ -27,5 +27,7 @@
     "onoff": "^6.0.0",
     "open": "^8.0.4",
     "electron": "^11.0.0"
-  }
+  },
+  "homepage": "https://github.com/wysiwyggins/Console#readme"
+  
 }
