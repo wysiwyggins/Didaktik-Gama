@@ -211,6 +211,7 @@ function setCurrentTile(tileIndex) {
       if (tilesDisplayed >= MAX_TILES) {
         //window.location.reload();
         window.location.href = 'automata.html';
+        socket.emit('requestSketchChange', { nextSketch: 'saltwave' });
       }
   } else {
       console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -452,4 +453,13 @@ function handleSpecialCharacters(char) {
       default:
           setCurrentTile(getTileIndex("BLANK"));
   }
+}
+
+function unloadCurrentSketch() {
+  if (currentSketch && currentSketch.cleanup) {
+      currentSketch.cleanup();  // Call a cleanup method on the current sketch
+  }
+  // Clear the content container
+  const sketchContainer = document.getElementById('sketch-container');
+  sketchContainer.innerHTML = '';
 }

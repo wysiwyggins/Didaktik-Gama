@@ -930,7 +930,8 @@ class Player extends Actor{
                 this.failedMoveAttempts++;
                 console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
                 if (this.failedMoveAttempts >= 3) { // If failed 3 times in zero-player mode, change page
-                    window.location.href = 'knit.html';
+                    //window.location.href = 'knit.html';
+                    socket.emit('requestSketchChange', { nextSketch: 'knit' });
                 }
             }
             return;
@@ -1195,7 +1196,7 @@ class Player extends Actor{
         }
     }
     handleCloseDoor() {
-
+        //oops
     }
 
     dropItemOnTile(item, x, y) {
@@ -2917,8 +2918,6 @@ function createChasmWall(x, y) {
     sprite.y = y * TILE_HEIGHT * SCALE_FACTOR + TILE_HEIGHT * SCALE_FACTOR / 2;
 }
 
-
-
 function createFloor(x, y) {
     createSprite(x, y, {x: 19, y: 6}, floorMap, 157);
 }
@@ -2936,7 +2935,6 @@ function createVerticalWall(x, y) {
     }
     createSprite(x, y - 2, {x: 16, y: 5}, wallMap, 131); // top
 }
-
 
 // dungeon generator
 function dungeonGeneration() {
@@ -2994,7 +2992,6 @@ async function addDoors() {
     return treasureRoom;
 }
 
-
 function isTileInTreasureRoom(tile, treasureRoom) {
     if (!currentTreasureRoom) {
         return false;
@@ -3004,11 +3001,11 @@ function isTileInTreasureRoom(tile, treasureRoom) {
            tile.y >= currentTreasureRoom.getTop() && tile.y <= currentTreasureRoom.getBottom();
 }
 
-
 function isTileWithDoor(tile, doorMap) {
     // Check if there's any door at the given tile's coordinates
     return doorMap[tile.y][tile.x] !== null && doorMap[tile.y][tile.x] !== undefined;
 }
+
 function placeKeyForDoor(door, doorName) {
     let walkableTiles = [];
     for (let y = 0; y < MAP_HEIGHT; y++) {
@@ -3151,7 +3148,6 @@ function isLowerLeftCornerTile(map, x, y, tileValue) {
     }
     return false;
 }
-
 
 function isLowerRightCornerTile(map, x, y, tileValue) {
     // Check if y + 1 is within bounds
@@ -3563,4 +3559,13 @@ async function setup() {
         resetTurnTimer();
     });
 
+}
+
+function unloadCurrentSketch() {
+    if (currentSketch && currentSketch.cleanup) {
+        currentSketch.cleanup();  // Call a cleanup method on the current sketch
+    }
+    // Clear the content container
+    const sketchContainer = document.getElementById('sketch-container');
+    sketchContainer.innerHTML = '';
 }

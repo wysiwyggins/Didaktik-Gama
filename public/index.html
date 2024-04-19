@@ -1,25 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script type="text/javascript" src="scripts/p5.js"></script>
-    <script type="text/javascript" src="scripts/p5.sound.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-
+<head>
+    <meta charset="UTF-8">
+    <title>Sketch Controller</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <meta charset="utf-8" />
+    <!-- Load socket.io client -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Load p5.js libraries from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+</head>
+<body>
+    <main id="sketch-container"></main>
 
-  </head>
-  <body>
-    <main>
-    </main>
-    
     <script>
         const socket = io();
+    
+        let currentSketch = null;
+    
+        // Function to unload the current sketch
+        function unloadCurrentSketch() {
+            const sketchContainer = document.getElementById('sketch-container');
+            sketchContainer.innerHTML = '';  // Remove all child nodes
+            if (currentSketch && typeof currentSketch.cleanup === 'function') {
+                currentSketch.cleanup();  // Call cleanup function if it exists
+            }
+        }
+    
+        // Function to load a new sketch
+        function loadSketch(sketchIndex) {
+            unloadCurrentSketch();  // Ensure the previous sketch is unloaded
+            const sketchContainer = document.getElementById('sketch-container');
+    
+            // Map index to sketch script paths
+            const sketches = {
+                0: 'scripts/abyss.js',
+                1: 'scripts/keyboard.js',
+                2: 'scripts/knit.js',
+                3: 'scripts/mirror.js',
+                4: 'scripts/saltwave.js'
+            };
+    
+            const sketchScript = sketches[sketchIndex % Object.keys(sketches).length];
+    
+            // Dynamically load the sketch script
+            if (sketchScript) {
+                const scriptTag = document.createElement('script');
+                scriptTag.src = sketchScript;
+                scriptTag.onload = () => console.log(`Loaded sketch: ${sketchScript}`);
+                scriptTag.onerror = () => console.error(`Error loading sketch: ${sketchScript}`);
+                sketchContainer.appendChild(scriptTag);
+                currentSketch = scriptTag;
+            } else {
+                console.log("No sketch found for index:", sketchIndex);
+            }
+        }
+    
+        // Listen for sketch change events from the server
         socket.on('changeSketch', function(sketchIndex) {
             console.log('Switch to sketch index:', sketchIndex);
-            // Logic to switch sketches based on sketchIndex
+            loadSketch(sketchIndex);
         });
+    
+        // Initially load the first sketch
+        loadSketch(0);
     </script>
-  </body>
+    
+</body>
 </html>

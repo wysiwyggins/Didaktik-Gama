@@ -428,3 +428,12 @@ function draw() {
   frameRate(24);
   
 }
+
+function unloadCurrentSketch() {
+  if (currentSketch && currentSketch.cleanup) {
+      currentSketch.cleanup();  // Call a cleanup method on the current sketch
+  }
+  // Clear the content container
+  const sketchContainer = document.getElementById('sketch-container');
+  sketchContainer.innerHTML = '';
+}

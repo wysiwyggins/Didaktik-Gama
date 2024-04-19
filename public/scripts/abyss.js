@@ -184,7 +184,8 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 
 function draw() {
   if (abysses > 20) {
-    window.location.href = 'keyboard.html';
+    //window.location.href = 'keyboard.html';
+    socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
   }
   background(255);
   noStroke();
@@ -316,3 +317,13 @@ function draw() {
   abysses++;
   
 }
+
+function unloadCurrentSketch() {
+  if (currentSketch && currentSketch.cleanup) {
+      currentSketch.cleanup();  // Call a cleanup method on the current sketch
+  }
+  // Clear the content container
+  const sketchContainer = document.getElementById('sketch-container');
+  sketchContainer.innerHTML = '';
+}
+
