@@ -23,7 +23,7 @@
     "express": "^4.17.1",
     "http": "^0.0.1-security",
     "socket.io": "^4.0.0",
-    "dmx": "^1.2.3",
+    "dmx": "~1.0",
     "onoff": "^6.0.0",
     "open": "^8.0.4",
     "electron": "^11.0.0"
