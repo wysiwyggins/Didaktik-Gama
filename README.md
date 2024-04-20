@@ -2,8 +2,14 @@
 
 This repository aims to unify several disparate JavaScript projects, envisioning them as different programs on an imaginary (haunted) alternate history computing device. Each sketch utilizes the 'Libuše' tileset in unique ways.
 
+This repository contains a Node.js application designed to run on a Raspberry Pi. Pull the repo to your pi, navigate to the new directory and install dependencies with `npm install`.
+
 The repository contains several HTML documents, each loading a different script. In the final version, a Node.js application will use input from Raspberry Pi GPIO pins to switch between the scripts: `dungeon.js` is my roguelike game experiment; `abyss.js` and `knit.js` are pattern generators; `saltwave.js` is an animated cellular automaton. Currently, to view them, use a local server (for instance, in VS Code).
 
+To start the server run `npm start`.
+
+License
+This art project is licensed under an [Anti-Capitalist License](https://anticapitalist.software).
 ___
 
 **Background:**
