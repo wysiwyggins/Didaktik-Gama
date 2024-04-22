@@ -47,7 +47,7 @@ const altCharToTileName = {
   '®': "OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT",
   '†': "DARK_SMILING_FACE",
   '¥': "EYE_OF_PROVIDENCE",
-  'ˆ': "BLACK_SQUARE",
+  'ˆ': "CARON",
   'ø': "INVERTED_CHECKER_BOARD",
   'π': "FLOATING_LEGS",
   'å': "LIGHT_SHADE_LOWER_RIGHT_TRIANGLE",
@@ -70,8 +70,14 @@ const altCharToTileName = {
   'µ': "LOWER_ONE_HALF_BLOCK",
   '≤': "LEFT_ONE_HALF_BLOCK",
   '≥': "RIGHT_ONE_HALF_BLOCK",
-  '÷': "BLACK_SQUARE"
+  '÷': "BLACK_SQUARE",
+  'é': "LATIN_SMALL_LETTER_E_WITH_ACUTE",
+  'í': "LATIN_SMALL_LETTER_I_WITH_ACUTE",
+  'á': "LATIN_SMALL_LETTER_A_WITH_ACUTE",
+  'č': "LATIN_SMALL_LETTER_C_WITH_CARON",
+  'š': "LATIN_SMALL_LETTER_S_WITH_CARON"
 };
+
 
 function mapAltCharacterToTileName(char) {
   return altCharToTileName[char]; 

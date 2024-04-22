@@ -47,7 +47,7 @@ const altCharToTileName = {
   '®': "OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT",
   '†': "DARK_SMILING_FACE",
   '¥': "EYE_OF_PROVIDENCE",
-  'ˆ': "BLACK_SQUARE",
+  'ˆ': "CARON",
   'ø': "INVERTED_CHECKER_BOARD",
   'π': "FLOATING_LEGS",
   'å': "LIGHT_SHADE_LOWER_RIGHT_TRIANGLE",
@@ -70,7 +70,12 @@ const altCharToTileName = {
   'µ': "LOWER_ONE_HALF_BLOCK",
   '≤': "LEFT_ONE_HALF_BLOCK",
   '≥': "RIGHT_ONE_HALF_BLOCK",
-  '÷': "BLACK_SQUARE"
+  '÷': "BLACK_SQUARE",
+  'é': "LATIN_SMALL_LETTER_E_WITH_ACUTE",
+  'í': "LATIN_SMALL_LETTER_I_WITH_ACUTE",
+  'á': "LATIN_SMALL_LETTER_A_WITH_ACUTE",
+  'č': "LATIN_SMALL_LETTER_C_WITH_CARON",
+  'š': "LATIN_SMALL_LETTER_S_WITH_CARON"
 };
 
 function mapAltCharacterToTileName(char) {
@@ -342,7 +347,7 @@ function keyPressed() {
         case 'y': setCurrentTile(getTileIndex("DOWNWARD_POINTING_TRIANGLE")); break; // Custom, no direct equivalent
         case 'u': setCurrentTile(getTileIndex("BOX_TOP_RIGHT")); break; // Custom, similar to box drawing
         case 'i': setCurrentTile(getTileIndex("BOX_BOTTOM_RIGHT")); break; // Custom, similar to box drawing
-        case 'o': setCurrentTile(getTileIndex("BOX_UP_HORIZONTAL")); break; // Custom, similar to box drawing
+        case '|': setCurrentTile(getTileIndex("BOX_UP_HORIZONTAL")); break; // Custom, similar to box drawing
         case 'p': setCurrentTile(getTileIndex("BOX_DOWN_HORIZONTAL")); break; // Custom, similar to box drawing
         case '[': setCurrentTile(getTileIndex("BOX_LEFT_VERTICAL")); break; // Custom, similar to box drawing
         case ']': setCurrentTile(getTileIndex("BOX_RIGHT_VERTICAL")); break; // Custom, similar to box drawing
@@ -357,9 +362,9 @@ function keyPressed() {
         case 'l': setCurrentTile(getTileIndex("SKULL")); break; // Custom, no direct equivalent but similar to ☠
         case ';': setCurrentTile(getTileIndex("DOOR_TOP")); break; // Custom, no direct equivalent
         case '\'': setCurrentTile(getTileIndex("DOOR_BOTTOM")); break; // Custom, no direct equivalent
-        case 'z': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_C_WITH_CARON")); break; // For "č", using Ctrl might not be standard but logical here
+        case 'c': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_C_WITH_CARON")); break; // For "č", using Ctrl might not be standard but logical here
         case 'x': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_S_WITH_CARON")); break; // For "š", using Ctrl might not be standard but logical here
-        case 'c': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_O_WITH_ACUTE")); break; // For "ó", using Ctrl might not be standard but logical here
+        case 'o': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_O_WITH_ACUTE")); break; // For "ó", using Ctrl might not be standard but logical here
         case 'v': setCurrentTile(getTileIndex("LATIN_SMALL_LETTER_I_WITH_ACUTE")); break; // For "í", using Ctrl might not be standard but logical here
        
 
