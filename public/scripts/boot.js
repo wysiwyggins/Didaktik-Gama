@@ -64,7 +64,7 @@ function draw() {
     reverb.process(wave1, chance, 2);
     reverb.process(wave2, 3, chance);
     reloads++;
-    if reloads > 80 {
+    if (reloads > 80) {
         socket.emit('requestSketchChange', { nextSketch: 'game' });
     }
 
