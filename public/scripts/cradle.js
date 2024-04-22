@@ -90,9 +90,9 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  fileIndex = floor(random(1, 11));
-  backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
-  fileText = loadStrings(`/public/data/texts/${fileIndex}.txt`);
+  //fileIndex = floor(random(1, 11));
+  backgroundImage = loadImage(`/public/assets/images/cradle.png`);
+  fileText = loadStrings(`/public/data/texts/cradle.txt`);
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
   /* for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
     let soundPath = `/public/assets/sound/${i}.wav`;
@@ -125,7 +125,8 @@ function setup() {
 function speak(text) {
   if (text.trim().length > 0) {
       let utterance = new SpeechSynthesisUtterance(text);
-    
+      utterance.lang = 'cs-CZ';
+      utterance.rate = 0.8; // Optional: Adjust the speed of speech
       // Check if the loaded text file is "10.txt" and change the language to Czech
       if (fileIndex === 10) {
           utterance.lang = 'cs-CZ'; // Set the language to Czech
@@ -136,12 +137,6 @@ function speak(text) {
 }
 
 function draw() {
-    if (!toneStarted){
-      wave1.start();
-      wave2.start();
-      toneStarted = true;
-      reverb.process(wave1, 2, 3);
-    }
     background(255);
     image(backgroundImage, 0, 0, width, height);
     for (let y = 0; y < CANVAS_ROWS; y++) {

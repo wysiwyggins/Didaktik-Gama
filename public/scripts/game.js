@@ -445,6 +445,8 @@ class Actor {
         }
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
+        } if (item.type === ItemType.CRADLE) { 
+            socket.emit('requestSketchChange', { nextSketch: 'cradle' });
         }
 
         // Log a message about the item picked up
@@ -1496,7 +1498,7 @@ const Attacks = {
     CLAW: function(monster, target) {
         if (monster.isAdjacent(target)) {
             messageList.addMessage(`The ${monster.name} claws at you!`);
-            if (target.isDead = false){
+            if (target.isDead == false){
                 sound.play('ouch');
             } else {
                 playBumpSound();
@@ -2308,7 +2310,8 @@ const ItemType = Object.freeze({
     "BOW": 1,
     "KEY": 2,
     "ARROW": 3,
-    "FLOWER": 4
+    "FLOWER": 4,
+    "CRADLE": 5
 });
 
 class Item {
