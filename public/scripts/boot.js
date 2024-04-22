@@ -10,7 +10,7 @@ let selectedTiles = [];
 let wave1;
 let wave2;
 let reloads = 0;
-let colorChangeFrameInterval = 30; // Number of frames between color changes
+let colorChangeFrameInterval = 120; // Number of frames between color changes
 
 function setup() {
     createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
@@ -47,28 +47,33 @@ function generateBaseAndComplementaryColors() {
 
 
 function draw() {
-    if (frameCount % colorChangeFrameInterval === 0) {
-        generateBaseAndComplementaryColors(); // Refresh colors every interval
-        drawColorPattern();
-    } else {
-        drawSerpentinePattern();
-    }
-    
+  let cyclePhase = frameCount % colorChangeFrameInterval;
+  background(colors[0]);
+  if (cyclePhase === 0) {
+      generateBaseAndComplementaryColors();
+  }
 
-    
-    image(backgroundImage, 0, 0, width, height);
-    wave1.start();
-    wave2.start();
-    let chance = floor(random(1, 5));
-    
-    reverb.process(wave1, chance, 2);
-    reverb.process(wave2, 3, chance);
-    reloads++;
-    if (reloads > 80) {
-        socket.emit('requestSketchChange', { nextSketch: 'game' });
-    }
+  if (cyclePhase < 5) {
+      drawColorPattern();  // Show animated rows briefly at the beginning of each cycle
+  } else {
+    background(colors[0]);  // Fill screen with a single color for the rest of the cycle
+  }
 
+  image(backgroundImage, 0, 0, width, height);  // Display background image
+  wave1.start();
+  wave2.start();
+  let chance = floor(random(1, 5));
+  wave1.freq(baseColor.levels[1] - (80 / chance));
+  wave2.freq(baseColor.levels[2] - (100 / chance));
+  reverb.process(wave1, chance, 2);
+  reverb.process(wave2, 3, chance);
+
+  reloads++;
+  if (reloads > 400) {
+      socket.emit('requestSketchChange', { nextSketch: 'game' });
+  }
 }
+
 
 function drawColorPattern() {
     let chance = floor(random(1, 5));
@@ -79,7 +84,7 @@ function drawColorPattern() {
             fill(colors[colorIndex % colors.length]);
             noStroke();
             rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-            wave1.freq(baseColor.levels[1] - x*10 / chance);
+            wave1.freq(baseColor.levels[1] - (80 + x) / chance);
             wave2.freq(baseColor.levels[2] - 100 / chance);
         }
     }
@@ -153,6 +158,7 @@ function drawSerpentinePattern() {
             // Draw the tile
             if (tile) {
               image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+
             }
       
             // Update direction and counter based on the serpentine logic
