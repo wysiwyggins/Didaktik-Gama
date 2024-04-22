@@ -85,8 +85,8 @@ function drawColorPattern() {
     // Use the predefined tileWidth and tileHeight for drawing
     // No need to calculate tileWidth and tileHeight based on canvas size
     let chance = floor(random(1, 5));
-    for (let y = 0; y < gridHeight; y++) {
-        for (let x = 0; x < gridWidth; x++) {
+    for (let y = 0; y < CANVAS_ROWS; y++) {
+        for (let x = 0; x < CANVAS_COLS; x++) {
         // Alternate color pairs every row, not every two rows
         
         let colorPair = y % 2; // This will alternate 0, 1, 0, 1, ..., for each row
@@ -103,7 +103,7 @@ function drawColorPattern() {
         noStroke();
         
 
-        rect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+        rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
         }
     }
 }
@@ -126,8 +126,8 @@ function drawSerpentinePattern() {
   let nextChange = 10; // Change direction after a set number of tiles
   let counter = 0;
 
-  for (let y = 0; y < gridHeight; y++) {
-    for (let x = 0; x < gridWidth; x++) {
+  for (let y = 0; y < CANVAS_ROWS; y++) {
+    for (let x = 0; x < CANVAS_COLS; x++) {
       let tile;
 
       // Before changing direction, select the appropriate corner or cross tile
@@ -161,7 +161,7 @@ function drawSerpentinePattern() {
 
       // Draw the tile
       if (tile) {
-        image(tile, x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+        image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
       }
 
       // Update direction and counter based on the serpentine logic
@@ -225,8 +225,8 @@ function extractTilesFromSpritesheet() {
 function drawSpritePattern() {
   console.log(`Drawing sprite pattern with ${selectedTiles.length} tiles.`);
   
-  for (let y = 0; y < gridHeight; y++) {
-    for (let x = 0; x < gridWidth; x++) {
+  for (let y = 0; y < CANVAS_ROWS; y++) {
+    for (let x = 0; x < CANVAS_COLS; x++) {
       let tile = random(selectedTiles);
       if (!tile) {
         console.error("Selected tile is undefined.");
@@ -234,7 +234,7 @@ function drawSpritePattern() {
       }
       tint(colors[1], 127); // Apply a semi-transparent tint
       // Specify the display size to half the original size for sharp rendering
-      image(tile, x * tileWidth, y * tileHeight, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
+      image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
       noTint();
     }
   }

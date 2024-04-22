@@ -316,7 +316,17 @@ function keyPressed() {
       } else if (key >= 'a' && key <= 'z') {
           let uppercaseKey = key.toUpperCase();
           tileName = 'LATIN_SMALL_LETTER_' + uppercaseKey; // Assumes tiles named like LATIN_SMALL_LETTER_A
-      }
+      } else if (key == 'é') {
+          tileName = 'LATIN_SMALL_LETTER_E_WITH_ACUTE';
+      } else if (key == 'á') {  
+          tileName = 'LATIN_SMALL_LETTER_A_WITH_ACUTE';
+      } else if (key == 'í') {  
+          tileName = 'LATIN_SMALL_LETTER_I_WITH_ACUTE';
+      } else if (key == 'č') {  
+          tileName = 'LATIN_SMALL_LETTER_C_WITH_CARON';
+      } else if (key == 'š') {
+          tileName = 'LATIN_SMALL_LETTER_S_WITH_CARON';
+      } 
 
       if (tileName && spriteData.tiles[tileName]) {
           setCurrentTile(getTileIndex(tileName));
@@ -436,7 +446,21 @@ function displayTileForCharacter(char) {
   } else if (char >= 'a' && char <= 'z') {
       let uppercaseChar = char.toUpperCase();
       tileName = 'LATIN_SMALL_LETTER_' + uppercaseChar;
-  }
+  } else if (char === 'é') {
+      tileName = 'LATIN_SMALL_LETTER_E_WITH_ACUTE';
+  } else if (char === 'á') {
+      tileName = 'LATIN_SMALL_LETTER_A_WITH_ACUTE';
+  } else if (char === 'é') {
+      tileName = 'LATIN_SMALL_LETTER_E_WITH_ACUTE';
+  } else if (char === 'á') {
+      tileName = 'LATIN_SMALL_LETTER_A_WITH_ACUTE';
+  } else if (char === 'í') {
+      tileName = 'LATIN_SMALL_LETTER_I_WITH_ACUTE';
+  } else if (char === 'č') {
+      tileName = 'LATIN_SMALL_LETTER_C_WITH_CARON';
+  } else if (char === 'š') {
+      tileName = 'LATIN_SMALL_LETTER_S_WITH_CARON';
+  } 
 
   // Check if a valid tileName was set, then add to wordBuffer and set the tile
   if (tileName && spriteData.tiles[tileName]) {
