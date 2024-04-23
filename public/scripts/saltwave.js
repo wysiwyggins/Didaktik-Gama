@@ -1,4 +1,4 @@
-                            
+let socket;                       
 let spritesheet;
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;
@@ -45,6 +45,7 @@ function preload() {
 }
 
 function setup() {
+  socket = io.connect(window.location.origin);
   createCanvas(GRID_WIDTH * TILE_WIDTH, GRID_HEIGHT * TILE_HEIGHT);
   background(255);  // Initialize with white background
   
@@ -286,7 +287,11 @@ function draw() {
   }
   if (year > 19) {  
     year = 0;
-    window.location.href = 'patterns.html';
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'knit' });
+    } else {
+      window.location.href = 'patterns.html';
+    }
     
   }
 
@@ -430,10 +435,10 @@ function draw() {
 }
 
 function unloadCurrentSketch() {
-  if (currentSketch && currentSketch.cleanup) {
-      currentSketch.cleanup();  // Call a cleanup method on the current sketch
-  }
-  // Clear the content container
   const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';
+  sketchContainer.innerHTML = '';  // Remove all child nodes
+  socket.close();
+  console.log('Socket closed');
 }
+
+

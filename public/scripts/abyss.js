@@ -1,3 +1,4 @@
+let socket;
 let spritesheet;
 let tiles = [];
 const tileWidth = 40; 
@@ -6,7 +7,6 @@ const columns = 23;
 const rows = 11;
 let gridWidth = 50;
 let gridHeight = 45;
-let socket;
 let abysses = 0;
 
 
@@ -184,8 +184,11 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 
 function draw() {
   if (abysses > 20) {
-    //window.location.href = 'keyboard.html';
-    socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
+    } else {
+      window.location.href = 'keyboard.html';
+    }
   }
   background(255);
   noStroke();
@@ -319,11 +322,9 @@ function draw() {
 }
 
 function unloadCurrentSketch() {
-  if (currentSketch && currentSketch.cleanup) {
-      currentSketch.cleanup();  // Call a cleanup method on the current sketch
-  }
-  // Clear the content container
   const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';
+  sketchContainer.innerHTML = '';  // Remove all child nodes
+  socket.close();
+  console.log('Socket closed');
 }
 

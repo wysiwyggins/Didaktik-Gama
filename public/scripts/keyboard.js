@@ -1,3 +1,4 @@
+let socket;
 let directionUpwards = false;
 let spriteSheet;
 let fileText;
@@ -100,6 +101,7 @@ function preload() {
 
 
 function setup() {
+  socket = io.connect(window.location.origin);
   createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
   for (let y = 0; y < CANVAS_ROWS; y++) {
     let currentRow = [];  // Renamed from 'row' to avoid name conflict
@@ -193,8 +195,12 @@ function setCurrentTile(tileIndex) {
     tilesDisplayed++;
     if (tilesDisplayed >= MAX_TILES) {
       //window.location.reload();
-      //window.location.href = 'automata.html';
-      socket.emit('requestSketchChange', { nextSketch: 'saltwave' });
+      if (socket.connected){
+        socket.emit('requestSketchChange', { nextSketch: 'saltwave' });
+      } else {
+        window.location.href = 'automata.html';
+      }
+     
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -453,10 +459,10 @@ function displayTileForCharacter(char) {
 }
 
 function unloadCurrentSketch() {
-  if (currentSketch && currentSketch.cleanup) {
-      currentSketch.cleanup();  // Call a cleanup method on the current sketch
-  }
-  // Clear the content container
   const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';
+  sketchContainer.innerHTML = '';  // Remove all child nodes
+  socket.close();
+  console.log('Socket closed');
 }
+
+

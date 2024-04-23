@@ -1,3 +1,4 @@
+let socket;
 let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
 const TILE_WIDTH = 20;
@@ -13,19 +14,20 @@ let reloads = 0;
 let colorChangeFrameInterval = 120; // Number of frames between color changes
 
 function setup() {
-    createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
-    frameRate(30); // Set frame rate
+  socket = io.connect(window.location.origin);
+  createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
+  frameRate(30); // Set frame rate
 
-    extractTilesFromSpritesheet(); 
-    selectBoxDrawingTiles();
-    selectPatternTiles(); 
+  extractTilesFromSpritesheet(); 
+  selectBoxDrawingTiles();
+  selectPatternTiles(); 
 
-    generateBaseAndComplementaryColors();
-    wave1 = new p5.Oscillator();
-    wave1.setType('triangle');
-    wave2 = new p5.Oscillator();
-    wave2.setType('sine');
-    reverb = new p5.Reverb();
+  generateBaseAndComplementaryColors();
+  wave1 = new p5.Oscillator();
+  wave1.setType('triangle');
+  wave2 = new p5.Oscillator();
+  wave2.setType('sine');
+  reverb = new p5.Reverb();
 }
 
 function preload() {
@@ -50,8 +52,7 @@ function generateBaseAndComplementaryColors() {
 function draw() {
   let cyclePhase = frameCount % colorChangeFrameInterval;
   background(colors[0]);
-  wave1.freq(random(50, 100));
-  wave2.freq(random(10, 100));
+  
   if (cyclePhase === 0) {
       generateBaseAndComplementaryColors();
       wave1.start();
@@ -60,6 +61,8 @@ function draw() {
 
   if (cyclePhase < 5) {
       drawColorPattern();  // Show animated rows briefly at the beginning of each cycle
+      wave1.freq(random(50, 100));
+      wave2.freq(random(10, 100));
   } else {
     background(colors[0]);  // Fill screen with a single color for the rest of the cycle
     
@@ -72,7 +75,11 @@ function draw() {
   
   reloads++;
   if (reloads > 1000) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'abyss' });
+    } else {
+      window.location.href = 'abyss.html';
+    }
   }
 }
 

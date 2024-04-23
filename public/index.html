@@ -22,9 +22,8 @@
         function unloadCurrentSketch() {
             const sketchContainer = document.getElementById('sketch-container');
             sketchContainer.innerHTML = '';  // Remove all child nodes
-            if (currentSketch && typeof currentSketch.cleanup === 'function') {
-                currentSketch.cleanup();  // Call cleanup function if it exists
-            }
+            socket.close();
+            console.log('Socket closed');
         }
     
         // Function to load a new sketch
@@ -34,11 +33,12 @@
     
             // Map index to sketch script paths
             const sketches = {
-                0: 'scripts/abyss.js',
-                1: 'scripts/keyboard.js',
-                2: 'scripts/knit.js',
-                3: 'scripts/mirror.js',
-                4: 'scripts/saltwave.js'
+                0: 'scripts/boot.js', 
+                1: 'scripts/abyss.js',
+                2: 'scripts/keyboard.js',
+                3: 'scripts/knit.js',
+                4: 'scripts/mirror.js',
+                5: 'scripts/saltwave.js'
             };
     
             const sketchScript = sketches[sketchIndex % Object.keys(sketches).length];

@@ -1008,14 +1008,20 @@ class Player extends Actor{
     }
 
     getAdjacentPosition(targetX, targetY) {
-        let diffX = this.x - targetX;
-        let diffY = this.y - targetY;
+        let diffX = targetX - this.x;
+        let diffY = targetY - this.y;
     
-        if (diffX !== 0) diffX = diffX > 0 ? 1 : -1;
-        if (diffY !== 0) diffY = diffY > 0 ? 1 : -1;
+        // Move in the opposite direction
+        let newX = this.x - Math.sign(diffX);
+        let newY = this.y - Math.sign(diffY);
     
-        return { x: targetX + diffX, y: targetY + diffY };
+        // Check for map boundaries
+        newX = Math.max(0, Math.min(MAP_WIDTH - 1, newX));
+        newY = Math.max(0, Math.min(MAP_HEIGHT - 1, newY));
+    
+        return { x: newX, y: newY };
     }
+    
 
     handleKeydown(event) {
         if (this.isDead) return;
@@ -1442,18 +1448,38 @@ async function moveToNearestItem(player) {
         engine.unlock();
     }
     let nearestItem = findNearestItem(player.x, player.y);
-    if (nearestItem) {
+    let nearestMonster = findNearestMonster(player);
+
+    // Prioritize moving away from monsters if one is adjacent
+    if (nearestMonster && player.isAdjacentTo(nearestMonster.x, nearestMonster.y)) {
+        let escapeTile = player.getAdjacentPosition(nearestMonster.x, nearestMonster.y);
+        console.log(`Zero-player mode: Escaping from monster at ${nearestMonster.x}, ${nearestMonster.y}`);
+        await player.moveTo(escapeTile.x, escapeTile.y);
+    } else if (nearestItem) {
         console.log(`Zero-player mode: Moving towards item at ${nearestItem.x}, ${nearestItem.y}`);
         await player.moveTo(nearestItem.x, nearestItem.y);
     } else {
-        console.log("No items available for zero-player mode.");
+        console.log("No items or immediate threats detected.");
         player.failedMoveAttempts++;
         if (player.failedMoveAttempts >= 3) {
             console.log("No movement possible, redirecting...");
-            window.location.href = 'knit.html';
+            window.location.href = 'knit.html'; // or socket.emit('requestSketchChange', { nextSketch: 'knit' });
         }
     }
     player.inactiveTurns = 0; // Reset the counter after attempting to move
+}
+
+function findNearestMonster(player) {
+    let nearest = null;
+    let minDist = Infinity;
+    for (let monster of Monster.allMonsters) {
+        let dist = Math.sqrt(Math.pow(monster.x - player.x, 2) + Math.pow(monster.y - player.y, 2));
+        if (dist < minDist) {
+            nearest = monster;
+            minDist = dist;
+        }
+    }
+    return nearest;
 }
 
 function findNearestItem(px, py) {
