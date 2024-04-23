@@ -43,33 +43,35 @@ function generateBaseAndComplementaryColors() {
     for (let i = 1; i <= 3; i++) {
         colors.push(complementColor(baseColor, i * 90)); // Generate and push complementary colors
     }
+    
 }
 
 
 function draw() {
   let cyclePhase = frameCount % colorChangeFrameInterval;
   background(colors[0]);
+  wave1.freq(random(50, 100));
+  wave2.freq(random(10, 100));
   if (cyclePhase === 0) {
       generateBaseAndComplementaryColors();
+      wave1.start();
+      wave2.start();
   }
 
   if (cyclePhase < 5) {
       drawColorPattern();  // Show animated rows briefly at the beginning of each cycle
   } else {
     background(colors[0]);  // Fill screen with a single color for the rest of the cycle
+    
   }
 
   image(backgroundImage, 0, 0, width, height);  // Display background image
-  wave1.start();
-  wave2.start();
+  
   let chance = floor(random(1, 5));
-  wave1.freq(baseColor.levels[1] - (80 / chance));
-  wave2.freq(baseColor.levels[2] - (100 / chance));
-  reverb.process(wave1, chance, 2);
-  reverb.process(wave2, 3, chance);
-
+  
+  
   reloads++;
-  if (reloads > 400) {
+  if (reloads > 1000) {
       socket.emit('requestSketchChange', { nextSketch: 'game' });
   }
 }
@@ -84,8 +86,8 @@ function drawColorPattern() {
             fill(colors[colorIndex % colors.length]);
             noStroke();
             rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-            wave1.freq(baseColor.levels[1] - (80 + x) / chance);
-            wave2.freq(baseColor.levels[2] - 100 / chance);
+            
+            
         }
     }
 }
