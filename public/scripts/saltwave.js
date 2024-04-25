@@ -219,7 +219,7 @@ function displayMessage(message, seconds) {
   }
 
   messageDisplayStart = frameCount;  // Store the frame when the message starts displaying
-  displayDurationFrames = seconds * 24; 
+  displayDurationFrames = seconds * 30; 
 }
 
 function drawTile(i, j, val) {

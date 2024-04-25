@@ -1,10 +1,10 @@
 let socket;
 let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
-const tileWidth = 20;
-const tileHeight = 15;
-const gridWidth = 60; // Number of cells horizontally
-const gridHeight = 50; // Number of cells vertically
+const TILE_WIDTH = 20;
+const TILE_HEIGHT = 15;
+const CANVAS_COLS = 60; // Number of cells horizontally
+const CANVAS_ROWS = 50; // Number of cells vertically
 let baseColor; // Holds the randomly generated base color
 let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
@@ -49,8 +49,13 @@ function generateBaseAndComplementaryColors() {
 
 function draw() {
   if (reloads > 40) {
-    //window.location.href = 'dungeon.html';
-    socket.emit('requestSketchChange', { nextSketch: 'game' });
+    
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'game' });
+    } else {
+      window.location.href = 'dungeon.html';
+    }
+    
   }
 
   drawColorPattern();
