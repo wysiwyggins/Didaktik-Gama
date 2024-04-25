@@ -22,15 +22,14 @@
         function unloadCurrentSketch() {
             const sketchContainer = document.getElementById('sketch-container');
             sketchContainer.innerHTML = '';  // Remove all child nodes
-            socket.close();
-            console.log('Socket closed');
+            console.log('Previous sketch unloaded');
         }
     
         // Function to load a new sketch
         function loadSketch(sketchIndex) {
             unloadCurrentSketch();  // Ensure the previous sketch is unloaded
             const sketchContainer = document.getElementById('sketch-container');
-    
+        
             // Map index to sketch script paths
             const sketches = {
                 0: 'scripts/boot.js',
@@ -41,9 +40,9 @@
                 5: 'scripts/mirror.js',
                 6: 'scripts/saltwave.js'
             };
-    
+        
             const sketchScript = sketches[sketchIndex % Object.keys(sketches).length];
-    
+        
             // Dynamically load the sketch script
             if (sketchScript) {
                 const scriptTag = document.createElement('script');
@@ -56,16 +55,17 @@
                 console.log("No sketch found for index:", sketchIndex);
             }
         }
-    
+        
         // Listen for sketch change events from the server
         socket.on('changeSketch', function(sketchIndex) {
             console.log('Switch to sketch index:', sketchIndex);
             loadSketch(sketchIndex);
         });
-    
+        
         // Initially load the first sketch
         loadSketch(0);
     </script>
+    
     
 </body>
 </html>

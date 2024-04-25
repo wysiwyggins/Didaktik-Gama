@@ -1,4 +1,4 @@
-let socket;
+
 let spritesheet;
 let tiles = [];
 const tileWidth = 40; 

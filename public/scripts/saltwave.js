@@ -1,4 +1,4 @@
-let socket;                       
+                    
 let spritesheet;
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;

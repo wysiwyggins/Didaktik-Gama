@@ -1,4 +1,4 @@
-let socket;
+
 let spriteSheet;
 let tileMap = [];
 let frames = [];
@@ -101,7 +101,7 @@ function draw() {
   }
   if (loopCounter > 6) {
     if (socket.connected){
-      socket.emit('requestSketchChange', { nextSketch: 'saltwave' });
+      socket.emit('requestSketchChange', { nextSketch: 'game' });
     } else {
       window.location.href = 'dungeon.html';
     }

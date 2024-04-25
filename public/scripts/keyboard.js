@@ -1,4 +1,4 @@
-let socket;
+
 let directionUpwards = false;
 let spriteSheet;
 let fileText;
@@ -103,6 +103,7 @@ function preload() {
 function setup() {
   socket = io.connect(window.location.origin);
   createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
+  console.log(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
   for (let y = 0; y < CANVAS_ROWS; y++) {
     let currentRow = [];  // Renamed from 'row' to avoid name conflict
     for (let x = 0; x < CANVAS_COLS; x++) {
