@@ -447,7 +447,11 @@ class Actor {
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
         } if (item.type === ItemType.CRADLE) { 
-            socket.emit('requestSketchChange', { nextSketch: 'cradle' });
+            if (socket.connected) {
+                socket.emit('requestSketchChange', { nextSketch: 'cradle' });
+            } else {
+                window.location.href = 'cradle.html';
+            }
         }
 
         // Log a message about the item picked up
@@ -933,8 +937,11 @@ class Player extends Actor{
                 this.failedMoveAttempts++;
                 console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
                 if (this.failedMoveAttempts >= 3) { // If failed 3 times in zero-player mode, change page
-                    //window.location.href = 'knit.html';
-                    socket.emit('requestSketchChange', { nextSketch: 'knit' });
+                    if (socket.connected) {
+                        socket.emit('requestSketchChange', { nextSketch: 'knit' });
+                    } else { 
+                        window.location.href = 'patterns.html';
+                    }
                 }
             }
             return;
@@ -1079,6 +1086,20 @@ class Player extends Actor{
             case '3':
             case 'c':
                 newDirection = 'down-right';
+                break;
+            case '}':
+                if (socket.connected) {
+                    socket.emit('requestSketchChange', { nextSketch: 'knit' });
+                } else { 
+                    window.location.href = 'patterns.html';
+                }
+                break;
+            case '{':
+                if (socket.connected) {
+                    socket.emit('requestSketchChange', { nextSketch: 'home' });
+                } else { 
+                    window.location.href = 'home.html';
+                }
                 break;
             default:
                 messageList.addMessage('Time passes.');
@@ -3477,6 +3498,7 @@ class UIBox {
 }
 // This function will run when the spritesheet has finished loading
 async function setup() {
+    socket = io.connect(window.location.origin);
     dungeonGeneration();
     addFloorsAndVoid();
     evaluateMapAndCreateWalls();

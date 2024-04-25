@@ -497,3 +497,21 @@ function unloadCurrentSketch() {
   console.log('Socket closed');
 }
 
+function keyPressed(event) {
+  if (event.key === '}') { 
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'game' });
+    } else { 
+      window.location.href = 'dungeon.html';
+    }
+  } else if (event.key === '{') {
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'home' });
+    } else { 
+      window.location.href = 'home.html';
+    }
+  }
+}
+
+// Add an event listener to the document to handle keydown events
+document.addEventListener('keydown', keyPressed);
