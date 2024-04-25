@@ -1,4 +1,4 @@
-
+let socket;
 let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
 const TILE_WIDTH = 20;
@@ -21,6 +21,7 @@ function preload() {
 }
 
 function setup() {
+  socket = io.connect(window.location.origin);
   createCanvas(900, 600);
   //noLoop(); // Since we're not animating, no need to loop
 

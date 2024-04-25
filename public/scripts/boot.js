@@ -1,3 +1,4 @@
+let socket;
 let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
 const TILE_WIDTH = 20;

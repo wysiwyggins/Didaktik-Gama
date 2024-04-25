@@ -1,3 +1,4 @@
+let socket;
 // Create a new Pixi Application
 let app = new PIXI.Application({
     width: 1200,

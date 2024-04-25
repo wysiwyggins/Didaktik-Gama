@@ -1,4 +1,4 @@
-
+let socket;
 let spriteSheet;
 let tileMap = [];
 let frames = [];

@@ -1,4 +1,4 @@
-
+let socket;
 let directionUpwards = false;
 let spriteSheet;
 let fileText;

@@ -1,4 +1,4 @@
-                    
+let socket;         
 let spritesheet;
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;
@@ -285,7 +285,7 @@ function draw() {
    season = 0;
    year += 1;
   }
-  if (year > 19) {  
+  if (year > 15) {  
     year = 0;
     if (socket.connected) {
       socket.emit('requestSketchChange', { nextSketch: 'knit' });
