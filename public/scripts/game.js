@@ -389,6 +389,7 @@ class Actor {
         this.inspector = inspector;
         this.inventory = [];
         this.blood = 100;
+        this.isFlammable = true;
         this.isBurning = false;
         this.burningTurns = 0;
     }
@@ -1567,7 +1568,6 @@ class Monster extends Actor{
         this.upright = true;
         this.prevX = null;
         this.prevY = null;
-        this.fireproof;
         this.firstTilePosition = { x: 0, y: 0 };  // Default values
         this.secondTilePosition = { x: 0, y: 0 };
         this.secondShadowTile = {x: 14, y: 9};
@@ -1596,6 +1596,91 @@ class Monster extends Actor{
             firstTile: {x: false, y: false},
             secondTile: {x: false, y: false}
         };
+        this.getTargetsInRange = function() {
+            //console.log("Checking for targets in range...");
+            if (players.length > 0) {
+                for(let obj of players) { 
+                    if(obj.isDead === false) {
+                        let dx = this.x - obj.x;
+                        let dy = this.y - obj.y;
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+        
+                        //console.log(`Checking player at (${obj.x}, ${obj.y}), Distance: ${distance}`);
+        
+                        if(Math.floor(distance) <= this.range) { // Use floor or a similar approach
+                            //console.log("Target within range found:", obj);
+                            this.target = obj;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                console.log("No players available.");
+                this.target = null;
+            }
+        }
+        this.canSeeTarget = function(target) {
+            let lineToTarget = line({x: this.x, y: this.y}, {x: target.x, y: target.y});
+            let seen = true;
+            for(let point of lineToTarget) {
+                let x = point.x;
+                let y = point.y;
+                // If there's a wall or any other blocking entity, the monster can't see the target
+                if (floorMap[y][x].value !== 157 || (doorMap[y] && doorMap[y][x].value != null)) {
+                    seen = false;
+                }
+            }
+            return seen;
+        }
+        this.getAdjacentTiles = function() {
+            let adjacentTiles = [];
+            for(let dx = -1; dx <= 1; dx++) {
+                for(let dy = -1; dy <= 1; dy++) {
+                    if(dx === 0 && dy === 0) continue;
+                    let newX = this.x + dx;
+                    let newY = this.y + dy;
+                    if(newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && floorMap[newY][newX].value === 157) {
+                        adjacentTiles.push({x: newX, y: newY});
+                    }
+                }
+            }
+            return adjacentTiles;
+        };
+        this.moveRandomly = function() {
+            let attempts = 3;  // Number of attempts to find an unblocked tile
+            let moved = false;
+        
+            while (attempts-- > 0 && !moved) {
+                let adjacentTiles = this.getAdjacentTiles();
+        
+                // Filter out tiles that have a locked door or are blocked.
+                adjacentTiles = adjacentTiles.filter(tile => {
+                    let door = Door.totalDoors().find(door => door.x === tile.x && door.y === tile.y);
+                    return !door || !this.isLockedDoor(door); // Allow open doors or tiles without doors
+                }).filter(tile => !this.isBlocked(tile.x, tile.y)); // Ensure the tile is not blocked
+        
+                if (adjacentTiles.length > 0) {
+                    let randomTile = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
+                    this.x = randomTile.x;
+                    this.y = randomTile.y;
+        
+                    // Open any unlocked door on the tile.
+                    let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
+                    if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
+                        doorOnTile.open();
+                        this.messageList.addMessage("You hear a crashing noise.");
+                    }
+        
+                    this.updateSpritePosition();
+                    this.checkForItems(this.x, this.y);
+                    moved = true; // Mark as moved
+                }
+            }
+        
+            if (!moved) {
+                console.log("Skeleton couldn't find an unblocked path to move randomly.");
+            }
+        };
         
         switch(type) {
             case MonsterType.BASILISK:
@@ -1606,100 +1691,11 @@ class Monster extends Actor{
                 this.attacks = ["FIREBREATH"];
                 this.target = null;
                 this.bloodColor = '0xFF0000';
+                this.isFlammable = false;
                 this.range = 5;
                 this.speed = 1; // Number of tiles to move in a turn
                 this.actFrequency = 2; // Number of turns to wait between actions
                 this.turnsWaited = 0; // Number of turns waited since last action
-                this.getTargetsInRange = function() {
-                    //console.log("Checking for targets in range...");
-                    if (players.length > 0) {
-                        for(let obj of players) { 
-                            if(obj.isDead === false) {
-                                let dx = this.x - obj.x;
-                                let dy = this.y - obj.y;
-                                let distance = Math.sqrt(dx * dx + dy * dy);
-                
-                                //console.log(`Checking player at (${obj.x}, ${obj.y}), Distance: ${distance}`);
-                
-                                if(Math.floor(distance) <= this.range) { // Use floor or a similar approach
-                                    //console.log("Target within range found:", obj);
-                                    this.target = obj;
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        console.log("No players available.");
-                        this.target = null;
-                    }
-                }
-                
-                
-                this.canSeeTarget = function(target) {
-                    let lineToTarget = line({x: this.x, y: this.y}, {x: target.x, y: target.y});
-                    let seen = true;
-                    for(let point of lineToTarget) {
-                        let x = point.x;
-                        let y = point.y;
-                        // If there's a wall or any other blocking entity, the monster can't see the target
-                        if (floorMap[y][x].value !== 157 || (doorMap[y] && doorMap[y][x].value != null)) {
-                            seen = false;
-                        }
-                    }
-                    return seen;
-                }
-                this.getAdjacentTiles = function() {
-                    let adjacentTiles = [];
-                    for(let dx = -1; dx <= 1; dx++) {
-                        for(let dy = -1; dy <= 1; dy++) {
-                            if(dx === 0 && dy === 0) continue;
-                            let newX = this.x + dx;
-                            let newY = this.y + dy;
-                            if(newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && floorMap[newY][newX].value === 157) {
-                                adjacentTiles.push({x: newX, y: newY});
-                            }
-                        }
-                    }
-                    return adjacentTiles;
-                };
-
-                
-                this.moveRandomly = function() {
-                    let attempts = 3;  // Number of attempts to find an unblocked tile
-                    let moved = false;
-                
-                    while (attempts-- > 0 && !moved) {
-                        let adjacentTiles = this.getAdjacentTiles();
-                
-                        // Filter out tiles that have a locked door or are blocked.
-                        adjacentTiles = adjacentTiles.filter(tile => {
-                            let door = Door.totalDoors().find(door => door.x === tile.x && door.y === tile.y);
-                            return !door || !this.isLockedDoor(door); // Allow open doors or tiles without doors
-                        }).filter(tile => !this.isBlocked(tile.x, tile.y)); // Ensure the tile is not blocked
-                
-                        if (adjacentTiles.length > 0) {
-                            let randomTile = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
-                            this.x = randomTile.x;
-                            this.y = randomTile.y;
-                
-                            // Open any unlocked door on the tile.
-                            let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
-                            if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
-                                doorOnTile.open();
-                                this.messageList.addMessage("You hear a crashing noise.");
-                            }
-                
-                            this.updateSpritePosition();
-                            this.checkForItems(this.x, this.y);
-                            moved = true; // Mark as moved
-                        }
-                    }
-                
-                    if (!moved) {
-                        console.log("Skeleton couldn't find an unblocked path to move randomly.");
-                    }
-                };
-                
                 this.act = function() {
                     console.log("Basilisk's turn");
                 
@@ -1769,6 +1765,7 @@ class Monster extends Actor{
                 this.name = "Skeleton";
                 this.upright = true;
                 this.attacks = ["CLAW"];
+                this.isFlammable = true;
                 this.firstTilePosition = {x: 8, y: 7};
                 this.secondTilePosition = {x: 9, y: 7};
                 this.act = function() {
@@ -1920,6 +1917,7 @@ class Monster extends Actor{
         if (this.isValidMove(newTileX, newTileY)) {
             this.x = newTileX;
             this.y = newTileY;
+            this.handleTileEffects(newTileX, newTileY);
             this.updateSpritePosition();
 
             let door = Door.totalDoors().find(d => d.x === newTileX && d.y === newTileY);
@@ -1928,10 +1926,72 @@ class Monster extends Actor{
             }
         }
     }
+    handleTileEffects(newTileX, newTileY) {
+        let atmosphereTileValue = atmosphereMap[newTileY][newTileX]?.value;
+
+        // Check for fire tile
+        if (atmosphereTileValue === 300) {  // Assuming 300 represents fire tiles
+            if (this.isFlammable && !this.isBurning) {
+                this.isBurning = true;
+                this.burningTurns = 0;
+                this.messageList.addMessage(`${this.name} stepped into fire!`);
+            }
+        }
+    }
+
+    applyDamageEffects() {
+        if (this.isBurning) {
+            this.blood -= 20;  // Or whatever damage value is appropriate
+            this.burningTurns++;
+            this.messageList.addMessage(`${this.name} is on fire!`);
+
+            if (this.burningTurns > 3 || (this.burningTurns > 3 && Math.random() < 0.5) || this.burningTurns > 5 && atmosphereMap[this.y][this.x].value != 300) {
+                this.isBurning = false;
+                this.messageList.addMessage(`${this.name} is no longer on fire.`);
+            }
+        }
+    }
     printStats() {
         this.inspector.clearMessages();
         this.inspector.addMessage( "Name: " + this.name);
         this.inspector.addMessage( "Blood: " + this.blood);
+    }
+    
+    act() {
+        if (this.bleeding && Math.random() < 0.7) {
+            dripBlood(this.x, this.y, this.bloodColor);
+        }
+
+        this.getTargetsInRange();
+
+        if(this.target) {
+            if (this.canSeeTarget(this.target)) {
+                this.sighted = true;
+                for (let attackKey of this.attacks) {
+                    Attacks[attackKey](this, this.target);
+                }
+            } else {
+                this.sighted = false;
+            }
+            this.target = null;
+        }
+
+        if (this.sighted) {
+            this.followTarget();
+        } else if(this.turnsWaited >= this.actFrequency) {
+            for(let i = 0; i < this.speed; i++) {
+                this.moveRandomly();
+            }
+            this.turnsWaited = 0;
+        } else {
+            this.turnsWaited++;
+        }
+
+        this.applyDamageEffects();  // Apply effects like burning from fire tiles
+        this.engine.unlock();       // Unlock the engine after actions
+    }
+    decideNextMove() {
+        //logic for move decision here?
     }
 }
 
