@@ -1,8 +1,8 @@
 let socket;
 // Create a new Pixi Application
 let app = new PIXI.Application({
-    width: 1200,
-    height: 752,
+    width: 1300,
+    height: 900,
     backgroundColor: 0xf5f5ee,
     resolution: window.devicePixelRatio || 1,
     autoDensity: true
@@ -38,8 +38,8 @@ let turnTimeout; // timer for passing turns
 const rect = app.view.getBoundingClientRect();
 const TILE_WIDTH = 40;
 const TILE_HEIGHT = 30;
-const MAP_WIDTH = 60;
-const MAP_HEIGHT = 50;
+const MAP_WIDTH = 65;
+const MAP_HEIGHT = 60;
 const SPRITESHEET_PATH = 'assets/spritesheets/libuse40x30-cp437.png';
 const SCALE_FACTOR = 0.5; // Scaling factor for HiDPI displays
 const SPRITE_POSITION = 5; // Position of the sprite (in tiles)

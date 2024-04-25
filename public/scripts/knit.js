@@ -3,8 +3,8 @@ let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
 const TILE_WIDTH = 20;
 const TILE_HEIGHT = 15;
-const CANVAS_COLS = 60; // Number of cells horizontally
-const CANVAS_ROWS = 50; // Number of cells vertically
+const CANVAS_COLS = 65;
+const CANVAS_ROWS = 60;
 let baseColor; // Holds the randomly generated base color
 let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
@@ -22,7 +22,7 @@ function preload() {
 
 function setup() {
   socket = io.connect(window.location.origin);
-  createCanvas(900, 600);
+  createCanvas(1300, 900);
   //noLoop(); // Since we're not animating, no need to loop
 
   // Assuming spritesheetData correctly holds the metadata after preload
