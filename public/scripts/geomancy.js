@@ -1,3 +1,4 @@
+let socket;
 let spriteSheet;
 let spriteData;
 const CANVAS_COLS = 65;
@@ -8,6 +9,8 @@ const SPRITESHEET_COLS = 23;
 const SPRITESHEET_ROWS = 11;
 let tileMap = [];  // Array to hold the tile data for the entire grid
 let currentFigure = 0;
+let toneStarted = false;
+let soundPlayed = false; 
 
 let geomancyBooleans = [];
 let displayIndex = 0;  // Index for displaying symbols
@@ -18,13 +21,22 @@ function preload() {
   spriteSheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
   spriteData = loadJSON('assets/spritesheets/spriteData.json');
   backgroundImage = loadImage('assets/images/geomancy_stage.png');
+  interfaceSound = loadSound('assets/sound/2.wav');
 }
 
 function setup() {
+  socket = io.connect(window.location.origin);
   createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
   frameRate(1);  // Set the frame rate so that draw() is called once per second
   generateGeomancyBooleans();
   initializeTileMap();  // Initialize the tile map with default values
+  wave1 = new p5.Oscillator();
+  wave1.amp(0.5);
+  wave1.setType('triangle');
+  wave2 = new p5.Oscillator();
+  wave2.amp(0.5);
+  wave2.setType('triangle');
+  reverb = new p5.Reverb();
 }
 
 function initializeTileMap() {
@@ -47,7 +59,12 @@ function draw() {
   frameRate(30);  // Set the frame rate so that draw() is called once per second
   background(255);
   image(backgroundImage, 0, 0, width, height);
-
+  if (!toneStarted){
+    wave1.start();
+    wave2.start();
+    toneStarted = true;
+    reverb.process(wave1, 2, 3);
+  }
   for (let i = 0; i <= currentFigure; i++) {
     let pos = getPositionForFigure(i);
     let booleansIndex = i * 4;
@@ -62,8 +79,15 @@ function draw() {
     }
   }
 
-  if (frameCount % 30 === 0 && currentFigure < 14) {  // Prevent incrementing beyond the last figure
+  if (frameCount % 30 === 0 && currentFigure < 15 && !soundPlayed) {
+    interfaceSound.play();
+    soundPlayed = true;  // Set the flag to true after playing the sound
+  }
+
+  // Increment current figure index and reset sound flag
+  if (frameCount % 30 === 0 && currentFigure < 14) {
     currentFigure++;
+    soundPlayed = false;  // Reset the sound flag for the next figure
   }
 }
 
@@ -79,12 +103,15 @@ function displayGeomanticTile(isActive, x, y) {
     let dx = x * TILE_WIDTH;
     let dy = y * TILE_HEIGHT;
     image(spriteSheet, dx, dy, TILE_WIDTH, TILE_HEIGHT, sx, sy, 40, 30);
+    wave1.freq(100 + (isActive * 10) % random(1, 3));
+    wave2.freq(100 - (isActive * 20) % random(1, 3));
   }
 }
 
 function displayGeomanticName(index, x, y) {
   let name = geomanticNames[index];
   // Calculate the centering offset
+  
   let nameCenterOffset = Math.floor(name.length / 2);
   let startX = x * TILE_WIDTH - (nameCenterOffset * TILE_WIDTH);
   let startY = (y + 1) * TILE_HEIGHT;  // Adding one more TILE_HEIGHT for lowering the names
@@ -100,6 +127,7 @@ function displayGeomanticName(index, x, y) {
       console.error("Invalid tile index for character", char);
     }
   }
+  
 }
 
 
@@ -127,6 +155,7 @@ function getPositionForFigure(index) {
     x = 32;  // Center this figure, add offset
     y = 52;
   }
+  
   return { x, y };
 }
 
