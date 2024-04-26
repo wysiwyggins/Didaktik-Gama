@@ -49,7 +49,7 @@ function mapSketchNameToIndex(sketchName) {
         'game': 3,
         'mirror': 4,
         'knit': 5,
-        'saltwave': 6,
+        'automata': 6,
         'keyboard': 7,
         'abyss': 8,
     };

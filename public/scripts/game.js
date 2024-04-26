@@ -939,7 +939,7 @@ class Player extends Actor{
                 console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
                 if (this.failedMoveAttempts >= 3) { // If failed 3 times in zero-player mode, change page
                     if (socket.connected) {
-                        socket.emit('requestSketchChange', { nextSketch: 'knit' });
+                        socket.emit('requestSketchChange', { nextSketch: 'patterns' });
                     } else { 
                         window.location.href = 'patterns.html';
                     }
@@ -1090,9 +1090,9 @@ class Player extends Actor{
                 break;
             case '}':
                 if (socket.connected) {
-                    socket.emit('requestSketchChange', { nextSketch: 'knit' });
+                    socket.emit('requestSketchChange', { nextSketch: 'abyss' });
                 } else { 
-                    window.location.href = 'patterns.html';
+                    window.location.href = 'abyss.html';
                 }
                 break;
             case '{':

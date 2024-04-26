@@ -197,7 +197,7 @@ function setCurrentTile(tileIndex) {
     if (tilesDisplayed >= MAX_TILES) {
       //window.location.reload();
       if (socket.connected){
-        socket.emit('requestSketchChange', { nextSketch: 'saltwave' });
+        socket.emit('requestSketchChange', { nextSketch: 'automata' });
       } else {
         window.location.href = 'automata.html';
       }
@@ -469,15 +469,15 @@ function unloadCurrentSketch() {
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 'patterns' });
     } else { 
-      window.location.href = 'dungeon.html';
+      window.location.href = 'patterns.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'home' });
+      socket.emit('requestSketchChange', { nextSketch: 'abyss' });
     } else { 
-      window.location.href = 'home.html';
+      window.location.href = 'abyss.html';
     }
   }
 }

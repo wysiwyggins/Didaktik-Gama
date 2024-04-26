@@ -8,26 +8,30 @@ const TILE_HEIGHT = 15;  // Display size
 const SPRITESHEET_COLS = 23;
 const SPRITESHEET_ROWS = 11;
 let tileMap = [];  // Array to hold the tile data for the entire grid
-let currentFigure = 0;
+let currentFigure = -1;
 let toneStarted = false;
 let soundPlayed = false; 
+let sounds = [];
 
 let geomancyBooleans = [];
 let displayIndex = 0;  // Index for displaying symbols
 let geomanticNames = ["Via", "Cauda Draconis", "Puer", "Fortuna Minor", "Puella", "Amissio", "Carcer", "Laetitia", "Caput Draconis", "Conjunctio", "Acquisitio", "Rubeus", "Fortuna Major", "Albus", "Tristitia", "Populus"];
 let displayNames = false;
+let finalFigureDisplayedTime = null; 
 
 function preload() {
   spriteSheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
   spriteData = loadJSON('assets/spritesheets/spriteData.json');
   backgroundImage = loadImage('assets/images/geomancy_stage.png');
-  interfaceSound = loadSound('assets/sound/2.wav');
+  for (let i = 1; i <= 10; i++) {
+    sounds.push(loadSound('assets/sound/' + i + '.wav'));
+  }
 }
 
 function setup() {
   socket = io.connect(window.location.origin);
   createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
-  frameRate(1);  // Set the frame rate so that draw() is called once per second
+  frameRate(30); // Set the frame rate so that draw() is called once per second
   generateGeomancyBooleans();
   initializeTileMap();  // Initialize the tile map with default values
   wave1 = new p5.Oscillator();
@@ -54,44 +58,44 @@ function booleansToNameIndex(booleans) {
   return parseInt(binaryString, 2);
 }
 
-
 function draw() {
-  frameRate(30);  // Set the frame rate so that draw() is called once per second
   background(255);
   image(backgroundImage, 0, 0, width, height);
-  if (!toneStarted){
-    wave1.start();
-    wave2.start();
-    toneStarted = true;
-    reverb.process(wave1, 2, 3);
-  }
-  for (let i = 0; i <= currentFigure; i++) {
-    let pos = getPositionForFigure(i);
-    let booleansIndex = i * 4;
-    let booleansForFigure = geomancyBooleans.slice(booleansIndex, booleansIndex + 4);
-    let nameIndex = booleansToNameIndex(booleansForFigure);
 
-    for (let j = 0; j < 4; j++) {
-      displayGeomanticTile(booleansForFigure[j], pos.x, pos.y + j);
+  if (frameCount > 30) {
+    for (let i = 0; i <= currentFigure; i++) {
+      let pos = getPositionForFigure(i);
+      let booleansIndex = i * 4;
+      let booleansForFigure = geomancyBooleans.slice(booleansIndex, booleansIndex + 4);
+      let nameIndex = booleansToNameIndex(booleansForFigure);
+
+      for (let j = 0; j < 4; j++) {
+        displayGeomanticTile(booleansForFigure[j], pos.x, pos.y + j);
+      }
+      if (i >= 8) {
+        displayGeomanticName(nameIndex, pos.x, pos.y + 4);
+      }
     }
-    if (i >= 8) {
-      displayGeomanticName(nameIndex, pos.x, pos.y + 4);
+
+    if (frameCount % 30 === 0 && currentFigure < 14) {
+      currentFigure++;
+      let soundIndex = floor(random(2, 7));
+      sounds[soundIndex].play();
+      if (currentFigure == 14) {  // Check if the last figure was just displayed
+        finalFigureDisplayedTime = millis();
+      }
     }
   }
 
-  if (frameCount % 30 === 0 && currentFigure < 15 && !soundPlayed) {
-    interfaceSound.play();
-    soundPlayed = true;  // Set the flag to true after playing the sound
-  }
-
-  // Increment current figure index and reset sound flag
-  if (frameCount % 30 === 0 && currentFigure < 14) {
-    currentFigure++;
-    soundPlayed = false;  // Reset the sound flag for the next figure
+  // Check if 10 seconds have passed since the last figure was displayed
+  if (finalFigureDisplayedTime && millis() - finalFigureDisplayedTime > 10000) {
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'home' });
+    } else { 
+      window.location.href = 'home.html';
+    }
   }
 }
-
-
 
 
 function displayGeomanticTile(isActive, x, y) {
@@ -182,4 +186,20 @@ function xyToIndex(x, y) {
       return -1; // Return -1 for invalid coordinates
   }
   return y * SPRITESHEET_COLS + x;
+}
+
+function keyPressed(event) {
+  if (event.key === '}') { 
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'home' });
+    } else { 
+      window.location.href = 'home.html';
+    }
+  } else if (event.key === '{') {
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'boot' });
+    } else { 
+      window.location.href = 'boot.html';
+    }
+  }
 }

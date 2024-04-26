@@ -4,7 +4,7 @@ This repository aims to unify several disparate JavaScript projects, envisioning
 
 This repository contains a Node.js application designed to run on a Raspberry Pi. Pull the repo to your pi, navigate to the new directory and install dependencies with `npm install`.
 
-The repository contains several HTML documents, each loading a different script. In the final version, a Node.js application will use input from Raspberry Pi GPIO pins to switch between the scripts: `dungeon.js` is my roguelike game experiment; `abyss.js` and `knit.js` are pattern generators; `saltwave.js` is an animated cellular automaton.
+The repository contains several HTML documents, each loading a different script. In the final version, a Node.js application will use input from Raspberry Pi GPIO pins to switch between the scripts: `dungeon.js` is my roguelike game experiment; `abyss.js` and `patterns.js` are pattern generators; `automata.js` is an animated cellular automaton.
 
 To start the server run `npm start`.
 

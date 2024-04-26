@@ -54,7 +54,7 @@ function draw() {
     if (socket.connected) {
       socket.emit('requestSketchChange', { nextSketch: 'game' });
     } else {
-      window.location.href = 'dungeon.html';
+      window.location.href = 'game.html';
     }
     
   }
@@ -259,15 +259,15 @@ function unloadCurrentSketch() {
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 'mirror' });
     } else { 
-      window.location.href = 'dungeon.html';
+      window.location.href = 'mirror.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'home' });
+      socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
     } else { 
-      window.location.href = 'home.html';
+      window.location.href = 'keyboard.html';
     }
   }
 }

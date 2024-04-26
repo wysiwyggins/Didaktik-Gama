@@ -76,9 +76,9 @@ function draw() {
   reloads++;
   if (reloads > 1000) {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'abyss' });
+      socket.emit('requestSketchChange', { nextSketch: 'geomancy' });
     } else {
-      window.location.href = 'abyss.html';
+      window.location.href = 'geomancy.html';
     }
   }
 }
@@ -258,17 +258,11 @@ function unloadCurrentSketch() {
 }
 
 function keyPressed(event) {
-  if (event.key === '}') { 
+  if (event.key === '}') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 'geomancy' });
     } else { 
-      window.location.href = 'dungeon.html';
-    }
-  } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'home' });
-    } else { 
-      window.location.href = 'home.html';
+      window.location.href = 'geomancy.html';
     }
   }
 }
