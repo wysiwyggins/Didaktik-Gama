@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "dev": "node server.js",
-    "postinstall": "npm rebuild"
-  },
+    "postinstall": ""
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wysiwyggins/Console.git"

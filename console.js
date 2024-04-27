@@ -5,6 +5,8 @@ const socketIo = require('socket.io');
 const { Gpio } = require('onoff');
 const open = require('open');
 const DMX = require('dmx');
+const dmx = new DMX();
+const universe = dmx.addUniverse('demo', 'enttec-usb-dmx-pro', '/dev/ttyUSB1');
 
 
 // GPIO setup for the rotary encoder
@@ -44,22 +46,39 @@ io.on('connection', (socket) => {
         judgeName = data.name;
       });
 
+    socket.on('setRGBLight', (data) => {
+        setRGBLight(data.red, data.green, data.blue);
+    });
+
+    socket.on('setBlackLight', (state) => {
+        setBlackLight(state);
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected');
     });
 });
 
+function setRGBLight(red, green, blue) {
+    universe.update({1: red, 2: green, 3: blue});
+}
+
+function setBlackLight(state) {
+    universe.update({4: state ? 255 : 0});
+}
+
 // Map sketch names to their corresponding indexes
 function mapSketchNameToIndex(sketchName) {
     const sketchMap = {
-        'boot': 1,
-        'home': 2, 
-        'game': 3,
-        'mirror': 4,
-        'knit': 5,
-        'automata': 6,
-        'keyboard': 7,
-        'abyss': 8,
+        'boot.js' : 0,
+        'geomancy.js' : 1,
+        'home.js' : 2,
+        'game.js' : 3, 
+        'abyss.js' : 4,
+        'keyboard.js' : 5,
+        'patterns.js' : 6,
+        'mirror.js' : 7,
+        'automata.js' : 8,
     };
     return sketchMap[sketchName] || 0; // Default to first sketch if name not found
 }
