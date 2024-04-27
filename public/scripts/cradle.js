@@ -136,11 +136,7 @@ function speak(text) {
       utterance.lang = 'cs-CZ';
       utterance.rate = 0.8; // Optional: Adjust the speed of speech
       utterance.pitch = 0.1;
-      // Check if the loaded text file is "10.txt" and change the language to Czech
-      if (fileIndex === 10) {
-          utterance.lang = 'cs-CZ'; // Set the language to Czech
-      }
-
+      utterance.volume = 0.5;
       speechSynthesis.speak(utterance);
   }
 }

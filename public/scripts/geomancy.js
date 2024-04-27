@@ -17,6 +17,7 @@ let geomancyBooleans = [];
 let displayIndex = 0;  // Index for displaying symbols
 let geomanticNames = ["Via", "Cauda Draconis", "Puer", "Fortuna Minor", "Puella", "Amissio", "Carcer", "Laetitia", "Caput Draconis", "Conjunctio", "Acquisitio", "Rubeus", "Fortuna Major", "Albus", "Tristitia", "Populus"];
 let displayNames = false;
+let nameIndex;
 let finalFigureDisplayedTime = null; 
 
 function preload() {
@@ -67,7 +68,7 @@ function draw() {
       let pos = getPositionForFigure(i);
       let booleansIndex = i * 4;
       let booleansForFigure = geomancyBooleans.slice(booleansIndex, booleansIndex + 4);
-      let nameIndex = booleansToNameIndex(booleansForFigure);
+      nameIndex = booleansToNameIndex(booleansForFigure);
 
       for (let j = 0; j < 4; j++) {
         displayGeomanticTile(booleansForFigure[j], pos.x, pos.y + j);
@@ -83,12 +84,15 @@ function draw() {
       sounds[soundIndex].play();
       if (currentFigure == 14) {  // Check if the last figure was just displayed
         finalFigureDisplayedTime = millis();
+      } else if (currentFigure == 15) {  
+        console.log("Final figure ", geomanticNames[nameIndex]);
+        socket.emit('sendJudgeName', { name: geomanticNames[nameIndex] });
       }
     }
   }
 
   // Check if 10 seconds have passed since the last figure was displayed
-  if (finalFigureDisplayedTime && millis() - finalFigureDisplayedTime > 10000) {
+  if (finalFigureDisplayedTime && millis() - finalFigureDisplayedTime > 12000) {
     if (socket.connected) {
       socket.emit('requestSketchChange', { nextSketch: 'home' });
     } else { 

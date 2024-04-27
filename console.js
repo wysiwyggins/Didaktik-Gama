@@ -4,12 +4,15 @@ const http = require('http');
 const socketIo = require('socket.io');
 const { Gpio } = require('onoff');
 const open = require('open');
+const DMX = require('dmx');
+
 
 // GPIO setup for the rotary encoder
 const encoderA = new Gpio(17, 'in', 'both');
 const encoderB = new Gpio(18, 'in', 'both');
 let lastEncoded = 0;
 let encoderValue = 0;
+let judgeName;
 
 // Server setup
 const app = express();
@@ -35,6 +38,11 @@ io.on('connection', (socket) => {
         // Convert the sketch name to an index and broadcast to all clients
         io.emit('changeSketch', mapSketchNameToIndex(data.nextSketch));
     });
+
+    socket.on('sendJudgeName', (data) => {
+        console.log('Last figure name received:', data.name);
+        judgeName = data.name;
+      });
 
     socket.on('disconnect', () => {
         console.log('Client disconnected');
