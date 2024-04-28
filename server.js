@@ -31,6 +31,16 @@ server.listen(PORT, () => {
     open(`http://localhost:${PORT}`);
 });
 
+try {
+    const testPin = new Gpio(17, 'out');
+    testPin.writeSync(1); // Set pin high
+    console.log('Pin state:', testPin.readSync()); // Read pin state
+    testPin.unexport(); // Release the GPIO pin
+} catch (err) {
+    console.error('Failed to access GPIO:', err);
+}
+
+
 // WebSocket connection setup
 io.on('connection', (socket) => {
     console.log('New client connected');
