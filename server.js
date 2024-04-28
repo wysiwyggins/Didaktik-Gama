@@ -2,19 +2,12 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { Gpio } = require('onoff');
 const open = require('open');
 const DMX = require('dmx');
 const dmx = new DMX();
 const universe = dmx.addUniverse('demo', 'enttec-usb-dmx-pro', '/dev/ttyUSB1');
 
 
-// GPIO setup for the rotary encoder
-const encoderA = new Gpio(17, 'in', 'both');
-const encoderB = new Gpio(18, 'in', 'both');
-let lastEncoded = 0;
-let encoderValue = 0;
-let judgeName;
 
 // Server setup
 const app = express();
@@ -92,38 +85,3 @@ function mapSketchNameToIndex(sketchName) {
     };
     return sketchMap[sketchName] || 0; // Default to first sketch if name not found
 }
-
-// Rotary encoder event handling
-function updateEncoder() {
-    const MSB = encoderA.readSync();
-    const LSB = encoderB.readSync();
-    const encoded = (MSB << 1) | LSB;
-    const sum = (lastEncoded << 2) | encoded;
-    const numberOfSketches = 7; // Total number of sketches including 'boot.js'
-
-    if ([0b1101, 0b0100, 0b0010, 0b1011].includes(sum)) {
-        encoderValue = (encoderValue + 1) % numberOfSketches;
-    } else if ([0b1110, 0b0111, 0b0001, 0b1000].includes(sum)) {
-        encoderValue = (encoderValue - 1 + numberOfSketches) % numberOfSketches;
-    }
-
-    lastEncoded = encoded;
-    io.emit('changeSketch', encoderValue); // Emitting the change sketch event with the new value
-}
-
-// Watch for changes on encoder pins
-encoderA.watch((err) => {
-    if (err) {
-        console.error('Error watching encoder A:', err);
-        return;
-    }
-    updateEncoder();
-});
-
-encoderB.watch((err) => {
-    if (err) {
-        console.error('Error watching encoder B:', err);
-        return;
-    }
-    updateEncoder();
-});
