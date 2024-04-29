@@ -1,18 +1,20 @@
-// npm install express http socket.io onoff open
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const open = require('open');
-const DMX = require('dmx');
-const dmx = new DMX();
-const universe = dmx.addUniverse('demo', 'enttec-usb-dmx-pro', '/dev/ttyUSB1');
+const os = require('os');
 
-
-
-// Server setup
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+
+// DMX setup only on Linux
+let universe;
+if (os.platform() === 'linux') {
+    const DMX = require('dmx');
+    const dmx = new DMX();
+    universe = dmx.addUniverse('demo', 'enttec-usb-dmx-pro', '/dev/ttyUSB1');
+}
 
 // Serve static files from the public directory
 app.use(express.static('public'));
@@ -24,28 +26,33 @@ server.listen(PORT, () => {
     open(`http://localhost:${PORT}`);
 });
 
-
 // WebSocket connection setup
 io.on('connection', (socket) => {
     console.log('New client connected');
 
     socket.on('requestSketchChange', (data) => {
         console.log('Request to change sketch to:', data.nextSketch);
-        // Convert the sketch name to an index and broadcast to all clients
         io.emit('changeSketch', mapSketchNameToIndex(data.nextSketch));
     });
 
     socket.on('sendJudgeName', (data) => {
         console.log('Last figure name received:', data.name);
-        judgeName = data.name;
-      });
+    });
 
     socket.on('setRGBLight', (data) => {
-        setRGBLight(data.red, data.green, data.blue);
+        if (os.platform() === 'linux') {
+            setRGBLight(data.red, data.green, data.blue);
+        } else {
+            console.log('DMX functionality not available on this platform.');
+        }
     });
 
     socket.on('setBlackLight', (state) => {
-        setBlackLight(state);
+        if (os.platform() === 'linux') {
+            setBlackLight(state);
+        } else {
+            console.log('DMX functionality not available on this platform.');
+        }
     });
 
     socket.on('disconnect', () => {
@@ -54,14 +61,17 @@ io.on('connection', (socket) => {
 });
 
 function setRGBLight(red, green, blue) {
-    universe.update({1: red, 2: green, 3: blue});
+    if (universe) {
+        universe.update({1: red, 2: green, 3: blue});
+    }
 }
 
 function setBlackLight(state) {
-    universe.update({4: state ? 255 : 0});
+    if (universe) {
+        universe.update({4: state ? 255 : 0});
+    }
 }
 
-// Map sketch names to their corresponding indexes
 function mapSketchNameToIndex(sketchName) {
     const sketchMap = {
         'boot.js' : 0,

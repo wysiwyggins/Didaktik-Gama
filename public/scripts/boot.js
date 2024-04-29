@@ -35,7 +35,7 @@ function preload() {
   spritesheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
   spritesheetData = loadJSON('assets/spritesheets/spriteData.json');
   backgroundImage = loadImage('assets/images/boot.png');
-  
+  console.log('boot loaded');
 }
 
 function generateBaseAndComplementaryColors() {

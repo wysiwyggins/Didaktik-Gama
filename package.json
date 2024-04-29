@@ -19,11 +19,12 @@
     "url": "https://github.com/wysiwyggins/Console/issues"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^4.0.0",
+    "@serialport/bindings": "^8.0.8",
     "dmx": "*",
+    "express": "^4.17.1",
     "onoff": "^6.0.0",
-    "open": "^8.0.4"
+    "open": "^8.0.4",
+    "socket.io": "^4.0.0"
   },
   "homepage": "https://github.com/wysiwyggins/Console#readme"
 }
