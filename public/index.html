@@ -20,11 +20,13 @@
             let currentSketch = null;
         
             function unloadCurrentSketch() {
+                if (window.currentSketch && window.currentSketch.remove) {
+                    window.currentSketch.remove(); // Calls p5.js's cleanup function
+                }
                 const sketchContainer = document.getElementById('sketch-container');
-                sketchContainer.innerHTML = '';  // Remove all child nodes
+                sketchContainer.innerHTML = '';  // Clear the container
                 console.log('Previous sketch unloaded');
             }
-        
             function loadSketch(sketchIndex) {
                 unloadCurrentSketch();  // Ensure the previous sketch is unloaded
                 const sketchContainer = document.getElementById('sketch-container');
@@ -43,14 +45,15 @@
             };
         
             const sketchScript = sketches[sketchIndex % Object.keys(sketches).length];
-        
             if (sketchScript) {
                 const scriptTag = document.createElement('script');
                 scriptTag.src = sketchScript;
-                scriptTag.onload = () => console.log(`Loaded sketch: ${sketchScript}`);
+                scriptTag.onload = () => {
+                    console.log(`Loaded sketch: ${sketchScript}`);
+                    // Assuming the loaded script assigns its p5 instance to window.currentSketch
+                };
                 scriptTag.onerror = () => console.error(`Error loading sketch: ${sketchScript}`);
                 sketchContainer.appendChild(scriptTag);
-                currentSketch = scriptTag;
             }
         }
 
