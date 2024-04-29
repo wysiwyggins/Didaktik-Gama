@@ -271,6 +271,8 @@ function retreatCursor() {
 }
 
 function keyPressed() {
+  console.log("KeyPressed detected: Key = " + key + ", keyCode = " + keyCode);
+
   lastUserInputTime = millis();
   typingPaused = true;
   if (keyCode === 33) { // Page Up key
@@ -289,17 +291,32 @@ function keyPressed() {
       setCurrentTile(getTileIndex("WHITE_FULL_BLOCK"));
       return false;
   }
-
+  if (key === '}') { 
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'patterns' });
+    } else { 
+      window.location.href = 'patterns.html';
+    }
+  } else if (event.key === '{') {
+    if (socket.connected) {
+      socket.emit('requestSketchChange', { nextSketch: 'abyss' });
+    } else { 
+      window.location.href = 'abyss.html';
+    }
+  }
   // Handle alphanumeric characters
   if (!keyIsDown(CONTROL) && !keyIsDown(ALT)) {
       let tileName;
       if (key >= '0' && key <= '9') {
           tileName = 'DIGIT_' + key; // Assumes you have tiles named like DIGIT_1, DIGIT_2, etc.
+          console.log(tileName);
       } else if (key >= 'A' && key <= 'Z') {
           tileName = 'LATIN_CAPITAL_LETTER_' + key; // Assumes tiles named like LATIN_CAPITAL_LETTER_A
+          console.log(tileName);
       } else if (key >= 'a' && key <= 'z') {
           let uppercaseKey = key.toUpperCase();
           tileName = 'LATIN_SMALL_LETTER_' + uppercaseKey; // Assumes tiles named like LATIN_SMALL_LETTER_A
+          console.log(tileName);
       }
 
       if (tileName && spriteData.tiles[tileName]) {
@@ -466,21 +483,6 @@ function unloadCurrentSketch() {
   console.log('Socket closed');
 }
 
-function keyPressed(event) {
-  if (event.key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'patterns' });
-    } else { 
-      window.location.href = 'patterns.html';
-    }
-  } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'abyss' });
-    } else { 
-      window.location.href = 'abyss.html';
-    }
-  }
-}
 
 // Add an event listener to the document to handle keydown events
 document.addEventListener('keydown', keyPressed);
