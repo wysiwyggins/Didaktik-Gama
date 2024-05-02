@@ -60,7 +60,12 @@ function booleansToNameIndex(booleans) {
 }
 
 function draw() {
-  background(255);
+  if (currentFigure > 13) {
+    background(random(255), random(255), 0);
+  } else {
+    background(255);
+  }
+  
   image(backgroundImage, 0, 0, width, height);
 
   if (frameCount > 30) {
