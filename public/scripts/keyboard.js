@@ -17,60 +17,6 @@ let typingPaused = false;
 let lastUserInputTime = 0;
 const pauseDuration = 5000;
 
-// Constants
-const CANVAS_COLS = 65;
-const CANVAS_ROWS = 60;
-const MAX_TILES = CANVAS_COLS * CANVAS_ROWS;
-const TILE_WIDTH = 20;   // Half size
-const TILE_HEIGHT = 15;
-const SPRITESHEET_COLS = 23;
-const SPRITESHEET_ROWS = 11;
-
-// Map of ALT-modified characters to their corresponding tile names
-const altCharToTileName = {
-  '¡': "DOUBLE_EXCLAMATION_MARK",
-  '™': "LEFT_ONE_FIFTH_BLOCK",
-  '£': "LEG",
-  '¢': "UPWARDS_ARROW_WITH_TIP_LEFTWARDS",
-  '∞': "BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE",
-  '§': "MEDIUM_SHADE",
-  '¶': "MEDIUM_LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE",
-  '•': "MIDDLE_DOT",
-  'ª': "MEDIUM_LIGHT_SHADE",
-  'º': "WALL_TOP",
-  '–': "BLACK_LOWER_LEFT_TRIANGLE",
-  '≠': "MEDIUM_SHADE_LOWER_LEFT_TRIANGLE",
-  'œ': "OPAQUE_DOTTED_LIGHT_SHADE",
-  '∑': "LATIN_SMALL_LETTER_C_WITH_CARON",
-  '´': "WHITE_LEG",
-  '®': "OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT",
-  '†': "DARK_SMILING_FACE",
-  '¥': "EYE_OF_PROVIDENCE",
-  'ˆ': "BLACK_SQUARE",
-  'ø': "INVERTED_CHECKER_BOARD",
-  'π': "FLOATING_LEGS",
-  'å': "LIGHT_SHADE_LOWER_RIGHT_TRIANGLE",
-  'ß': "CHAIN_LINK_VERTICAL",
-  '∂': "CHAIN_LINK_HORIZONTAL",
-  'ƒ': "IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION",
-  '©': "LATIN_SMALL_LETTER_S_WITH_CARON",
-  '˙': "FULL_BLOCK",
-  '∆': "INVERTED_EYE_OF_PROVIDENCE",
-  '˚': "WHITE_FLORETTE",
-  '¬': "BOX_TOP_RIGHT",
-  '…': "BOX_DRAWING_LIGHT_HORIZONTAL",
-  'æ': "CANDLE_STICK",
-  'Ω': "DOOR_TOP",
-  '≈': "DOOR_BOTTOM",
-  'ç': "LATIN_SMALL_LETTER_O_WITH_ACUTE",
-  '√': "BALLOT_BOX_WITH_X",
-  '∫': "BOX_DRAWING_HEAVY_LEFT_LIGHT_RIGHT",
-  '˜': "BOX_BOTTOM_RIGHT",
-  'µ': "LOWER_ONE_HALF_BLOCK",
-  '≤': "LEFT_ONE_HALF_BLOCK",
-  '≥': "RIGHT_ONE_HALF_BLOCK",
-  '÷': "BLACK_SQUARE"
-};
 
 function mapAltCharacterToTileName(char) {
   return altCharToTileName[char]; 
@@ -197,7 +143,7 @@ function setCurrentTile(tileIndex) {
     if (tilesDisplayed >= MAX_TILES) {
       //window.location.reload();
       if (socket.connected){
-        socket.emit('requestSketchChange', { nextSketch: 'automata' });
+        socket.emit('requestSketchChange', { nextSketch: 8 });
       } else {
         window.location.href = 'automata.html';
       }
@@ -293,14 +239,13 @@ function keyPressed() {
   }
   if (key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'patterns' });
+      socket.emit('requestSketchChange', { nextSketch: 6 });
     } else { 
       window.location.href = 'patterns.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'abyss' });
-    } else { 
+      socket.emit('requestSketchChange', { nextSketch: 4 });
       window.location.href = 'abyss.html';
     }
   }
@@ -476,12 +421,6 @@ function displayTileForCharacter(char) {
     }
 }
 
-function unloadCurrentSketch() {
-  const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';  // Remove all child nodes
-  socket.close();
-  console.log('Socket closed');
-}
 
 
 // Add an event listener to the document to handle keydown events

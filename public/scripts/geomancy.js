@@ -1,12 +1,5 @@
-let socket;
 let spriteSheet;
 let spriteData;
-const CANVAS_COLS = 65;
-const CANVAS_ROWS = 60;
-const TILE_WIDTH = 20;   // Display size
-const TILE_HEIGHT = 15;  // Display size
-const SPRITESHEET_COLS = 23;
-const SPRITESHEET_ROWS = 11;
 let tileMap = [];  // Array to hold the tile data for the entire grid
 let currentFigure = -1;
 let toneStarted = false;
@@ -30,8 +23,8 @@ function preload() {
 }
 
 function setup() {
-  socket = io.connect(window.location.origin);
-  createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
+  //socket = io.connect(window.location.origin);
+  createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set the frame rate so that draw() is called once per second
   generateGeomancyBooleans();
   initializeTileMap();  // Initialize the tile map with default values
@@ -45,9 +38,9 @@ function setup() {
 }
 
 function initializeTileMap() {
-  for (let y = 0; y < CANVAS_ROWS; y++) {
+  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
       tileMap[y] = [];
-      for (let x = 0; x < CANVAS_COLS; x++) {
+      for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
           tileMap[y][x] = 0; 
       }
   }
@@ -99,7 +92,7 @@ function draw() {
   // Check if 10 seconds have passed since the last figure was displayed
   if (finalFigureDisplayedTime && millis() - finalFigureDisplayedTime > 12000) {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'home' });
+      socket.emit('requestSketchChange', { nextSketch: 2 });
     } else { 
       window.location.href = 'home.html';
     }
@@ -111,11 +104,11 @@ function displayGeomanticTile(isActive, x, y) {
   let tileName = isActive ? "TWO_BLACK_DIAMONDS" : "BLACK_DIAMOND_SUITE";
   let tileIndex = getTileIndex(tileName);
   if (tileIndex !== -1) {
-    let sx = (tileIndex % SPRITESHEET_COLS) * 40;
-    let sy = Math.floor(tileIndex / SPRITESHEET_COLS) * 30;
-    let dx = x * TILE_WIDTH;
-    let dy = y * TILE_HEIGHT;
-    image(spriteSheet, dx, dy, TILE_WIDTH, TILE_HEIGHT, sx, sy, 40, 30);
+    let sx = (tileIndex % globalVars.SPRITESHEET_COLS) * 40;
+    let sy = Math.floor(tileIndex / globalVars.SPRITESHEET_COLS) * 30;
+    let dx = x * globalVars.TILE_HALF_WIDTH;
+    let dy = y * globalVars.TILE_HALF_HEIGHT;
+    image(spriteSheet, dx, dy, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT, sx, sy, 40, 30);
     wave1.freq(100 + (isActive * 10) % random(1, 3));
     wave2.freq(100 - (isActive * 20) % random(1, 3));
   }
@@ -126,16 +119,16 @@ function displayGeomanticName(index, x, y) {
   // Calculate the centering offset
   
   let nameCenterOffset = Math.floor(name.length / 2);
-  let startX = x * TILE_WIDTH - (nameCenterOffset * TILE_WIDTH);
-  let startY = (y + 1) * TILE_HEIGHT;  // Adding one more TILE_HEIGHT for lowering the names
+  let startX = x * globalVars.TILE_HALF_WIDTH - (nameCenterOffset * globalVars.TILE_HALF_WIDTH);
+  let startY = (y + 1) * globalVars.TILE_HALF_HEIGHT;  // Adding one more globalVars.TILE_HEIGHT for lowering the names
 
   for (let i = 0; i < name.length; i++) {
     let char = name[i];
     let tileIndex = getTileIndexFromChar(char);
     if (tileIndex !== -1) {
-      let sx = (tileIndex % SPRITESHEET_COLS) * 40;
-      let sy = Math.floor(tileIndex / SPRITESHEET_COLS) * 30;
-      image(spriteSheet, startX + (i * TILE_WIDTH), startY, TILE_WIDTH, TILE_HEIGHT, sx, sy, 40, 30);
+      let sx = (tileIndex % globalVars.SPRITESHEET_COLS) * 40;
+      let sy = Math.floor(tileIndex / globalVars.SPRITESHEET_COLS) * 30;
+      image(spriteSheet, startX + (i * globalVars.TILE_HALF_WIDTH), startY, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT, sx, sy, 40, 30);
     } else {
       console.error("Invalid tile index for character", char);
     }
@@ -194,19 +187,19 @@ function xyToIndex(x, y) {
       console.error("Invalid tile coordinates:", x, y);
       return -1; // Return -1 for invalid coordinates
   }
-  return y * SPRITESHEET_COLS + x;
+  return y * globalVars.SPRITESHEET_COLS + x;
 }
 
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'home' });
+      socket.emit('requestSketchChange', { nextSketch: 2 });
     } else { 
       window.location.href = 'home.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'boot' });
+      socket.emit('requestSketchChange', { nextSketch: 0 });
     } else { 
       window.location.href = 'boot.html';
     }

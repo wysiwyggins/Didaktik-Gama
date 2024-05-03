@@ -1,10 +1,6 @@
-let socket;
+
 let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
-const TILE_WIDTH = 20;
-const TILE_HEIGHT = 15;
-const CANVAS_COLS = 65; // Number of cells horizontally
-const CANVAS_ROWS = 60; // Number of cells vertically
 let baseColor; // Holds the randomly generated base color
 let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
@@ -15,7 +11,7 @@ let colorChangeFrameInterval = 120; // Number of frames between color changes
 
 function setup() {
   socket = io.connect(window.location.origin);
-  createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
+  createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set frame rate
 
   extractTilesFromSpritesheet(); 
@@ -74,25 +70,23 @@ function draw() {
   
   
   reloads++;
-  if (reloads > 1000) {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'geomancy' });
-    } else {
-      window.location.href = 'geomancy.html';
+    if (reloads > 1000 && socket.connected) {
+        console.log('Requesting next sketch...');
+        socket.emit('requestSketchChange', { nextSketch: 1 });
+        reloads = 0; // Reset reloads to prevent multiple emissions
     }
-  }
 }
 
 
 function drawColorPattern() {
     let chance = floor(random(1, 5));
     let offset = floor(frameCount / colorChangeFrameInterval + chance)  % 2; // Alternate color starting index
-    for (let y = 0; y < CANVAS_ROWS; y++) {
+    for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
         let colorIndex = (y + offset) % 2; // Change starting index every interval
-        for (let x = 0; x < CANVAS_COLS; x++) { // Loop for columns added here
+        for (let x = 0; x < globalVars.CANVAS_COLS; x++) { // Loop for columns added here
             fill(colors[colorIndex % colors.length]);
             noStroke();
-            rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            rect(x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
             
             
         }
@@ -122,71 +116,6 @@ function selectBoxDrawingTiles() {
         // Store the tile with its key for easy access
         boxDrawingTiles[key] = tile;
     });
-}
-
-function drawSerpentinePattern() {
-  let direction = 'right'; // Initial direction
-  let nextDirection = 'down'; // Next direction, initialized for logic purposes
-  let nextChange = 10; // Change direction after a set number of tiles
-  let counter = 0;
-
-  for (let y = 0; y < CANVAS_ROWS; y++) {
-    if (y != 51 && y != 52 && y != 53 ){
-        for (let x = 0; x < CANVAS_COLS; x++) {
-            let tile;
-      
-            // Before changing direction, select the appropriate corner or cross tile
-            if (counter === nextChange - 1) { // If it's the last tile before changing direction
-              // Conditions for corner tiles before a direction change
-              if (direction === 'right' && nextDirection === 'down') {
-                tile = boxDrawingTiles.BOX_BOTTOM_RIGHT;
-              } else if (direction === 'down' && nextDirection === 'right') {
-                tile = boxDrawingTiles.BOX_TOP_LEFT;
-              }
-              // Add more conditions as needed for other direction changes
-            } else {
-              // Introduce a small random chance of using the cross tile
-              if (random() < 0.05) { // 10% chance
-                tile = boxDrawingTiles.BOX_VERTICAL_HORIZONTAL;
-              } else {
-                // Standard direction tiles
-                switch (direction) {
-                  case 'right':
-                    tile = boxDrawingTiles.BOX_HORIZONTAL;
-                    break;
-                  case 'down':
-                    tile = boxDrawingTiles.BOX_VERTICAL;
-                    break;
-                  case 'up':
-                    tile = boxDrawingTiles.BOX_UP_HORIZONTAL;
-                    break;
-                }
-              }
-            }
-      
-            // Draw the tile
-            if (tile) {
-              image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-
-            }
-      
-            // Update direction and counter based on the serpentine logic
-            counter++;
-            if (counter >= nextChange) {
-              counter = 0;
-              if (direction === 'right') {
-                direction = 'down';
-                nextDirection = 'right';
-              } else if (direction === 'down') {
-                direction = 'right';
-                nextDirection = 'down';
-              }
-              nextChange = floor(random(5, 15)); // Randomize for variety
-            }
-          }
-    }
-    
-  }
 }
 
 function selectPatternTiles() {
@@ -233,8 +162,8 @@ function extractTilesFromSpritesheet() {
 function drawSpritePattern() {
   console.log(`Drawing sprite pattern with ${selectedTiles.length} tiles.`);
   
-  for (let y = 0; y < CANVAS_ROWS; y++) {
-    for (let x = 0; x < CANVAS_COLS; x++) {
+  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
+    for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
       let tile = random(selectedTiles);
       if (!tile) {
         console.error("Selected tile is undefined.");
@@ -242,25 +171,18 @@ function drawSpritePattern() {
       }
       tint(colors[1], 127); // Apply a semi-transparent tint
       // Specify the display size to half the original size for sharp rendering
-      image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
+      image(tile, x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
       noTint();
     }
   }
 }
 
-function unloadCurrentSketch() {
-  if (currentSketch && currentSketch.cleanup) {
-      currentSketch.cleanup();  // Call a cleanup method on the current sketch
-  }
-  // Clear the content container
-  const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';
-}
+
 
 function keyPressed(event) {
   if (event.key === '}') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'geomancy' });
+      socket.emit('requestSketchChange', { nextSketch: 1 });
     } else { 
       window.location.href = 'geomancy.html';
     }

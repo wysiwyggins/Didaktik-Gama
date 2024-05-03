@@ -36,15 +36,15 @@ let turnTimeout; // timer for passing turns
 
 // Set up some constants
 const rect = app.view.getBoundingClientRect();
-const TILE_WIDTH = 40;
-const TILE_HEIGHT = 30;
+const globalVars.TILE_WIDTH = 40;
+const globalVars.TILE_HEIGHT = 30;
 const MAP_WIDTH = 65;
 const MAP_HEIGHT = 60;
 const SPRITESHEET_PATH = 'assets/spritesheets/libuse40x30-cp437.png';
 const SCALE_FACTOR = 0.5; // Scaling factor for HiDPI displays
 const SPRITE_POSITION = 5; // Position of the sprite (in tiles)
-const SPRITESHEET_COLUMNS = 23;
-const SPRITESHEET_ROWS = 11;
+const globalVars.SPRITESHEET_COLS = 23;
+const globalVars.SPRITESHEET_ROWS = 11;
 //dungeon is used by rot.js' dungeon drawing functions, we need a global stub to get things like
 //door locations
 let dungeon = null;
@@ -182,12 +182,12 @@ PIXI.Loader.shared
 
 PIXI.Loader.shared.onComplete.add(() => {
     for (let i = 0; i < 7; i++) {
-        let rect = new PIXI.Rectangle(i * TILE_WIDTH, 0, TILE_WIDTH, TILE_HEIGHT);
+        let rect = new PIXI.Rectangle(i * globalVars.TILE_HALF_WIDTH, 0, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
         let texture = new PIXI.Texture(PIXI.Loader.shared.resources.fire.texture.baseTexture, rect);
         fireFrames.push(texture);
     }
     for (let i = 0; i < 7; i++) {
-        let rect = new PIXI.Rectangle(i * TILE_WIDTH, 0, TILE_WIDTH, TILE_HEIGHT);
+        let rect = new PIXI.Rectangle(i * globalVars.TILE_HALF_WIDTH, 0, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
         let texture = new PIXI.Texture(PIXI.Loader.shared.resources.smoke.texture.baseTexture, rect);
         smokeFrames.push(texture);
     }
@@ -324,7 +324,7 @@ class Entity {
             this.sprite.animationSpeed = 0.1;
             this.sprite.loop = true;
             this.sprite.play();
-            this.sprite.position.set(x * TILE_WIDTH * SCALE_FACTOR, y * TILE_HEIGHT * SCALE_FACTOR); 
+            this.sprite.position.set(x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR, y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR); 
             this.sprite.scale.set(SCALE_FACTOR);
             this.sprite.zIndex = zIndex;
             gameContainer.addChild(this.sprite);
@@ -449,7 +449,7 @@ class Actor {
             this.flowers++;
         } if (item.type === ItemType.CRADLE) { 
             if (socket.connected) {
-                socket.emit('requestSketchChange', { nextSketch: 'cradle' });
+                socket.emit('requestSketchChange', { nextSketch: 9 });
             } else {
                 window.location.href = 'cradle.html';
             }
@@ -533,8 +533,8 @@ class Player extends Actor{
                 let relativeX = event.clientX - rect.left;
                 let relativeY = event.clientY - rect.top;
                 
-                let x = Math.floor(relativeX / (TILE_WIDTH * SCALE_FACTOR));
-                let y = Math.floor(relativeY / (TILE_HEIGHT * SCALE_FACTOR));
+                let x = Math.floor(relativeX / (globalVars.TILE_HALF_WIDTH * SCALE_FACTOR));
+                let y = Math.floor(relativeY / (globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR));
                 
                 // Update the targeting sprite
                 this.removeTargetingSprite();
@@ -643,8 +643,8 @@ class Player extends Actor{
         let relativeX = event.clientX - rect.left;
         let relativeY = event.clientY - rect.top;
 
-        let x = Math.floor(relativeX / (TILE_WIDTH * SCALE_FACTOR));
-        let y = Math.floor(relativeY / (TILE_HEIGHT * SCALE_FACTOR));
+        let x = Math.floor(relativeX / (globalVars.TILE_HALF_WIDTH * SCALE_FACTOR));
+        let y = Math.floor(relativeY / (globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR));
 
         // If player is in targeting mode
         if (this.isTargeting) {
@@ -843,18 +843,18 @@ class Player extends Actor{
     
 
     updateSprites(newTileX, newTileY) {
-        this.sprite.footprint.x = this.x * TILE_WIDTH * SCALE_FACTOR;
-        this.sprite.footprint.y = this.y * TILE_HEIGHT * SCALE_FACTOR;
+        this.sprite.footprint.x = this.x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
+        this.sprite.footprint.y = this.y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
         this.sprite.overlay.x = this.sprite.footprint.x;
-        this.sprite.overlay.y = this.sprite.footprint.y - TILE_HEIGHT * SCALE_FACTOR;
+        this.sprite.overlay.y = this.sprite.footprint.y - globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     
         let headTileY = this.y - 1;
         let isFrontOfWall = floorMap[headTileY]?.[this.x + 1]?.value === 177 && wallMap[headTileY]?.[this.x + 1]?.value !== 131; // check the tile to the right of the head
         this.sprite.shadow.visible = isFrontOfWall;
     
         if (isFrontOfWall) {
-            this.sprite.shadow.x = (this.x + 1) * TILE_WIDTH * SCALE_FACTOR; // position shadow to the right of the head
-            this.sprite.shadow.y = headTileY * TILE_HEIGHT * SCALE_FACTOR;
+            this.sprite.shadow.x = (this.x + 1) * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR; // position shadow to the right of the head
+            this.sprite.shadow.y = headTileY * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
         }
     
         // Handle visibility and positioning of the foot shadow
@@ -862,8 +862,8 @@ class Player extends Actor{
         this.sprite.footShadow.visible = isBesideFloor;
     
         if (isBesideFloor) {
-            this.sprite.footShadow.x = (this.x + 1) * TILE_WIDTH * SCALE_FACTOR; // position foot shadow to the right of the footprint
-            this.sprite.footShadow.y = this.y * TILE_HEIGHT * SCALE_FACTOR;
+            this.sprite.footShadow.x = (this.x + 1) * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR; // position foot shadow to the right of the footprint
+            this.sprite.footShadow.y = this.y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
         }
     
         // Reset opacity of sprites that were previously occluded
@@ -939,7 +939,7 @@ class Player extends Actor{
                 console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
                 if (this.failedMoveAttempts >= 3) { // If failed 3 times in zero-player mode, change page
                     if (socket.connected) {
-                        socket.emit('requestSketchChange', { nextSketch: 'patterns' });
+                        socket.emit('requestSketchChange', { nextSketch: 6 });
                     } else { 
                         window.location.href = 'patterns.html';
                     }
@@ -1090,14 +1090,14 @@ class Player extends Actor{
                 break;
             case '}':
                 if (socket.connected) {
-                    socket.emit('requestSketchChange', { nextSketch: 'abyss' });
+                    socket.emit('requestSketchChange', { nextSketch: 4 });
                 } else { 
                     window.location.href = 'abyss.html';
                 }
                 break;
             case '{':
                 if (socket.connected) {
-                    socket.emit('requestSketchChange', { nextSketch: 'home' });
+                    socket.emit('requestSketchChange', { nextSketch: 2 });
                 } else { 
                     window.location.href = 'home.html';
                 }
@@ -1241,8 +1241,8 @@ class Player extends Actor{
         objectMap[y][x] = item;
     
         // Update the position of the item's sprite
-        item.sprite.x = x * TILE_WIDTH;
-        item.sprite.y = y * TILE_HEIGHT;
+        item.sprite.x = x * globalVars.TILE_HALF_WIDTH;
+        item.sprite.y = y * globalVars.TILE_HALF_HEIGHT;
     }
     findAdjacentWalkableTile() {
         // Define the coordinates for the adjacent tiles
@@ -1322,13 +1322,13 @@ class Player extends Actor{
                 break;
         }
         let footprintTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-            footprintPosition.x * TILE_WIDTH, 
-            footprintPosition.y * TILE_HEIGHT, 
-            TILE_WIDTH, TILE_HEIGHT));
+            footprintPosition.x * globalVars.TILE_HALF_WIDTH, 
+            footprintPosition.y * globalVars.TILE_HALF_HEIGHT, 
+            globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
         let overlayTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-            headPosition.x * TILE_WIDTH, 
-            headPosition.y * TILE_HEIGHT, 
-            TILE_WIDTH, TILE_HEIGHT));
+            headPosition.x * globalVars.TILE_HALF_WIDTH, 
+            headPosition.y * globalVars.TILE_HALF_HEIGHT, 
+            globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     
         this.sprite.footprint.texture = footprintTexture;
         this.sprite.overlay.texture = overlayTexture;
@@ -1350,13 +1350,13 @@ class Player extends Actor{
                 break;
         }
         let footprintTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-            footprintPosition.x * TILE_WIDTH, 
-            footprintPosition.y * TILE_HEIGHT, 
-            TILE_WIDTH, TILE_HEIGHT));
+            footprintPosition.x * globalVars.TILE_HALF_WIDTH, 
+            footprintPosition.y * globalVars.TILE_HALF_HEIGHT, 
+            globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
         let overlayTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-            headPosition.x * TILE_WIDTH, 
-            headPosition.y * TILE_HEIGHT, 
-            TILE_WIDTH, TILE_HEIGHT));
+            headPosition.x * globalVars.TILE_HALF_WIDTH, 
+            headPosition.y * globalVars.TILE_HALF_HEIGHT, 
+            globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     
         this.sprite.footprint.texture = footprintTexture;
         this.sprite.overlay.texture = overlayTexture;
@@ -1390,25 +1390,25 @@ function createPlayerSprite(player) {
     players.push(player);
     let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
     let footprintTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        player.footprintPosition.x * TILE_WIDTH, 
-        player.footprintPosition.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        player.footprintPosition.x * globalVars.TILE_HALF_WIDTH, 
+        player.footprintPosition.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteFootprint = new PIXI.Sprite(footprintTexture);
     spriteFootprint.scale.set(SCALE_FACTOR);
     spriteFootprint.zIndex = 2.3;
 
     let overlayTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        player.headPosition.x * TILE_WIDTH, 
-        player.headPosition.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        player.headPosition.x * globalVars.TILE_HALF_WIDTH, 
+        player.headPosition.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteOverlay = new PIXI.Sprite(overlayTexture);
     spriteOverlay.scale.set(SCALE_FACTOR);
     spriteOverlay.zIndex = 2.3;
 
-    spriteFootprint.x = player.x * TILE_WIDTH * SCALE_FACTOR;
-    spriteFootprint.y = player.y * TILE_HEIGHT * SCALE_FACTOR;
+    spriteFootprint.x = player.x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
+    spriteFootprint.y = player.y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     spriteOverlay.x = spriteFootprint.x;
-    spriteOverlay.y = spriteFootprint.y - TILE_HEIGHT * SCALE_FACTOR;
+    spriteOverlay.y = spriteFootprint.y - globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
 
     gameContainer.addChild(spriteFootprint);
     gameContainer.addChild(spriteOverlay);
@@ -1439,18 +1439,18 @@ function createPlayerSprite(player) {
     });
     player.sprite = { footprint: spriteFootprint, overlay: spriteOverlay };
     let shadowTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        player.headShadowTile.x * TILE_WIDTH, 
-        player.headShadowTile.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        player.headShadowTile.x * globalVars.TILE_HALF_WIDTH, 
+        player.headShadowTile.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteShadow = new PIXI.Sprite(shadowTexture);
     spriteShadow.scale.set(SCALE_FACTOR);
     spriteShadow.zIndex = 6; // Set zIndex to show it in front of all other tiles
     spriteShadow.visible = false;
     
     let footShadowTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        player.footShadowTile.x * TILE_WIDTH, 
-        player.footShadowTile.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        player.footShadowTile.x * globalVars.TILE_HALF_WIDTH, 
+        player.footShadowTile.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteFootShadow = new PIXI.Sprite(footShadowTexture);
     spriteFootShadow.scale.set(SCALE_FACTOR);
     spriteFootShadow.zIndex = 3; // Set zIndex to show it in front of the footprint but behind the shadow
@@ -1801,14 +1801,14 @@ class Monster extends Actor{
 
         this.updateSpritePosition = function() {
             if (this.sprite.firstTile && this.sprite.secondTile) {
-                this.sprite.firstTile.x = this.x * TILE_WIDTH * SCALE_FACTOR;
-                this.sprite.firstTile.y = this.y * TILE_HEIGHT * SCALE_FACTOR;
+                this.sprite.firstTile.x = this.x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
+                this.sprite.firstTile.y = this.y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
         
                 if (this.upright) {
                     this.sprite.secondTile.x = this.sprite.firstTile.x;
-                    this.sprite.secondTile.y = this.sprite.firstTile.y - TILE_HEIGHT * SCALE_FACTOR;
+                    this.sprite.secondTile.y = this.sprite.firstTile.y - globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
                 } else {
-                    this.sprite.secondTile.x = this.sprite.firstTile.x + TILE_WIDTH * SCALE_FACTOR;
+                    this.sprite.secondTile.x = this.sprite.firstTile.x + globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
                     this.sprite.secondTile.y = this.sprite.firstTile.y;
                 }
         
@@ -2020,44 +2020,44 @@ function createMonsterSprite(monster) {
     activeEntities.push(this);
     let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
     let firstTileTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        monster.firstTilePosition.x * TILE_WIDTH, 
-        monster.firstTilePosition.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        monster.firstTilePosition.x * globalVars.TILE_HALF_WIDTH, 
+        monster.firstTilePosition.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteFirstTile = new PIXI.Sprite(firstTileTexture);
     spriteFirstTile.scale.set(SCALE_FACTOR);
     spriteFirstTile.zIndex = 2;
 
     let secondTileTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        monster.secondTilePosition.x * TILE_WIDTH, 
-        monster.secondTilePosition.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        monster.secondTilePosition.x * globalVars.TILE_HALF_WIDTH, 
+        monster.secondTilePosition.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteSecondTile = new PIXI.Sprite(secondTileTexture);
     spriteSecondTile.scale.set(SCALE_FACTOR);
     spriteSecondTile.zIndex = 1;
 
-    spriteFirstTile.x = monster.x * TILE_WIDTH * SCALE_FACTOR;
-    spriteFirstTile.y = monster.y * TILE_HEIGHT * SCALE_FACTOR;
+    spriteFirstTile.x = monster.x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
+    spriteFirstTile.y = monster.y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     if (monster.spriteFlip.firstTile.x) {
         spriteFirstTile.scale.x *= -1; // Flip horizontally
-        spriteFirstTile.x += TILE_WIDTH * SCALE_FACTOR;
+        spriteFirstTile.x += globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
     }
     if (monster.spriteFlip.firstTile.y) {
         spriteFirstTile.scale.y *= -1; // Flip vertically
-        spriteFirstTile.y += TILE_HEIGHT * SCALE_FACTOR;
+        spriteFirstTile.y += globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     }
     if (monster.spriteFlip.secondTile.x) {
         spriteSecondTile.scale.x *= -1; // Flip horizontally
-        spriteSecondTile.x += TILE_WIDTH * SCALE_FACTOR;
+        spriteSecondTile.x += globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
     }
     if (monster.spriteFlip.secondTile.y) {
         spriteSecondTile.scale.y *= -1; // Flip vertically
-        spriteSecondTile.y += TILE_HEIGHT * SCALE_FACTOR;
+        spriteSecondTile.y += globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     }
     if (monster.upright) {
         spriteSecondTile.x = spriteFirstTile.x;
-        spriteSecondTile.y = spriteFirstTile.y - TILE_HEIGHT * SCALE_FACTOR;
+        spriteSecondTile.y = spriteFirstTile.y - globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     } else {
-        spriteSecondTile.x = spriteFirstTile.x + TILE_WIDTH * SCALE_FACTOR;
+        spriteSecondTile.x = spriteFirstTile.x + globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
         spriteSecondTile.y = spriteFirstTile.y;
     }
     if (monster.spriteFlip.firstTile.x) {
@@ -2077,18 +2077,18 @@ function createMonsterSprite(monster) {
 
     monster.sprite = { firstTile: spriteFirstTile, secondTile: spriteSecondTile };
     let firstShadowTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        monster.firstShadowTile.x * TILE_WIDTH, 
-        monster.firstShadowTile.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        monster.firstShadowTile.x * globalVars.TILE_HALF_WIDTH, 
+        monster.firstShadowTile.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteFirstShadow = new PIXI.Sprite(firstShadowTexture);
     spriteFirstShadow.scale.set(SCALE_FACTOR);
     spriteFirstShadow.zIndex = 6; // Set zIndex to show it in front of all other tiles
     spriteFirstShadow.visible = false;
 
     let secondShadowTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        monster.secondShadowTile.x * TILE_WIDTH, 
-        monster.secondShadowTile.y * TILE_HEIGHT, 
-        TILE_WIDTH, TILE_HEIGHT));
+        monster.secondShadowTile.x * globalVars.TILE_HALF_WIDTH, 
+        monster.secondShadowTile.y * globalVars.TILE_HALF_HEIGHT, 
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
     let spriteSecondShadow = new PIXI.Sprite(secondShadowTexture);
     spriteSecondShadow.scale.set(SCALE_FACTOR);
     spriteSecondShadow.zIndex = 3; // Set zIndex to show it in front of the footprint but behind the wall
@@ -2230,8 +2230,8 @@ class Fire extends Entity {
                         fire.sprite.scale.x *= -1;
                 
                         // Adjust sprite's position due to anchor change
-                        fire.sprite.x += TILE_WIDTH * SCALE_FACTOR / 2;
-                        fire.sprite.y += TILE_HEIGHT * SCALE_FACTOR / 2;
+                        fire.sprite.x += globalVars.TILE_HALF_WIDTH * SCALE_FACTOR / 2;
+                        fire.sprite.y += globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR / 2;
                     }
                                     
                     this.scheduler.add(fire, true); 
@@ -2472,10 +2472,10 @@ class Item {
         }
         let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
         this.spriteTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-            this._tileIndex.x * TILE_WIDTH, 
-            this._tileIndex.y * TILE_HEIGHT, 
-            TILE_WIDTH, 
-            TILE_HEIGHT
+            this._tileIndex.x * globalVars.TILE_HALF_WIDTH, 
+            this._tileIndex.y * globalVars.TILE_HALF_HEIGHT, 
+            globalVars.TILE_HALF_WIDTH, 
+            globalVars.TILE_HALF_HEIGHT
         ));
         this.sprite = new PIXI.Sprite(this.spriteTexture);
         this.sprite.interactive = true;
@@ -2491,7 +2491,7 @@ class Item {
         });
         
         // Set position, scale, and zIndex of the sprite
-        this.sprite.position.set(x * TILE_WIDTH * SCALE_FACTOR, y * TILE_HEIGHT * SCALE_FACTOR);
+        this.sprite.position.set(x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR, y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR);
         this.sprite.scale.set(SCALE_FACTOR);
         this.sprite.zIndex = 2;
         if (type === ItemType.FLOWER || type === ItemType.KEY ) { 
@@ -2748,12 +2748,12 @@ class Exit {
             // Positioning for flipping logic
             if (spriteInfo.flipH) {
                 sprite.scale.x *= -1;
-                sprite.x += TILE_WIDTH * SCALE_FACTOR;
+                sprite.x += globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
             }
     
             if (spriteInfo.flipV) {
                 sprite.scale.y *= -1;
-                sprite.y += TILE_HEIGHT * SCALE_FACTOR;
+                sprite.y += globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
             }
     
             this.sprites.push(sprite);
@@ -2802,9 +2802,9 @@ function checkGameState() {
 function getTextureFromIndices(index) {
     let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
     let texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        index.x * TILE_WIDTH,
-        index.y * TILE_HEIGHT,
-        TILE_WIDTH, TILE_HEIGHT));
+        index.x * globalVars.TILE_HALF_WIDTH,
+        index.y * globalVars.TILE_HALF_HEIGHT,
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
 
     return texture;
 }
@@ -2827,14 +2827,14 @@ function createSprite(x, y, index, layer, value = null, overlay = false, tint = 
 
     let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
     let texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        index.x * TILE_WIDTH,
-        index.y * TILE_HEIGHT,
-        TILE_WIDTH, TILE_HEIGHT));
+        index.x * globalVars.TILE_HALF_WIDTH,
+        index.y * globalVars.TILE_HALF_HEIGHT,
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
 
     let sprite = new PIXI.Sprite(texture);
     sprite.scale.set(SCALE_FACTOR);
-    sprite.x = x * TILE_WIDTH * SCALE_FACTOR;
-    sprite.y = y * TILE_HEIGHT * SCALE_FACTOR;
+    sprite.x = x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
+    sprite.y = y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     if (tint) {
         sprite.tint = tint;
     }
@@ -2881,7 +2881,7 @@ function createSprite(x, y, index, layer, value = null, overlay = false, tint = 
     layer[y][x] = {value: value !== null ? value : existingValue, sprite: sprite};
     // Update zIndex for objectMap based on y position compared to walls
     if (layer === objectMap || layer === doorMap && wallMap?.[y]?.[x]?.sprite) {
-        if (y * TILE_HEIGHT * SCALE_FACTOR < wallMap[y][x].sprite.y) {
+        if (y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR < wallMap[y][x].sprite.y) {
             sprite.zIndex = 4; // Object is behind the wall
         }
     }
@@ -2908,14 +2908,14 @@ function createSprite(x, y, index, layer, value = null, overlay = false, tint = 
 
     let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
     let texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        index.x * TILE_WIDTH,
-        index.y * TILE_HEIGHT,
-        TILE_WIDTH, TILE_HEIGHT));
+        index.x * globalVars.TILE_HALF_WIDTH,
+        index.y * globalVars.TILE_HALF_HEIGHT,
+        globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT));
 
     let sprite = new PIXI.Sprite(texture);
     sprite.scale.set(SCALE_FACTOR);
-    sprite.x = x * TILE_WIDTH * SCALE_FACTOR;
-    sprite.y = y * TILE_HEIGHT * SCALE_FACTOR;
+    sprite.x = x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR;
+    sprite.y = y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR;
     if (tint) {
         sprite.tint = tint;
     }
@@ -2962,7 +2962,7 @@ function createSprite(x, y, index, layer, value = null, overlay = false, tint = 
     layer[y][x] = {value: value !== null ? value : existingValue, sprite: sprite};
     // Update zIndex for objectMap based on y position compared to walls
     if (layer === objectMap || layer === doorMap && wallMap?.[y]?.[x]?.sprite) {
-        if (y * TILE_HEIGHT * SCALE_FACTOR < wallMap[y][x].sprite.y) {
+        if (y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR < wallMap[y][x].sprite.y) {
             sprite.zIndex = 4; // Object is behind the wall
         }
     }
@@ -3004,8 +3004,8 @@ function createVoid(x, y) {
     }
 
     // Adjust sprite's position due to anchor change
-    sprite.x = x * TILE_WIDTH * SCALE_FACTOR + TILE_WIDTH * SCALE_FACTOR / 2;
-    sprite.y = y * TILE_HEIGHT * SCALE_FACTOR + TILE_HEIGHT * SCALE_FACTOR / 2;
+    sprite.x = x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR + globalVars.TILE_HALF_WIDTH * SCALE_FACTOR / 2;
+    sprite.y = y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR + globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR / 2;
 }
 
 function createChasmWall(x, y) {
@@ -3025,8 +3025,8 @@ function createChasmWall(x, y) {
     }
 
     // Adjust sprite's position due to anchor change
-    sprite.x = x * TILE_WIDTH * SCALE_FACTOR + TILE_WIDTH * SCALE_FACTOR / 2;
-    sprite.y = y * TILE_HEIGHT * SCALE_FACTOR + TILE_HEIGHT * SCALE_FACTOR / 2;
+    sprite.x = x * globalVars.TILE_HALF_WIDTH * SCALE_FACTOR + globalVars.TILE_HALF_WIDTH * SCALE_FACTOR / 2;
+    sprite.y = y * globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR + globalVars.TILE_HALF_HEIGHT * SCALE_FACTOR / 2;
 }
 
 function createFloor(x, y) {
@@ -3437,10 +3437,10 @@ class UIBox {
     charToSpriteLocation(char) {
         let charCode = char.charCodeAt(0);
         let tileNumber = charCode; 
-        let spriteColumn = tileNumber % SPRITESHEET_COLUMNS;
-        let spriteRow = Math.floor(tileNumber / SPRITESHEET_COLUMNS);
+        let spriteColumn = tileNumber % globalVars.SPRITESHEET_COLS;
+        let spriteRow = Math.floor(tileNumber / globalVars.SPRITESHEET_COLS);
         
-        if(spriteColumn >= SPRITESHEET_COLUMNS) {
+        if(spriteColumn >= globalVars.SPRITESHEET_COLS) {
             spriteColumn = 0;
             spriteRow++;
         }
@@ -3620,7 +3620,7 @@ async function setup() {
 
     PIXI.Loader.shared.onComplete.add(() => {
         for (let i = 0; i < 7; i++) { // assuming you have 4 frames of fire animation
-            let rect = new PIXI.Rectangle(i * TILE_WIDTH, 0, TILE_WIDTH, TILE_HEIGHT);
+            let rect = new PIXI.Rectangle(i * globalVars.TILE_HALF_WIDTH, 0, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
             let texture = new PIXI.Texture(PIXI.Loader.shared.resources.fire.texture.baseTexture, rect);
             fireFrames.push(texture);
         }
@@ -3673,11 +3673,3 @@ async function setup() {
 
 }
 
-function unloadCurrentSketch() {
-    if (currentSketch && currentSketch.cleanup) {
-        currentSketch.cleanup();  // Call a cleanup method on the current sketch
-    }
-    // Clear the content container
-    const sketchContainer = document.getElementById('sketch-container');
-    sketchContainer.innerHTML = '';
-}

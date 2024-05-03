@@ -31,8 +31,8 @@ io.on('connection', (socket) => {
     console.log('New client connected');
 
     socket.on('requestSketchChange', (data) => {
-        console.log('Request to change sketch to:', data.nextSketch);
-        io.emit('changeSketch', mapSketchNameToIndex(data.nextSketch));
+        console.log('Request to change sketch to index:', data.nextSketch);
+        io.emit('changeSketch', data.nextSketch);
     });
 
     socket.on('sendJudgeName', (data) => {
@@ -72,17 +72,5 @@ function setBlackLight(state) {
     }
 }
 
-function mapSketchNameToIndex(sketchName) {
-    const sketchMap = {
-        'boot.js' : 0,
-        'geomancy.js' : 1,
-        'home.js' : 2,
-        'game.js' : 3, 
-        'abyss.js' : 4,
-        'keyboard.js' : 5,
-        'patterns.js' : 6,
-        'mirror.js' : 7,
-        'automata.js' : 8,
-    };
-    return sketchMap[sketchName] || 0; // Default to first sketch if name not found
-}
+
+

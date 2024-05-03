@@ -19,14 +19,6 @@ let noteDuration = 0;
 let startTime;
 reverb = new p5.Reverb();
 
-// Constants
-const CANVAS_COLS = 65;
-const CANVAS_ROWS = 60;
-const TILE_WIDTH = 40;   // Updated size to match the actual sprite size
-const TILE_HEIGHT = 30;  // Updated size to match the actual sprite size
-const SPRITESHEET_COLS = 23;
-const SPRITESHEET_ROWS = 11;
-
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
   spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
@@ -35,7 +27,7 @@ function preload() {
 
 function setup() {
   socket = io.connect(window.location.origin);
-  createCanvas(CANVAS_COLS * TILE_WIDTH / 2, CANVAS_ROWS * TILE_HEIGHT / 2);
+  createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH / 2, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT / 2);
   parseTMJ(tmjData);
   generateColors();
   osc = new p5.Oscillator('triangle');
@@ -101,7 +93,7 @@ function draw() {
   }
   if (loopCounter > 6) {
     if (socket.connected){
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 3 });
     } else {
       window.location.href = 'game.html';
     }
@@ -127,7 +119,7 @@ function drawColorLayer(colorLayer) {
       let colorIndex = (colorLayer[y][x] - 1) % 3; // Cycle through the three colors
       fill(colors[colorIndex]);
       noStroke();
-      rect(x * TILE_WIDTH / 2, y * TILE_HEIGHT / 2, TILE_WIDTH / 2, TILE_HEIGHT / 2);
+      rect(x * globalVars.TILE_WIDTH / 2, y * globalVars.TILE_HEIGHT / 2, globalVars.TILE_WIDTH / 2, globalVars.TILE_HEIGHT / 2);
     }
   }
 }
@@ -141,11 +133,11 @@ function drawFrame(frame) {
       let flippedV = (tileCode & 0x40000000) > 0;
       let tileIndex = (tileCode & 0x1FFFFFFF) - 1; // Adjust for zero-based indexing
 
-      let sx = (tileIndex % SPRITESHEET_COLS) * TILE_WIDTH;
-      let sy = Math.floor(tileIndex / SPRITESHEET_COLS) * TILE_HEIGHT;
+      let sx = (tileIndex % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
+      let sy = Math.floor(tileIndex / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HEIGHT;
 
       push(); // Isolate transformations
-      translate(x * TILE_WIDTH / 2 + TILE_WIDTH / 4, y * TILE_HEIGHT / 2 + TILE_HEIGHT / 4);
+      translate(x * globalVars.TILE_WIDTH / 2 + globalVars.TILE_WIDTH / 4, y * globalVars.TILE_HEIGHT / 2 + globalVars.TILE_HEIGHT / 4);
       if (flippedH && flippedV) {
         rotate(PI); // Rotate 180 degrees to handle both flips
       } else {
@@ -156,7 +148,7 @@ function drawFrame(frame) {
           scale(1, -1); // Flip vertically
         }
       }
-      image(spriteSheet, -TILE_WIDTH / 4, -TILE_HEIGHT / 4, TILE_WIDTH / 2, TILE_HEIGHT / 2, sx, sy, TILE_WIDTH, TILE_HEIGHT);
+      image(spriteSheet, -globalVars.TILE_WIDTH / 4, -globalVars.TILE_HEIGHT / 4, globalVars.TILE_WIDTH / 2, globalVars.TILE_HEIGHT / 2, sx, sy, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
       pop();
     }
   }
@@ -164,13 +156,13 @@ function drawFrame(frame) {
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 3 });
     } else { 
       window.location.href = 'game.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'geomancy' });
+      socket.emit('requestSketchChange', { nextSketch: 1 });
     } else { 
       window.location.href = 'geomancy.html';
     }

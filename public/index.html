@@ -7,8 +7,10 @@
     <!-- Load socket.io client -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <!-- Load p5.js and p5.sound.js -->
-    <script type="text/javascript" src="scripts/p5.js"></script>
-    <script type="text/javascript" src="scripts/p5.sound.js"></script>
+    <script type="text/javascript" src="./scripts/p5.js"></script>
+    <script type="text/javascript" src="./scripts/p5.sound.js"></script>
+    <!-- Load global variables-->
+    <script src="./scripts/globals.js"></script>
 </head>
 <body>
     <main id="sketch-container"></main>
@@ -19,14 +21,19 @@
         
             let currentSketch = null;
         
+            
             function unloadCurrentSketch() {
                 if (window.currentSketch && window.currentSketch.remove) {
                     window.currentSketch.remove(); // Calls p5.js's cleanup function
                 }
                 const sketchContainer = document.getElementById('sketch-container');
                 sketchContainer.innerHTML = '';  // Clear the container
+                // Explicitly remove script tags if they're added dynamically
+                const scripts = sketchContainer.getElementsByTagName('script');
+                Array.from(scripts).forEach(script => script.remove());
                 console.log('Previous sketch unloaded');
             }
+
             function loadSketch(sketchIndex) {
                 unloadCurrentSketch();  // Ensure the previous sketch is unloaded
                 const sketchContainer = document.getElementById('sketch-container');
@@ -41,7 +48,8 @@
                 5: 'scripts/keyboard.js',
                 6: 'scripts/patterns.js',
                 7: 'scripts/mirror.js',
-                8: 'scripts/automata.js'
+                8: 'scripts/automata.js',
+                9: 'scripts/cradle.js'
             };
         
             const sketchScript = sketches[sketchIndex % Object.keys(sketches).length];
@@ -50,7 +58,16 @@
                 scriptTag.src = sketchScript;
                 scriptTag.onload = () => {
                     console.log(`Loaded sketch: ${sketchScript}`);
-                    // Assuming the loaded script assigns its p5 instance to window.currentSketch
+                    // Check if preload function is defined in the loaded script
+                    if (typeof window.preload === 'function') {
+                        // Wait for preload to finish loading sound files
+                        window.preload(); // Call preload function
+                        setTimeout(() => {
+                            setup();
+                        }, 100); // A short delay to ensure sound files are loaded
+                    } else {
+                        setup();
+                    }
                 };
                 scriptTag.onerror = () => console.error(`Error loading sketch: ${sketchScript}`);
                 sketchContainer.appendChild(scriptTag);
@@ -58,8 +75,10 @@
         }
 
         socket.on('changeSketch', function(sketchIndex) {
-            console.log('Switch to sketch index:', sketchIndex);
-            loadSketch(sketchIndex);
+            console.log('Received sketch index:', sketchIndex);
+            setTimeout(() => {
+                loadSketch(sketchIndex);
+            }, 100); // A short delay to ensure everything is cleared
         });
 
         loadSketch(0);

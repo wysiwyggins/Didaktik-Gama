@@ -1,16 +1,9 @@
-let socket;
+
 let spritesheet;
 let tiles = [];
-const tileWidth = 40; 
-const tileHeight = 30; 
-const columns = 23;
-const rows = 11;
-let gridWidth = 50;
-let gridHeight = 45;
 let abysses = 0;
 
-
-const BOX_TILES = [215, 195, 178, 215, 28, 214, 196, 192, 179, 194, 193, 250];
+const BOX_TILE_INDICES = [215, 195, 178, 215, 28, 214, 196, 192, 179, 194, 193, 250];
 
 let tiledData;
 
@@ -25,7 +18,7 @@ function preload() {
 }
 
 function isBoxTile(index) {
-  return BOX_TILES.includes(index);
+  return BOX_TILE_INDICES.includes(index);
 }
 
 /* function windowResized() {
@@ -41,9 +34,9 @@ function isBoxTile(index) {
 
 function setup() {
     socket = io.connect(window.location.origin);
-    gridWidth = floor(windowWidth / tileWidth) * 2;
-    gridHeight = floor(windowHeight / tileHeight) * 2;
-    createCanvas(gridWidth * tileWidth, gridHeight * tileHeight);
+    globalVars.CANVAS_COLS = floor(windowWidth / globalVars.TILE_HALF_WIDTH) * 2;
+    globalVars.CANVAS_ROWS = floor(windowHeight / globalVars.TILE_HALF_HEIGHT) * 2;
+    createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
     pixelDensity(1); // Avoid automatic scaling with displayDensity
     
     // Scale down the canvas with CSS
@@ -54,16 +47,16 @@ function setup() {
 
 
     // Slice the spritesheet into individual tiles
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < columns; x++) {
+    for (let y = 0; y < globalVars.SPRITESHEET_ROWS; y++) {
+        for (let x = 0; x < globalVars.SPRITESHEET_COLS; x++) {
             let tile = spritesheet.get(
-            x * tileWidth,
-            y * tileHeight,
-            tileWidth,
-            tileHeight
+            x * globalVars.TILE_HALF_WIDTH,
+            y * globalVars.TILE_HALF_HEIGHT,
+            globalVars.TILE_HALF_WIDTH,
+            globalVars.TILE_HALF_HEIGHT
             );
             // Scale the tile to the new size
-            tile.resize(tileWidth, tileHeight);
+            tile.resize(globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
             tiles.push(tile);
         }
     }
@@ -127,8 +120,8 @@ function placeTiledLayer(grid, tiledData) {
 
     let placed = false;
     while (!placed) {
-      const offsetX = floor(random(gridWidth - layer.width));
-      const offsetY = floor(random(gridHeight - layer.height));
+      const offsetX = floor(random(globalVars.CANVAS_COLS - layer.width));
+      const offsetY = floor(random(globalVars.CANVAS_ROWS - layer.height));
 
       let canPlace = true;
       for (let i = 0; i < layer.width && canPlace; i++) {
@@ -167,7 +160,7 @@ function placeTiledLayer(grid, tiledData) {
 function drawTile(tile, x, y, flipHorizontally, flipVertically) {
   wave1.freq((x * 100) % 400);
   push();
-  translate(x + tileWidth / 2, y + tileHeight / 2); // Move origin to the center of the tile
+  translate(x + globalVars.TILE_HALF_WIDTH / 2, y + globalVars.TILE_HALF_HEIGHT / 2); // Move origin to the center of the tile
   
   if (flipHorizontally) {
     scale(-1, 1);
@@ -178,14 +171,14 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
   }
 
   // Draw the image offset by half its width and height to correct the position
-  image(tile, -tileWidth / 2, -tileHeight / 2, tileWidth, tileHeight);
+  image(tile, -globalVars.TILE_HALF_WIDTH / 2, -globalVars.TILE_HALF_HEIGHT / 2, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
   pop();
 }
 
 function draw() {
   if (abysses > 20) {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
+      socket.emit('requestSketchChange', { nextSketch: 5 });
     } else {
       window.location.href = 'keyboard.html';
     }
@@ -201,21 +194,21 @@ function draw() {
   let grid = []; // Create an empty grid
 
   // First loop to set the tile indices based on the rules
-  for (let i = 0; i < gridWidth; i++) {
+  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
 
     grid[i] = [];
-    for (let j = 0; j < gridHeight; j++) {
+    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       let tileIndex = floor(random(tiles.length));
       grid[i][j] = tileIndex; // Store the tile index in the grid
       wave2.freq(i + tileIndex);
       if (tileIndex === 127) {
-        if (i < gridWidth - 1 && grid[i + 1] !== undefined)
+        if (i < globalVars.CANVAS_COLS - 1 && grid[i + 1] !== undefined)
           grid[i + 1][j] = 177;
-        if (j < gridHeight - 1 && grid[i][j + 1] !== undefined)
+        if (j < globalVars.CANVAS_ROWS - 1 && grid[i][j + 1] !== undefined)
           grid[i][j + 1] = 216;
         if (
-          i < gridWidth - 1 &&
-          j < gridHeight - 1 &&
+          i < globalVars.CANVAS_COLS - 1 &&
+          j < globalVars.CANVAS_ROWS - 1 &&
           grid[i + 1] !== undefined &&
           grid[i + 1][j + 1] !== undefined
         )
@@ -225,34 +218,34 @@ function draw() {
     
     
   }
-  for (let i = 0; i < gridWidth; i++) {
-    for (let j = 0; j < gridHeight; j++) {
+  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
+    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       if (grid[i][j] === 127) {
         let k = 0;
         
         // Create the diagonal stripe of tiles with index 127
-        while (i + k < gridWidth && j + k < gridHeight) {
+        while (i + k < globalVars.CANVAS_COLS && j + k < globalVars.CANVAS_ROWS) {
           grid[i + k][j + k] = 127;
           k++;
           wave2.freq(i + k);
         }
 
         // Fill the right side of the stripe with tiles of index 177
-        for (let m = j + 1; m < gridHeight; m++) {
+        for (let m = j + 1; m < globalVars.CANVAS_ROWS; m++) {
           grid[i][m] = 216;
           wave2.freq(i - m);
         }
 
         // Fill the left side of the stripe with tiles of index 216
-        for (let n = i + 1; n < gridWidth; n++) {
+        for (let n = i + 1; n < globalVars.CANVAS_COLS; n++) {
           grid[n][j] = 177;
           wave2.freq(n - j);
         }
       }
     }
   }
-  for (let i = 0; i < gridWidth; i++) {
-    for (let j = 0; j < gridHeight; j++) {
+  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
+    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       let tileIndex = grid[i][j];
 
       if (isBoxTile(tileIndex)) {
@@ -265,14 +258,14 @@ function draw() {
         for (let [dx, dy] of directions) {
           let x = i + dx;
           let y = j + dy;
-          if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
+          if (x >= 0 && x < globalVars.CANVAS_COLS && y >= 0 && y < globalVars.CANVAS_ROWS) {
             if (
               !isBoxTile(grid[x][y]) &&
               grid[x][y] !== 127 &&
               grid[x][y] !== 177 &&
               grid[x][y] !== 216
             ) {
-              grid[x][y] = random(BOX_TILES); // Assign a random box-drawing tile
+              grid[x][y] = random(BOX_TILE_INDICES); // Assign a random box-drawing tile
             }
           }
         }
@@ -283,8 +276,8 @@ function draw() {
   // Second loop to draw the tiles and the backgrounds
   wave1.start();
   wave2.start(); 
-  for (let i = 0; i < gridWidth; i++) {
-    for (let j = 0; j < gridHeight; j++) {
+  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
+    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       let tileIndex = grid[i][j];
 
       if (tileIndex === 127 || tileIndex === 177 || tileIndex === 216) {
@@ -296,7 +289,7 @@ function draw() {
         fill(colors[(j + colorOffset) % colors.length]);
       }
 
-      rect(i * tileWidth, j * tileHeight, tileWidth, tileHeight);
+      rect(i * globalVars.TILE_HALF_WIDTH, j * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
       tint(lightestColor);
 
       let flipHorizontally = random() > 0.5;
@@ -305,13 +298,13 @@ function draw() {
       if (tileIndex === 177 || tileIndex === 216) {
         drawTile(
           tiles[tileIndex],
-          i * tileWidth,
-          j * tileHeight,
+          i * globalVars.TILE_HALF_WIDTH,
+          j * globalVars.TILE_HALF_HEIGHT,
           flipHorizontally,
           flipVertically
         );
       } else {
-        image(tiles[tileIndex], i * tileWidth, j * tileHeight);
+        image(tiles[tileIndex], i * globalVars.TILE_HALF_WIDTH, j * globalVars.TILE_HALF_HEIGHT);
       }
 
       noTint();
@@ -321,23 +314,17 @@ function draw() {
   
 }
 
-function unloadCurrentSketch() {
-  const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';  // Remove all child nodes
-  socket.close();
-  console.log('Socket closed');
-}
 
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 3 });
     } else { 
       window.location.href = 'game.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
+      socket.emit('requestSketchChange', { nextSketch: 5 });
     } else { 
       window.location.href = 'keyboard.html';
     }

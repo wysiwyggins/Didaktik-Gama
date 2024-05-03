@@ -1,10 +1,6 @@
 let socket;
 let spritesheet; // Holds the spritesheet image
 let tiles = []; // Stores individual tiles cut from the spritesheet
-const TILE_WIDTH = 20;
-const TILE_HEIGHT = 15;
-const CANVAS_COLS = 65;
-const CANVAS_ROWS = 60;
 let baseColor; // Holds the randomly generated base color
 let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
@@ -52,7 +48,7 @@ function draw() {
   if (reloads > 40) {
     
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'game' });
+      socket.emit('requestSketchChange', { nextSketch: 3 });
     } else {
       window.location.href = 'game.html';
     }
@@ -92,8 +88,8 @@ function drawColorPattern() {
     // Use the predefined tileWidth and tileHeight for drawing
     // No need to calculate tileWidth and tileHeight based on canvas size
     let chance = floor(random(1, 5));
-    for (let y = 0; y < CANVAS_ROWS; y++) {
-        for (let x = 0; x < CANVAS_COLS; x++) {
+    for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
+        for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
         // Alternate color pairs every row, not every two rows
         
         let colorPair = y % 2; // This will alternate 0, 1, 0, 1, ..., for each row
@@ -110,7 +106,7 @@ function drawColorPattern() {
         noStroke();
         
 
-        rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        rect(x * globalVars.TILE_WIDTH, y * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
         }
     }
 }
@@ -133,8 +129,8 @@ function drawSerpentinePattern() {
   let nextChange = 10; // Change direction after a set number of tiles
   let counter = 0;
 
-  for (let y = 0; y < CANVAS_ROWS; y++) {
-    for (let x = 0; x < CANVAS_COLS; x++) {
+  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
+    for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
       let tile;
 
       // Before changing direction, select the appropriate corner or cross tile
@@ -168,7 +164,7 @@ function drawSerpentinePattern() {
 
       // Draw the tile
       if (tile) {
-        image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        image(tile, x * globalVars.TILE_WIDTH, y * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
       }
 
       // Update direction and counter based on the serpentine logic
@@ -232,8 +228,8 @@ function extractTilesFromSpritesheet() {
 function drawSpritePattern() {
   console.log(`Drawing sprite pattern with ${selectedTiles.length} tiles.`);
   
-  for (let y = 0; y < CANVAS_ROWS; y++) {
-    for (let x = 0; x < CANVAS_COLS; x++) {
+  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
+    for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
       let tile = random(selectedTiles);
       if (!tile) {
         console.error("Selected tile is undefined.");
@@ -241,31 +237,24 @@ function drawSpritePattern() {
       }
       tint(colors[1], 127); // Apply a semi-transparent tint
       // Specify the display size to half the original size for sharp rendering
-      image(tile, x * TILE_WIDTH, y * TILE_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
+      image(tile, x * globalVars.TILE_WIDTH, y * globalVars.TILE_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
       noTint();
     }
   }
 }
 
-function unloadCurrentSketch() {
-  if (currentSketch && currentSketch.cleanup) {
-      currentSketch.cleanup();  // Call a cleanup method on the current sketch
-  }
-  // Clear the content container
-  const sketchContainer = document.getElementById('sketch-container');
-  sketchContainer.innerHTML = '';
-}
+
 
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'mirror' });
+      socket.emit('requestSketchChange', { nextSketch: 7 });
     } else { 
       window.location.href = 'mirror.html';
     }
   } else if (event.key === '{') {
     if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 'keyboard' });
+      socket.emit('requestSketchChange', { nextSketch: 5 });
     } else { 
       window.location.href = 'keyboard.html';
     }
