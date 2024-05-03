@@ -33,7 +33,11 @@ function isBoxTile(index) {
 } */
 
 function setup() {
-    socket = io.connect(window.location.origin);
+    try {
+      socket = io.connect(window.location.origin);
+    } catch (error) { 
+      console.error('Socket connection failed.');
+    }
     globalVars.CANVAS_COLS = floor(windowWidth / globalVars.TILE_HALF_WIDTH) * 2;
     globalVars.CANVAS_ROWS = floor(windowHeight / globalVars.TILE_HALF_HEIGHT) * 2;
     createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);

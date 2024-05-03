@@ -23,7 +23,11 @@ function preload() {
 }
 
 function setup() {
-  //socket = io.connect(window.location.origin);
+  try {
+    socket = io.connect(window.location.origin);
+  } catch (error) { 
+    console.error('Socket connection failed.');
+  }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set the frame rate so that draw() is called once per second
   generateGeomancyBooleans();

@@ -47,7 +47,11 @@ function preload() {
 
 
 function setup() {
-  socket = io.connect(window.location.origin);
+  try {
+    socket = io.connect(window.location.origin);
+  } catch (error) { 
+    console.error('Socket connection failed.');
+  }
   createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
   console.log(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
   for (let y = 0; y < CANVAS_ROWS; y++) {

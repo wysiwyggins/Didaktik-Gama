@@ -26,7 +26,11 @@ function preload() {
 }
 
 function setup() {
-  socket = io.connect(window.location.origin);
+  try {
+    socket = io.connect(window.location.origin);
+  } catch (error) { 
+    console.error('Socket connection failed.');
+  }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH / 2, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT / 2);
   parseTMJ(tmjData);
   generateColors();

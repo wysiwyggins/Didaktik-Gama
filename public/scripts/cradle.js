@@ -20,13 +20,13 @@ let lastUserInputTime = 0;
 const pauseDuration = 5000;
 
 // Constants
-const globalVars.CANVAS_COLS = 65;
-const globalVars.CANVAS_ROWS = 60;
-const globalVars.MAX_TILES = globalVars.CANVAS_COLS * globalVars.CANVAS_ROWS;
-const globalVars.TILE_HALF_WIDTH = 20;   // Half size
-const globalVars.TILE_HALF_HEIGHT = 15;
-const globalVars.SPRITESHEET_COLS = 23;
-const globalVars.SPRITESHEET_ROWS = 11;
+const CANVAS_COLS = 65;
+const CANVAS_ROWS = 60;
+const MAX_TILES = globalVars.CANVAS_COLS * globalVars.CANVAS_ROWS;
+const TILE_HALF_WIDTH = 20;   // Half size
+const TILE_HALF_HEIGHT = 15;
+const SPRITESHEET_COLS = 23;
+const SPRITESHEET_ROWS = 11;
 
 // Map of ALT-modified characters to their corresponding tile names
 const altCharToTileName = {
@@ -109,7 +109,11 @@ function preload() {
 
 
 function setup() {
-  socket = io.connect(window.location.origin);
+  try {
+    socket = io.connect(window.location.origin);
+  } catch (error) { 
+    console.error('Socket connection failed.');
+  }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
     let currentRow = [];  // Renamed from 'row' to avoid name conflict

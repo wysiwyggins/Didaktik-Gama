@@ -17,7 +17,11 @@ function preload() {
 }
 
 function setup() {
-  socket = io.connect(window.location.origin);
+  try {
+    socket = io.connect(window.location.origin);
+  } catch (error) { 
+    console.error('Socket connection failed.');
+  }
   createCanvas(1300, 900);
   //noLoop(); // Since we're not animating, no need to loop
 

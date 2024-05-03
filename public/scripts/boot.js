@@ -10,7 +10,11 @@ let reloads = 0;
 let colorChangeFrameInterval = 120; // Number of frames between color changes
 
 function setup() {
-  socket = io.connect(window.location.origin);
+  try {
+    socket = io.connect(window.location.origin);
+  } catch (error) { 
+    console.error('Socket connection failed.');
+  }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set frame rate
 
