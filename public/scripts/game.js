@@ -1,4 +1,3 @@
-let socket;
 // Create a new Pixi Application
 let app = new PIXI.Application({
     width: 1300,
@@ -169,7 +168,7 @@ let fireFrames = [];
 let smokeFrames = [];
 // Load the spritesheet using the global PIXI.Loader object
 PIXI.Loader.shared
-    .add('tiles', SPRITESHEET_PATH)
+    .add('tiles', globalVars.SPRITESHEET_PATH)
     .add('fire', 'assets/spritesheets/fire.png')
     .add('smoke', 'assets/spritesheets/smoke.png')
     .load(setup);
