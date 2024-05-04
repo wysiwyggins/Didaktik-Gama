@@ -38,9 +38,9 @@ function setup() {
     } catch (error) { 
       console.error('Socket connection failed.');
     }
-    globalVars.CANVAS_COLS = floor(windowWidth / globalVars.TILE_HALF_WIDTH) * 2;
-    globalVars.CANVAS_ROWS = floor(windowHeight / globalVars.TILE_HALF_HEIGHT) * 2;
-    createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
+    globalVars.CANVAS_COLS = floor(windowWidth / globalVars.TILE_WIDTH) * 2;
+    globalVars.CANVAS_ROWS = floor(windowHeight / globalVars.TILE_HEIGHT) * 2;
+    createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT);
     pixelDensity(1); // Avoid automatic scaling with displayDensity
     
     // Scale down the canvas with CSS
@@ -54,13 +54,13 @@ function setup() {
     for (let y = 0; y < globalVars.SPRITESHEET_ROWS; y++) {
         for (let x = 0; x < globalVars.SPRITESHEET_COLS; x++) {
             let tile = spritesheet.get(
-            x * globalVars.TILE_HALF_WIDTH,
-            y * globalVars.TILE_HALF_HEIGHT,
-            globalVars.TILE_HALF_WIDTH,
-            globalVars.TILE_HALF_HEIGHT
+            x * globalVars.TILE_WIDTH,
+            y * globalVars.TILE_HEIGHT,
+            globalVars.TILE_WIDTH,
+            globalVars.TILE_HEIGHT
             );
             // Scale the tile to the new size
-            tile.resize(globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
+            tile.resize(globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
             tiles.push(tile);
         }
     }
@@ -164,7 +164,7 @@ function placeTiledLayer(grid, tiledData) {
 function drawTile(tile, x, y, flipHorizontally, flipVertically) {
   wave1.freq((x * 100) % 400);
   push();
-  translate(x + globalVars.TILE_HALF_WIDTH / 2, y + globalVars.TILE_HALF_HEIGHT / 2); // Move origin to the center of the tile
+  translate(x + globalVars.TILE_WIDTH / 2, y + globalVars.TILE_HEIGHT / 2); // Move origin to the center of the tile
   
   if (flipHorizontally) {
     scale(-1, 1);
@@ -175,7 +175,7 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
   }
 
   // Draw the image offset by half its width and height to correct the position
-  image(tile, -globalVars.TILE_HALF_WIDTH / 2, -globalVars.TILE_HALF_HEIGHT / 2, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
+  image(tile, -globalVars.TILE_WIDTH / 2, -globalVars.TILE_HEIGHT / 2, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
   pop();
 }
 
@@ -293,7 +293,7 @@ function draw() {
         fill(colors[(j + colorOffset) % colors.length]);
       }
 
-      rect(i * globalVars.TILE_HALF_WIDTH, j * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
+      rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
       tint(lightestColor);
 
       let flipHorizontally = random() > 0.5;
@@ -302,13 +302,13 @@ function draw() {
       if (tileIndex === 177 || tileIndex === 216) {
         drawTile(
           tiles[tileIndex],
-          i * globalVars.TILE_HALF_WIDTH,
-          j * globalVars.TILE_HALF_HEIGHT,
+          i * globalVars.TILE_WIDTH,
+          j * globalVars.TILE_HEIGHT,
           flipHorizontally,
           flipVertically
         );
       } else {
-        image(tiles[tileIndex], i * globalVars.TILE_HALF_WIDTH, j * globalVars.TILE_HALF_HEIGHT);
+        image(tiles[tileIndex], i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT);
       }
 
       noTint();
