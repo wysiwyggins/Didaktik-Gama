@@ -4,7 +4,6 @@ let fileText;
 let toneStarted = false;
 let soundFiles = [];
 
-let tileMap = [];
 let cursorX = 0;
 let cursorY = 0;
 currentPenColor = null;

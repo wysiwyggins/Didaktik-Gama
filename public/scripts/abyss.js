@@ -1,5 +1,4 @@
 
-let tiles = [];
 let abysses = 0;
 
 const BOX_TILE_INDICES = [215, 195, 178, 215, 28, 214, 196, 192, 179, 194, 193, 250];

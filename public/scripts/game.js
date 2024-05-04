@@ -1539,7 +1539,7 @@ const Attacks = {
         messageList.addMessage("The {0} breathes flames!", [monster.name]);
     },
     CLAW: function(monster, target) {
-        if (monster.isAdjacent(target)) {
+        if (monster.isAdjacent(target) && target.isDead == false) {
             messageList.addMessage(`The ${monster.name} claws at you!`);
             if (target.isDead == false){
                 sound.play('ouch');
@@ -1891,6 +1891,7 @@ class Monster extends Actor{
     }
     
     die() {
+        console.log("Monster "+ this.name + " died!");
         this.isDead = true;
         this.sprite.firstTile.visible = false;
         this.sprite.secondTile.visible = false;
@@ -2255,7 +2256,7 @@ class Fire extends Entity {
             let item = objectMap[y][x].item;
             if (item && item.sprite && item.sprite.texture) {
                 item.destroy();
-                messageList.addMessage(`The ${item.name} dissapears in flames.`);
+                messageList.addMessage(`The ${item.name} disappears in flames.`);
                //console.log("Destroyed flammable item");
             }
         }
