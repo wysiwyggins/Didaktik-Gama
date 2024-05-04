@@ -6,7 +6,6 @@ let soundFiles = [];
 let wordBuffer = "";
 let fileIndex;
 
-let tileMap = [];
 let cursorX = 0;
 let cursorY = 0;
 currentPenColor = null;
@@ -17,58 +16,6 @@ let tilesDisplayed = 0;
 let typingPaused = false;
 let lastUserInputTime = 0;
 const pauseDuration = 5000;
-
-// Map of ALT-modified characters to their corresponding tile names
-const altCharToTileName = {
-  '¡': "DOUBLE_EXCLAMATION_MARK",
-  '™': "LEFT_ONE_FIFTH_BLOCK",
-  '£': "LEG",
-  '¢': "UPWARDS_ARROW_WITH_TIP_LEFTWARDS",
-  '∞': "BLACK_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE",
-  '§': "MEDIUM_SHADE",
-  '¶': "MEDIUM_LIGHT_SHADE_LOWER_LEFT_TRIANGLE_WITH_DARK_SHADE_UPPER_RIGHT_TRIANGLE",
-  '•': "MIDDLE_DOT",
-  'ª': "MEDIUM_LIGHT_SHADE",
-  'º': "WALL_TOP",
-  '–': "BLACK_LOWER_LEFT_TRIANGLE",
-  '≠': "MEDIUM_SHADE_LOWER_LEFT_TRIANGLE",
-  'œ': "OPAQUE_DOTTED_LIGHT_SHADE",
-  '∑': "LATIN_SMALL_LETTER_C_WITH_CARON",
-  '´': "WHITE_LEG",
-  '®': "OPAQUE_QUADRANT_UPPER_LEFT_AND_LOWER_LEFT_AND_LOWER_RIGHT",
-  '†': "DARK_SMILING_FACE",
-  '¥': "EYE_OF_PROVIDENCE",
-  'ˆ': "CARON",
-  'ø': "INVERTED_CHECKER_BOARD",
-  'π': "FLOATING_LEGS",
-  'å': "LIGHT_SHADE_LOWER_RIGHT_TRIANGLE",
-  'ß': "CHAIN_LINK_VERTICAL",
-  '∂': "CHAIN_LINK_HORIZONTAL",
-  'ƒ': "IMPERFECT_DOTTED_LIGHT_SHADE_VARIATION",
-  '©': "LATIN_SMALL_LETTER_S_WITH_CARON",
-  '˙': "FULL_BLOCK",
-  '∆': "INVERTED_EYE_OF_PROVIDENCE",
-  '˚': "WHITE_FLORETTE",
-  '¬': "BOX_TOP_RIGHT",
-  '…': "BOX_DRAWING_LIGHT_HORIZONTAL",
-  'æ': "CANDLE_STICK",
-  'Ω': "DOOR_TOP",
-  '≈': "DOOR_BOTTOM",
-  'ç': "LATIN_SMALL_LETTER_O_WITH_ACUTE",
-  '√': "BALLOT_BOX_WITH_X",
-  '∫': "BOX_DRAWING_HEAVY_LEFT_LIGHT_RIGHT",
-  '˜': "BOX_BOTTOM_RIGHT",
-  'µ': "LOWER_ONE_HALF_BLOCK",
-  '≤': "LEFT_ONE_HALF_BLOCK",
-  '≥': "RIGHT_ONE_HALF_BLOCK",
-  '÷': "BLACK_SQUARE",
-  'é': "LATIN_SMALL_LETTER_E_WITH_ACUTE",
-  'í': "LATIN_SMALL_LETTER_I_WITH_ACUTE",
-  'á': "LATIN_SMALL_LETTER_A_WITH_ACUTE",
-  'č': "LATIN_SMALL_LETTER_C_WITH_CARON",
-  'š': "LATIN_SMALL_LETTER_S_WITH_CARON"
-};
-
 
 function mapAltCharacterToTileName(char) {
   return altCharToTileName[char]; 
@@ -87,8 +34,8 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  //fileIndex = floor(random(1, 11));
-  backgroundImage = loadImage(`/public/assets/images/cradle.png`);
+  let fileIndex = floor(random(1, 17));
+  backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
   fileText = loadStrings(`/public/data/texts/cradle.txt`);
   spritesheetData = loadJSON('/public/assets/spritesheets/spriteData.json');
   /* for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
