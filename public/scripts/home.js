@@ -133,7 +133,7 @@ function drawColorLayer(colorLayer) {
 
 function drawFrame(frame) {
   if (!frame) {
-    frame = frames[1] || []; // Provide an empty array as default if frames[1] is undefined
+    frame = frames[1]; // Provide an empty array as default if frames[1] is undefined
   }
   for (let y = 0; y < frame.length; y++) {
     for (let x = 0; x < frame[y].length; x++) {

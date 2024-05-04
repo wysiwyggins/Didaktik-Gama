@@ -68,10 +68,14 @@ function draw() {
   
   
   reloads++;
-    if (reloads > 1000 && socket.connected) {
-        console.log('Requesting next sketch...');
-        socket.emit('requestSketchChange', { nextSketch: 1 });
-        reloads = 0; // Reset reloads to prevent multiple emissions
+    if (reloads > 1000 ) {
+        if (socket.connected) {
+          console.log('Requesting next sketch...');
+          socket.emit('requestSketchChange', { nextSketch: 1 });
+          reloads = 0; // Reset reloads to prevent multiple emissions
+        }
+    } else { 
+      window.location.href = 'geomancy.html';
     }
 }
 
