@@ -1,13 +1,7 @@
-let socket;
-let spriteSheet;
-let tileMap = [];
-let frames = [];
+
 let colorFrames = [];
-let currentFrame = 0;
 let tmjData;
-let tmjFile = 'assets/maps/flipbooks.tmj';
-let spriteData;
-let colors = [];
+let tmjFile = './assets/maps/flipbooks.tmj';
 let loopCounter = 0; 
 
 let osc;
@@ -20,8 +14,8 @@ let startTime;
 reverb = new p5.Reverb();
 
 function preload() {
-  spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
+  spriteSheet = loadImage(globalVars.SPRITESHEET_PATH);
+  spritesheetData = loadJSON(globalVars.SPRITE_DATA_PATH);
   tmjData = loadJSON(tmjFile);
 }
 

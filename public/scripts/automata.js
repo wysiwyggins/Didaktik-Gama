@@ -1,5 +1,3 @@
-let socket;         
-let spritesheet;
 let grid = [];
 let sounds = [];
 let season = 0;

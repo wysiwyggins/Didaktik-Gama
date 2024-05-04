@@ -1,8 +1,4 @@
 
-let spritesheet; // Holds the spritesheet image
-let tiles = []; // Stores individual tiles cut from the spritesheet
-let baseColor; // Holds the randomly generated base color
-let colors = []; // Array to hold the base color and its complements
 let selectedTiles = [];
 let wave1;
 let wave2;

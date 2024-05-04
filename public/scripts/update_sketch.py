@@ -1,3 +1,5 @@
+#I used this to migrate the individual p5.js variables to a globalVars object in the globals.js file
+
 import re
 
 def update_sketch_with_globals(globals_js_path, sketch_js_path, output_path):

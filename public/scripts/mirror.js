@@ -1,5 +1,4 @@
 let directionUpwards = false;
-let spriteSheet;
 let fileText;
 let toneStarted = false;
 let soundFiles = [];

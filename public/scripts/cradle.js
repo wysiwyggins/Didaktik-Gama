@@ -1,6 +1,5 @@
 let socket;
 let directionUpwards = false;
-let spriteSheet;
 let fileText;
 let toneStarted = false;
 let soundFiles = [];
@@ -18,15 +17,6 @@ let tilesDisplayed = 0;
 let typingPaused = false;
 let lastUserInputTime = 0;
 const pauseDuration = 5000;
-
-// Constants
-const CANVAS_COLS = 65;
-const CANVAS_ROWS = 60;
-const MAX_TILES = globalVars.CANVAS_COLS * globalVars.CANVAS_ROWS;
-const TILE_HALF_WIDTH = 20;   // Half size
-const TILE_HALF_HEIGHT = 15;
-const SPRITESHEET_COLS = 23;
-const SPRITESHEET_ROWS = 11;
 
 // Map of ALT-modified characters to their corresponding tile names
 const altCharToTileName = {
@@ -100,7 +90,7 @@ function preload() {
   //fileIndex = floor(random(1, 11));
   backgroundImage = loadImage(`/public/assets/images/cradle.png`);
   fileText = loadStrings(`/public/data/texts/cradle.txt`);
-  spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
+  spritesheetData = loadJSON('/public/assets/spritesheets/spriteData.json');
   /* for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
     let soundPath = `/public/assets/sound/${i}.wav`;
     soundFiles.push(loadSound(soundPath));
@@ -171,7 +161,7 @@ function draw() {
 
 function getTileCoords(tileName) {
   // Retrieve tile coordinates from JSON data
-  let coords = spriteData.tiles[tileName];
+  let coords = spritesheetData.tiles[tileName];
   if (!coords) {
     console.error("Tile not found:", tileName);
     return [0, 0]; // Default to BLANK if not found
@@ -334,7 +324,7 @@ function keyPressed() {
       tileName = 'LATIN_SMALL_LETTER_U_WITH_RING_ABOVE';
     }
 
-    if (tileName && spriteData.tiles[tileName]) {
+    if (tileName && spritesheetData.tiles[tileName]) {
         setCurrentTile(getTileIndex(tileName));
         return false;
     }
@@ -469,7 +459,7 @@ function displayTileForCharacter(char) {
   } 
 
   // Check if a valid tileName was set, then add to wordBuffer and set the tile
-  if (tileName && spriteData.tiles[tileName]) {
+  if (tileName && spritesheetData.tiles[tileName]) {
       if (![' ', '\n'].includes(char)) { // Directly add valid characters to the word buffer
           wordBuffer += char;
       }

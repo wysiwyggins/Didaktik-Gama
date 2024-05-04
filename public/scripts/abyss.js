@@ -1,5 +1,4 @@
 
-let spritesheet;
 let tiles = [];
 let abysses = 0;
 

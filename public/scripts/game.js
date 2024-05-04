@@ -38,7 +38,6 @@ let turnTimeout; // timer for passing turns
 const rect = app.view.getBoundingClientRect();
 const MAP_WIDTH = 65;
 const MAP_HEIGHT = 60;
-const SPRITESHEET_PATH = 'assets/spritesheets/libuse40x30-cp437.png';
 const SCALE_FACTOR = 0.5; // Scaling factor for HiDPI displays
 const SPRITE_POSITION = 5; // Position of the sprite (in tiles)
 //dungeon is used by rot.js' dungeon drawing functions, we need a global stub to get things like

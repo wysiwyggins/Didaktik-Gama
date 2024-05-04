@@ -1,6 +1,5 @@
 let socket;
 let directionUpwards = false;
-let spriteSheet;
 let fileText;
 let toneStarted = false;
 let soundFiles = [];
@@ -38,7 +37,7 @@ function preload() {
   let fileIndex = floor(random(1, 11));
   backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
   fileText = loadStrings(`/public/data/texts/${fileIndex}.txt`);
-  spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
+  spritesheetData = loadJSON('/public/assets/spritesheets/spriteData.json');
   /* for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
     let soundPath = `/public/assets/sound/${i}.wav`;
     soundFiles.push(loadSound(soundPath));
@@ -105,7 +104,7 @@ function draw() {
 
 function getTileCoords(tileName) {
   // Retrieve tile coordinates from JSON data
-  let coords = spriteData.tiles[tileName];
+  let coords = spritesheetData.tiles[tileName];
   if (!coords) {
     console.error("Tile not found:", tileName);
     return [0, 0]; // Default to BLANK if not found
@@ -268,7 +267,7 @@ function keyPressed() {
           console.log(tileName);
       }
 
-      if (tileName && spriteData.tiles[tileName]) {
+      if (tileName && spritesheetData.tiles[tileName]) {
           setCurrentTile(getTileIndex(tileName));
           return false;
       }
@@ -385,7 +384,7 @@ function displayTileForCharacter(char) {
   }
 
   // If tileName was set, look it up and set the tile
-  if (tileName && spriteData.tiles[tileName]) {
+  if (tileName && spritesheetData.tiles[tileName]) {
       setCurrentTile(getTileIndex(tileName));
   } else {
       // Map non-alphanumeric characters to their corresponding tiles

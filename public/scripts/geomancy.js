@@ -1,11 +1,7 @@
-let spriteSheet;
-let spriteData;
-let tileMap = [];  // Array to hold the tile data for the entire grid
+
 let currentFigure = -1;
 let toneStarted = false;
 let soundPlayed = false; 
-let sounds = [];
-
 let geomancyBooleans = [];
 let displayIndex = 0;  // Index for displaying symbols
 let geomanticNames = ["Via", "Cauda Draconis", "Puer", "Fortuna Minor", "Puella", "Amissio", "Carcer", "Laetitia", "Caput Draconis", "Conjunctio", "Acquisitio", "Rubeus", "Fortuna Major", "Albus", "Tristitia", "Populus"];
@@ -15,7 +11,7 @@ let finalFigureDisplayedTime = null;
 
 function preload() {
   spriteSheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
-  spriteData = loadJSON('assets/spritesheets/spriteData.json');
+  spritesheetData = loadJSON('assets/spritesheets/spriteData.json');
   backgroundImage = loadImage('assets/images/geomancy_stage.png');
   for (let i = 1; i <= 10; i++) {
     sounds.push(loadSound('assets/sound/' + i + '.wav'));
@@ -173,12 +169,12 @@ function getPositionForFigure(index) {
 
 function getTileIndexFromChar(char) {
   let tileName = 'LATIN_CAPITAL_LETTER_' + char.toUpperCase();
-  return spriteData.tiles[tileName] ? getTileIndex(tileName) : null;
+  return spritesheetData.tiles[tileName] ? getTileIndex(tileName) : null;
 }
 
 function getTileIndex(tileName) {
   // Retrieve tile coordinates from JSON data
-  let coords = spriteData.tiles[tileName];
+  let coords = spritesheetData.tiles[tileName];
   if (!coords || coords.length !== 2) {
       console.error("Tile not found or invalid coordinates:", tileName, coords);
       return -1; // Return -1 if the tile is not found or coordinates are invalid
