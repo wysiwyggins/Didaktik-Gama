@@ -110,7 +110,7 @@ function drawColorPattern() {
         noStroke();
         
 
-        rect(x * globalVars.TILE_WIDTH, y * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+        rect(x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
         }
     }
 }
@@ -168,7 +168,7 @@ function drawSerpentinePattern() {
 
       // Draw the tile
       if (tile) {
-        image(tile, x * globalVars.TILE_WIDTH, y * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+        image(tile, x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
       }
 
       // Update direction and counter based on the serpentine logic
@@ -241,7 +241,7 @@ function drawSpritePattern() {
       }
       tint(colors[1], 127); // Apply a semi-transparent tint
       // Specify the display size to half the original size for sharp rendering
-      image(tile, x * globalVars.TILE_WIDTH, y * globalVars.TILE_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
+      image(tile, x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, spritesheetData.tileDisplayWidth, spritesheetData.tileDisplayHeight);
       noTint();
     }
   }

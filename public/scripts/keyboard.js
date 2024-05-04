@@ -52,11 +52,11 @@ function setup() {
   } catch (error) { 
     console.error('Socket connection failed.');
   }
-  createCanvas(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
-  console.log(CANVAS_COLS * TILE_WIDTH, CANVAS_ROWS * TILE_HEIGHT);
-  for (let y = 0; y < CANVAS_ROWS; y++) {
+  createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
+  console.log(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
+  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
     let currentRow = [];  // Renamed from 'row' to avoid name conflict
-    for (let x = 0; x < CANVAS_COLS; x++) {
+    for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
       currentRow.push(getTileIndex("BLANK"));
     }
     tileMap.push(currentRow);
@@ -82,20 +82,20 @@ function draw() {
     }
     background(255);
     image(backgroundImage, 0, 0, width, height);
-    for (let y = 0; y < CANVAS_ROWS; y++) {
-      for (let x = 0; x < CANVAS_COLS; x++) {
+    for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
+      for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
         
         let tileData = tileMap[y][x];
         
-        let sx = (tileData.tile % SPRITESHEET_COLS) * (TILE_WIDTH * 2);
-        let sy = Math.floor(tileData.tile / SPRITESHEET_COLS) * (TILE_HEIGHT * 2);
+        let sx = (tileData.tile % globalVars.SPRITESHEET_COLS) * (globalVars.TILE_HALF_WIDTH * 2);
+        let sy = Math.floor(tileData.tile / globalVars.SPRITESHEET_COLS) * (globalVars.TILE_HALF_HEIGHT * 2);
   
         if (tileData.bgColor) {
           fill(tileData.bgColor);
-          rect(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+          rect(x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
         }
         
-        image(spriteSheet, x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, sx, sy, TILE_WIDTH * 2, TILE_HEIGHT * 2);
+        image(spriteSheet, x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT, sx, sy, globalVars.TILE_HALF_WIDTH * 2, globalVars.TILE_HALF_HEIGHT * 2);
       }
     }
     if (!typingPaused) {
@@ -129,7 +129,7 @@ function penColor(hexValue) {
 function drawCursor() {
   stroke(10, 10, 10);
   noFill();
-  rect(cursorX * TILE_WIDTH, cursorY * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+  rect(cursorX * globalVars.TILE_HALF_WIDTH, cursorY * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
 }
 
 function setCurrentTile(tileIndex) {
@@ -144,7 +144,7 @@ function setCurrentTile(tileIndex) {
     }
     advanceCursor();
     tilesDisplayed++;
-    if (tilesDisplayed >= MAX_TILES) {
+    if (tilesDisplayed >= globalVars.MAX_TILES) {
       //window.location.reload();
       if (socket.connected){
         socket.emit('requestSketchChange', { nextSketch: 8 });
@@ -162,10 +162,10 @@ function advanceCursor() {
   if (keyIsDown(CONTROL)) {
     // Move cursor to the right
     cursorX++;
-    if (cursorX >= CANVAS_COLS) {
+    if (cursorX >= globalVars.CANVAS_COLS) {
         cursorX = 0;
         cursorY++;
-        if (cursorY >= CANVAS_ROWS) {
+        if (cursorY >= globalVars.CANVAS_ROWS) {
             cursorY = 0;  // Optional: Reset to start or stop at the end
         }
     }
@@ -173,9 +173,9 @@ function advanceCursor() {
   // Move cursor to the left
   cursorX--;
   if (cursorX <= 0) {
-      cursorX = CANVAS_COLS - 1;
+      cursorX = globalVars.CANVAS_COLS - 1;
       cursorY--;
-      if (cursorY >= CANVAS_ROWS) {
+      if (cursorY >= globalVars.CANVAS_ROWS) {
           cursorY = 0;  // Optional: Reset to start or stop at the end
       }
   }
@@ -189,17 +189,17 @@ function advanceCursor() {
           cursorX--;
         } else {
           // Wrap around to the last column
-          cursorX = CANVAS_COLS - 1;
+          cursorX = globalVars.CANVAS_COLS - 1;
         }
-        cursorY = CANVAS_ROWS - 1; // Move to the bottom row
+        cursorY = globalVars.CANVAS_ROWS - 1; // Move to the bottom row
       }
     } else {
       // Move cursor downwards
       cursorY++;
-      if (cursorY >= CANVAS_ROWS) {
+      if (cursorY >= globalVars.CANVAS_ROWS) {
         cursorY = 0;
         cursorX++;
-        if (cursorX >= CANVAS_COLS) {
+        if (cursorX >= globalVars.CANVAS_COLS) {
           cursorX = 0;  // Optional: Reset to start or stop at the end
         }
       }
@@ -214,7 +214,7 @@ function retreatCursor() {
     if (cursorY > 0) {
       cursorY--;
     } else if (cursorX > 0) {
-      cursorY = CANVAS_ROWS - 1;
+      cursorY = globalVars.CANVAS_ROWS - 1;
       cursorX--;
     }
     tileMap[cursorY][cursorX] = getTileIndex("BLANK");
@@ -330,7 +330,7 @@ function keyPressed() {
   
 
 function xyToIndex(x, y) {
-  return y * SPRITESHEET_COLS + x;
+  return y * globalVars.SPRITESHEET_COLS + x;
 }
 
 let textIndex = 0;

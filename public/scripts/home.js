@@ -84,7 +84,7 @@ function draw() {
   drawColorLayer(colorFrames[0]); // Assume there's only one color layer
   
   drawFrame(frames[currentFrame]);
-  if (frameCount % 8 === 0) {
+  if (frameCount % 6 === 0) {
     currentFrame = (currentFrame + 1) % frames.length;
     if (currentFrame === 0) {  // Check if a loop has completed
       loopCounter++;

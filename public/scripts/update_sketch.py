@@ -42,7 +42,7 @@ def update_sketch_with_globals(globals_js_path, sketch_js_path, output_path):
 
 # Example usage
 globals_js_path = 'globals.js'
-sketch_js_path = 'patterns.js'
-output_path = 'patterns_updated.js'
+sketch_js_path = 'keyboard.js'
+output_path = 'keyboard_updated.js'
 
 update_sketch_with_globals(globals_js_path, sketch_js_path, output_path)
