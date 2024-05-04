@@ -5,8 +5,6 @@ let spritesheetData;
 let baseColor;
 let colors = []; 
 let sounds = [];
-let currentFrame = 0;
-let frames = [];
 // Function to convert x, y coordinates to an index
 function xyToIndex(x, y) {
   return y * 23 + x;

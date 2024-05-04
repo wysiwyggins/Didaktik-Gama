@@ -1,8 +1,9 @@
-
 let colorFrames = [];
+let homeFrames = []; // Initialize the frames array
 let tmjData;
 let tmjFile = './assets/maps/flipbooks.tmj';
 let loopCounter = 0; 
+let currentHomeFrame = 0;
 
 let osc;
 let melody = [53, 55, 57, 58, 62, 60, 57, 60, 58, 57, 58, 55, 57, 53, 55, 57, 58, 62,60, 57, 60, 58, 57, 58, 55, 53]; // MIDI notes for "Home! Sweet Home!"
@@ -31,8 +32,12 @@ function setup() {
   osc = new p5.Oscillator('triangle');
   playNote();
   reverb.process(osc, loopCounter, loopCounter + 1);
-}
 
+  // Delay the execution of draw function by 600 milliseconds (adjust the delay time as needed)
+  setTimeout(() => {
+    draw(); // Call the draw function after the delay
+  }, 600);
+}
 
 function playNote() {
   if (noteIndex >= melody.length) {
@@ -48,6 +53,7 @@ function playNote() {
 }
 
 function parseTMJ(tmj) {
+  frames = []; // Clear existing frames before parsing new ones
   tmj.layers.forEach((layer, index) => {
     let frame = [];
     for (let i = 0; i < layer.data.length; i++) {
@@ -77,10 +83,10 @@ function draw() {
   background(0);
   drawColorLayer(colorFrames[0]); // Assume there's only one color layer
   
-  drawFrame(frames[currentFrame]);
+  drawFrame(frames[currentHomeFrame] || []); // Check if frames[currentFrame] exists, otherwise provide an empty array as default
   if (frameCount % 6 === 0) {
-    currentFrame = (currentFrame + 1) % frames.length;
-    if (currentFrame === 0) {  // Check if a loop has completed
+    currentHomeFrame = (currentHomeFrame + 1) % frames.length;
+    if (currentHomeFrame === 0) {  // Check if a loop has completed
       loopCounter++;
       corruptTiles();  // Introduce corruption
     }
@@ -112,6 +118,9 @@ function corruptTiles() {
 }
 
 function drawColorLayer(colorLayer) {
+  if (!colorLayer) {
+    return;
+  }
   for (let y = 0; y < colorLayer.length; y++) {
     for (let x = 0; x < colorLayer[y].length; x++) {
       let colorIndex = (colorLayer[y][x] - 1) % 3; // Cycle through the three colors
@@ -122,8 +131,10 @@ function drawColorLayer(colorLayer) {
   }
 }
 
-
 function drawFrame(frame) {
+  if (!frame) {
+    frame = frames[1] || []; // Provide an empty array as default if frames[1] is undefined
+  }
   for (let y = 0; y < frame.length; y++) {
     for (let x = 0; x < frame[y].length; x++) {
       let tileCode = frame[y][x];
@@ -151,6 +162,7 @@ function drawFrame(frame) {
     }
   }
 }
+
 function keyPressed(event) {
   if (event.key === '}') { 
     if (socket.connected) {

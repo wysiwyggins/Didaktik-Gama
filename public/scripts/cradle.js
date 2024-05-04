@@ -34,7 +34,7 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
-  let fileIndex = floor(random(1, 17));
+  let fileIndex = floor(random(1, 20));
   backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
   fileText = loadStrings(`/public/data/texts/cradle.txt`);
   spritesheetData = loadJSON('/public/assets/spritesheets/spriteData.json');

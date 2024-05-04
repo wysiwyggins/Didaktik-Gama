@@ -1,7 +1,5 @@
 
 let selectedTiles = [];
-let wave1;
-let wave2;
 let reloads = 0;
 let colorChangeFrameInterval = 120; // Number of frames between color changes
 
@@ -28,9 +26,9 @@ function setup() {
 
 function preload() {
 
-  spritesheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
-  spritesheetData = loadJSON('assets/spritesheets/spriteData.json');
-  backgroundImage = loadImage('assets/images/boot.png');
+  spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
+  spritesheetData = loadJSON('./assets/spritesheets/spriteData.json');
+  backgroundImage = loadImage('./assets/images/boot.png');
   console.log('boot loaded');
 }
 

@@ -1,7 +1,5 @@
 
 let selectedTiles = [];
-let wave1;
-let wave2;
 let reloads = 0;
 
 

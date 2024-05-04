@@ -8,6 +8,7 @@ let geomanticNames = ["Via", "Cauda Draconis", "Puer", "Fortuna Minor", "Puella"
 let displayNames = false;
 let nameIndex;
 let finalFigureDisplayedTime = null; 
+let wave1, wave2, reverb;
 
 function preload() {
   spriteSheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
