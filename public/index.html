@@ -1,110 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sketch Controller</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <!-- Load socket.io client -->
+  <head>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <!-- Load p5.js and p5.sound.js -->
-    <script type="text/javascript" src="./scripts/p5.js"></script>
-    <script type="text/javascript" src="./scripts/p5.sound.js"></script>
-    <!-- Load global variables-->
+    <script type="text/javascript" src="scripts/p5.js"></script>
+    <script type="text/javascript" src="scripts/p5.sound.js"></script>
     <script src="./scripts/globals.js"></script>
-    <!-- rot.js game-->
-    <script src="scripts/rot.min.js"></script>
-    <script src="scripts/pixi.min.js"></script>
-    <script src="scripts/howler.js"></script>
-    <script src="scripts/tweenjs.min.js"></script>
-</head>
-<body>
-    <main id="sketch-container"></main>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
 
-    <script>
-        (function() {
-            const socket = io(); // This 'socket' is now locally scoped to the function
-        
-            let currentSketchIndex = null; // Track the index of the currently loaded sketch
-        
-            function unloadCurrentSketch() {
-                // Clean up any resources specific to the current sketch
-                if (window.currentSketch && window.currentSketch.remove) {
-                    window.currentSketch.remove(); // Calls p5.js's cleanup function
-                }
-                const sketchContainer = document.getElementById('sketch-container');
-                sketchContainer.innerHTML = '';  
-                
-                // Explicitly remove script tags if they're added dynamically
-                const scripts = sketchContainer.getElementsByTagName('script');
-                Array.from(scripts).forEach(script => script.remove());
-                
-                // Additional cleanup specific to home.js
-                if (window.currentSketchIndex === 1) {
-                    // Reset or clean up any variables or resources specific to home.js
-                    // For example:
-                    // colorLayer = null; // Reset colorLayer variable if needed
-                }
-                
-                console.log('Previous sketch unloaded');
-            }
-
-    
-            function loadSketch(sketchIndex) {
-                if (sketchIndex === currentSketchIndex) {
-                    console.log('Requested sketch is already loaded');
-                    return; // Exit early if the requested sketch is already loaded
-                }
-                unloadCurrentSketch();  // Ensure the previous sketch is unloaded
-                const sketchContainer = document.getElementById('sketch-container');
-                
-                // Map index to sketch script paths
-                const sketches = {
-                    0: 'scripts/boot.js',
-                    1: 'scripts/geomancy.js',
-                    2: 'scripts/home.js', 
-                    3: 'scripts/game.js',
-                    4: 'scripts/abyss.js',
-                    5: 'scripts/keyboard.js',
-                    6: 'scripts/patterns.js',
-                    7: 'scripts/mirror.js',
-                    8: 'scripts/automata.js',
-                    9: 'scripts/cradle.js'
-                };
-            
-                const sketchScript = sketches[sketchIndex % Object.keys(sketches).length];
-                if (sketchScript) {
-                    const scriptTag = document.createElement('script');
-                    scriptTag.src = sketchScript;
-                    scriptTag.onload = () => {
-                        console.log(`Loaded sketch: ${sketchScript}`);
-                        // Check if preload function is defined in the loaded script
-                        if (typeof window.preload === 'function') {
-                            // Wait for preload to finish loading sound files
-                            window.preload(); // Call preload function
-                            setTimeout(() => {
-                                setup();
-                            }, 100); // A short delay to ensure sound files are loaded
-                        } else {
-                            setup();
-                        }
-                    };
-                    scriptTag.onerror = () => console.error(`Error loading sketch: ${sketchScript}`);
-                    sketchContainer.appendChild(scriptTag);
-                    currentSketchIndex = sketchIndex; // Update the current sketch index
-                }
-            }
-    
-            socket.on('changeSketch', function(sketchIndex) {
-                console.log('Received sketch index:', sketchIndex);
-                setTimeout(() => {
-                    loadSketch(sketchIndex);
-                }, 100); // A short delay to ensure everything is cleared
-            });
-            console.log('Initializing sketch loading');
-            loadSketch(0);
-        })();
-    </script>
-    
-    
-</body>
+  </head>
+  <body>
+    <main>
+    </main>
+    <script src="scripts/boot.js"></script>
+    <script>const socket = io();</script>
+  </body>
 </html>

@@ -264,11 +264,7 @@ function draw() {
   }
   if (year > 15) {  
     year = 0;
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 6 });
-    } else {
-      window.location.href = 'patterns.html';
-    }
+    window.location.href = 'patterns.html';
     
   }
 

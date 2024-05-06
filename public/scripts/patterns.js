@@ -44,13 +44,7 @@ function generateBaseAndComplementaryColors() {
 
 function draw() {
   if (reloads > 40) {
-    
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 3 });
-    } else {
-      window.location.href = 'game.html';
-    }
-    
+    window.location.href = 'game.html';
   }
 
   drawColorPattern();
@@ -245,17 +239,9 @@ function drawSpritePattern() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 7 });
-    } else { 
-      window.location.href = 'mirror.html';
-    }
+    window.location.href = 'mirror.html';
   } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 5 });
-    } else { 
-      window.location.href = 'keyboard.html';
-    }
+    window.location.href = 'keyboard.html';
   }
 }
 

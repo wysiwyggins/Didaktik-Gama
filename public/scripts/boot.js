@@ -68,15 +68,9 @@ function draw() {
   
   
   reloads++;
-    if (reloads > 1000 ) {
-        if (socket.connected) {
-          console.log('Requesting next sketch...');
-          socket.emit('requestSketchChange', { nextSketch: 1 });
-          reloads = 0; // Reset reloads to prevent multiple emissions
-        }
-    } else { 
-      window.location.href = 'geomancy.html';
-    }
+  if (reloads > 1000 ) {
+    window.location.href = 'geomancy.html';
+  } 
 }
 
 
@@ -182,13 +176,7 @@ function drawSpritePattern() {
 
 
 function keyPressed(event) {
-  if (event.key === '}') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 1 });
-    } else { 
-      window.location.href = 'geomancy.html';
-    }
-  }
+  window.location.href = 'geomancy.html';
 }
 
 // Add an event listener to the document to handle keydown events

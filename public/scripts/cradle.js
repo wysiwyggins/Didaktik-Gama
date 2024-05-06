@@ -150,13 +150,7 @@ function setCurrentTile(tileIndex) {
       advanceCursor();
       tilesDisplayed++;
       if (tilesDisplayed >= globalVars.MAX_TILES) {
-        //window.location.reload();
-        if (socket.connected) {
-          socket.emit('requestSketchChange', { nextSketch: 8 });
-        } else {
-          window.location.href = 'automata.html';
-        }
-        
+        window.location.href = 'automata.html';
         
       }
   } else {
@@ -430,17 +424,9 @@ function handleSpecialCharacters(char) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 3 });
-    } else { 
-      window.location.href = 'game.html';
-    }
+    window.location.href = 'game.html';
   } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 2 });
-    } else { 
-      window.location.href = 'home.html';
-    }
+    window.location.href = 'home.html';
   }
 }
 

@@ -19,17 +19,6 @@ function isBoxTile(index) {
   return BOX_TILE_INDICES.includes(index);
 }
 
-/* function windowResized() {
-  // Adjust grid size based on new window dimensions
-  gridWidth = floor(windowWidth / tileWidth) * 2;
-  gridHeight = floor(windowHeight / tileHeight) * 2;
-  // Resize the canvas
-  resizeCanvas(gridWidth * tileWidth, gridHeight * tileHeight);
-
-  // Optionally call redraw if you're not using a draw loop
-  redraw();
-} */
-
 function setup() {
     try {
       socket = io.connect(window.location.origin);
@@ -179,11 +168,7 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 
 function draw() {
   if (abysses > 20) {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 5 });
-    } else {
-      window.location.href = 'keyboard.html';
-    }
+    window.location.href = 'keyboard.html';
   }
   background(255);
   noStroke();
@@ -319,17 +304,9 @@ function draw() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 3 });
-    } else { 
-      window.location.href = 'game.html';
-    }
+    window.location.href = 'game.html';
   } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 5 });
-    } else { 
-      window.location.href = 'keyboard.html';
-    }
+    window.location.href = 'keyboard.html';
   }
 }
 

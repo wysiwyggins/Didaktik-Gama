@@ -143,13 +143,7 @@ function setCurrentTile(tileIndex) {
     advanceCursor();
     tilesDisplayed++;
     if (tilesDisplayed >= globalVars.MAX_TILES) {
-      //window.location.reload();
-      if (socket.connected){
-        socket.emit('requestSketchChange', { nextSketch: 8 });
-      } else {
-        window.location.href = 'automata.html';
-      }
-     
+      window.location.href = 'automata.html';
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -240,16 +234,9 @@ function keyPressed() {
       return false;
   }
   if (key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 6 });
-    } else { 
-      window.location.href = 'patterns.html';
-    }
+    window.location.href = 'patterns.html';
   } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 4 });
-      window.location.href = 'abyss.html';
-    }
+    window.location.href = 'abyss.html';
   }
   // Handle alphanumeric characters
   if (!keyIsDown(CONTROL) && !keyIsDown(ALT)) {

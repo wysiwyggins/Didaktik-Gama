@@ -92,11 +92,7 @@ function draw() {
 
   // Check if 10 seconds have passed since the last figure was displayed
   if (finalFigureDisplayedTime && millis() - finalFigureDisplayedTime > 12000) {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 2 });
-    } else { 
-      window.location.href = 'home.html';
-    }
+    window.location.href = 'home.html';
   }
 }
 
@@ -193,16 +189,8 @@ function xyToIndex(x, y) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 2 });
-    } else { 
-      window.location.href = 'home.html';
-    }
+    window.location.href = 'home.html';
   } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 0 });
-    } else { 
-      window.location.href = 'boot.html';
-    }
+    window.location.href = 'index.html';
   }
 }

@@ -8,6 +8,9 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
+// Define a variable to hold judgeName
+let judgeName = '';
+
 // DMX setup only on Linux
 let universe;
 if (os.platform() === 'linux') {
@@ -30,13 +33,10 @@ server.listen(PORT, () => {
 io.on('connection', (socket) => {
     console.log('New client connected');
 
-    socket.on('requestSketchChange', (data) => {
-        console.log('Request to change sketch to index:', data.nextSketch);
-        io.emit('changeSketch', data.nextSketch);
-    });
-
     socket.on('sendJudgeName', (data) => {
         console.log('Last figure name received:', data.name);
+        // Store the received judge name in the variable
+        judgeName = data.name;
     });
 
     socket.on('setRGBLight', (data) => {
@@ -71,6 +71,3 @@ function setBlackLight(state) {
         universe.update({4: state ? 255 : 0});
     }
 }
-
-
-

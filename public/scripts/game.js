@@ -442,11 +442,7 @@ class Actor {
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
         } if (item.type === ItemType.CRADLE) { 
-            if (socket.connected) {
-                socket.emit('requestSketchChange', { nextSketch: 9 });
-            } else {
-                window.location.href = 'cradle.html';
-            }
+            window.location.href = 'cradle.html';
         }
 
         // Log a message about the item picked up
@@ -932,11 +928,7 @@ class Player extends Actor{
                 this.failedMoveAttempts++;
                 console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
                 if (this.failedMoveAttempts >= 3) { // If failed 3 times in zero-player mode, change page
-                    if (socket.connected) {
-                        socket.emit('requestSketchChange', { nextSketch: 6 });
-                    } else { 
-                        window.location.href = 'patterns.html';
-                    }
+                    window.location.href = 'patterns.html';
                 }
             }
             return;
@@ -1083,18 +1075,10 @@ class Player extends Actor{
                 newDirection = 'down-right';
                 break;
             case '}':
-                if (socket.connected) {
-                    socket.emit('requestSketchChange', { nextSketch: 4 });
-                } else { 
-                    window.location.href = 'abyss.html';
-                }
+                window.location.href = 'abyss.html';
                 break;
             case '{':
-                if (socket.connected) {
-                    socket.emit('requestSketchChange', { nextSketch: 2 });
-                } else { 
-                    window.location.href = 'home.html';
-                }
+                window.location.href = 'home.html';
                 break;
             default:
                 messageList.addMessage('Time passes.');
@@ -1480,7 +1464,7 @@ async function moveToNearestItem(player) {
         player.failedMoveAttempts++;
         if (player.failedMoveAttempts >= 3) {
             console.log("No movement possible, redirecting...");
-            window.location.href = 'knit.html'; // or socket.emit('requestSketchChange', { nextSketch: 'knit' });
+            window.location.href = 'knit.html'; 
         }
     }
     player.inactiveTurns = 0; // Reset the counter after attempting to move

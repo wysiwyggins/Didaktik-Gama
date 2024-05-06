@@ -96,11 +96,7 @@ function draw() {
     playNote(); // Play the next note or loop back to the start
   }
   if (loopCounter > 6) {
-    if (socket.connected){
-      socket.emit('requestSketchChange', { nextSketch: 3 });
-    } else {
-      window.location.href = 'game.html';
-    }
+    window.location.href = 'game.html';
   }
 
 }
@@ -165,17 +161,9 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 3 });
-    } else { 
-      window.location.href = 'game.html';
-    }
+    window.location.href = 'game.html';
   } else if (event.key === '{') {
-    if (socket.connected) {
-      socket.emit('requestSketchChange', { nextSketch: 1 });
-    } else { 
-      window.location.href = 'geomancy.html';
-    }
+    window.location.href = 'geomancy.html';
   }
 }
 
