@@ -3608,7 +3608,7 @@ async function setup() {
             .then(data => {
                 const judgeName = data.judgeName;
                 console.log('Judge name:', judgeName);
-                if (judgeName != null){
+                if (judgeName != ""){
                     messageList.addMessage(`Your judge is ${judgeName}.`);
                 }
             })
