@@ -234,7 +234,7 @@ function keyPressed() {
       return false;
   }
   if (key === '}') { 
-    window.location.href = 'patterns.html';
+    window.location.href = 'automata.html';
   } else if (event.key === '{') {
     window.location.href = 'abyss.html';
   }

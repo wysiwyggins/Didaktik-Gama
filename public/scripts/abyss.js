@@ -304,9 +304,9 @@ function draw() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'game.html';
-  } else if (event.key === '{') {
     window.location.href = 'keyboard.html';
+  } else if (event.key === '{') {
+    window.location.href = 'game.html';
   }
 }
 

@@ -3,17 +3,13 @@ let season = 0;
 let day = 0;
 let year = 0;
 
-AUTOMATA_CANVAS_COLS = 40;
-AUTOMATA_CANVAS_ROWS = 30;
-
+const AUTOMATA_CANVAS_COLS = 40;
+const AUTOMATA_CANVAS_ROWS = 30;
+const MAX_YEAR = 15;
+const MESSAGE_DISPLAY_DURATION_SECONDS = 1;
 
 function preload() {
   spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
-  spritesheetData = loadJSON('./assets/spritesheets/spriteData.json');
-    
-  
-  //loadLayerFrames('bird'); // preload any tilemap frames by layer name
-  // Load sounds
   for (let i = 1; i <= 22; i++) {
     sounds.push(loadSound('./assets/sound/' + i + '.wav'));
   }
@@ -27,145 +23,8 @@ function setup() {
   }
   createCanvas(AUTOMATA_CANVAS_COLS * globalVars.TILE_WIDTH, AUTOMATA_CANVAS_ROWS * globalVars.TILE_HEIGHT);
   background(255);  // Initialize with white background
-  
-  // Initialize grid with random values
-  for (let i = 0 + season; i < AUTOMATA_CANVAS_COLS; i++) {
-    grid[i] = [];
-    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
-      grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
-    }
-  }
+  initializeGrid();
 }
-
-function isShadowEdgeTile(val) {
-  return val === SHADOW_EDGE;
-}
-function isVoid(val) {
-  return val === VOID;
-}
-function isWall(val){
-  return val === WALL;
-}
-function xyToIndex(x, y) {
-  return y * globalVars.SPRITESHEET_COLS + x;
-}
-
-function isBoxTile(val) {
-  return [
-    BOX_TOP_LEFT, BOX_HORIZONTAL, BOX_VERTICAL, 
-    BOX_TOP_RIGHT, BOX_BOTTOM_LEFT, BOX_BOTTOM_RIGHT,
-    BOX_VERTICAL_HORIZONTAL, BOX_UP_HORIZONTAL, BOX_LEFT_VERTICAL,
-    BOX_RIGHT_VERTICAL, BOX_DOWN_HORIZONTAL, BOX_HORIZONTAL_HALF
-  ].includes(val);
-}
-function addConnectingTile(i, j, updatedGrid) {
-  let randChoice = (arr) => arr[floor(random(arr.length))];
-
-  if (grid[i][j] === BOX_TOP_LEFT) {
-    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
-      updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_VERTICAL_HORIZONTAL,BOX_TOP_RIGHT,]);
-    }
-    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
-      updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_VERTICAL_HORIZONTAL]);
-    }
-  }
-
-  if (grid[i][j] === BOX_HORIZONTAL) {
-    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
-      updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_RIGHT, BOX_BOTTOM_RIGHT, BOX_VERTICAL_HORIZONTAL]);
-    }
-    if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
-      updatedGrid[i-1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_LEFT, BOX_BOTTOM_LEFT, BOX_VERTICAL_HORIZONTAL]);
-    }
-  }
-
-  if (grid[i][j] === BOX_VERTICAL && season % 2 == 0) {
-    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
-      updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_TOP_LEFT, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL]);
-    }
-    if (j-1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
-      updatedGrid[i][j+1] = BOX_VERTICAL_HORIZONTAL;
-    }
-  }
-
-  // ... Similar logic for BOX_TOP_RIGHT, BOX_BOTTOM_LEFT, and BOX_BOTTOM_RIGHT ...
-  if (grid[i][j] === BOX_TOP_RIGHT) {
-    if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
-      updatedGrid[i-1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_LEFT, BOX_VERTICAL_HORIZONTAL]);
-    }
-    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
-      updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_VERTICAL_HORIZONTAL]);
-    }
-  } 
-  if (grid[i][j] === BOX_BOTTOM_LEFT) {
-    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
-      updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL]);
-    }
-    if (j-1 >= 0 && !isBoxTile(grid[i][j-1])) {
-      updatedGrid[i][j-1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_RIGHT, BOX_VERTICAL_HORIZONTAL]);
-    }
-  }
-  if (grid[i][j] === BOX_BOTTOM_RIGHT) { 
-    if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
-      updatedGrid[i-1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_LEFT, BOX_VERTICAL_HORIZONTAL]);
-    }
-    if (j-1 >= 0 && !isBoxTile(grid[i][j-1])) {
-      updatedGrid[i][j-1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_VERTICAL_HORIZONTAL]);
-    }
-  }
-
-  if (grid[i][j] === BOX_VERTICAL_HORIZONTAL) {
-    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
-      updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_RIGHT, BOX_BOTTOM_RIGHT]);
-    }
-    if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
-      updatedGrid[i-1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_LEFT, BOX_BOTTOM_LEFT]);
-    }
-    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
-      updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_TOP_LEFT, BOX_TOP_RIGHT]);
-    }
-    if (j-1 >= 0 && !isBoxTile(grid[i][j-1])) {
-      updatedGrid[i][j-1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_BOTTOM_RIGHT]);
-    }
-  }
-}
-
-
-function hasBoxTiles() {
-  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
-    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
-      if (isBoxTile(grid[i][j])) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function reseedGrid() {
-  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
-    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
-      grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
-    }
-  }
-}
-
-function charToSpriteLocation(char) {
-  let charCode = char.charCodeAt(0);
-  let tileNumber = charCode; 
-  let spriteColumn = tileNumber % globalVars.SPRITESHEET_COLS;
-  let spriteRow = Math.floor(tileNumber / globalVars.SPRITESHEET_COLS);
-  
-  if(spriteColumn >= globalVars.SPRITESHEET_COLS) {
-      spriteColumn = 0;
-      spriteRow++;
-  }
-
-  return { x: spriteColumn, y: spriteRow };
-}
-let messageDisplayStart = -1;
-let displayDurationFrames = 0;
-
 function displayMessage(message, seconds) {
   let messages = [message];  // Start with just the original message
 
@@ -201,39 +60,145 @@ function displayMessage(message, seconds) {
   displayDurationFrames = seconds * 24; 
 }
 
-function drawTile(i, j, val) {
-  // Clear the specific tile location based on tile value
-  if (val % 2 === 0 && val !== 0) {
-    fill(i*10 + season, val*10+ season, val*20+ season); 
-  } else {
-    fill(255);  // White color
+function charToSpriteLocation(char) {
+  let charCode = char.charCodeAt(0);
+  let tileNumber = charCode; 
+  let spriteColumn = tileNumber % globalVars.SPRITESHEET_COLS;
+  let spriteRow = Math.floor(tileNumber / globalVars.SPRITESHEET_COLS);
+  
+  if(spriteColumn >= globalVars.SPRITESHEET_COLS) {
+      spriteColumn = 0;
+      spriteRow++;
   }
+
+  return { x: spriteColumn, y: spriteRow };
+}
+
+
+
+
+function initializeGrid() {
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    grid[i] = [];
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
+      grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
+    }
+  }
+}
+
+function reseedGrid() {
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
+      grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
+    }
+  }
+}
+
+function getTileIndex(tileName) {
+  let coords = spritesheetData.tiles[tileName];
+  if (!coords || coords.length !== 2) {
+      console.error("Tile not found or invalid coordinates:", tileName, coords);
+      return -1;
+  }
+  return coords[1] * globalVars.SPRITESHEET_COLS + coords[0];
+}
+
+function drawTile(i, j, val) {
+  fill((val % 2 === 0 && val !== 0) ? (i * 10 + season) : 255);
   noStroke();
   rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
-  
-  // Draw the tile on the canvas
-  // Calculate the position of the tile in the spritesheet
   let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
   let y = floor(val / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HEIGHT;
   image(spritesheet, i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, x, y, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
 }
-function canConnect(i, j) {
-  const directions = [
-    {dx: 1, dy: 0},
-    {dx: -1, dy: 0},
-    {dx: 0, dy: 1},
-    {dx: 0, dy: -1}
-  ];
-  for (const dir of directions) {
-    let ni = i + dir.dx;
-    let nj = j + dir.dy;
-    if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[ni][nj])) {
-      return true;
+
+function draw() {
+  if (year < 1 && season < 3) {
+    displayMessage('Photosensitive Epilepsy Warning, Flashing Images', MESSAGE_DISPLAY_DURATION_SECONDS);
+  }
+  if (messageDisplayStart !== -1 && (frameCount - messageDisplayStart) > displayDurationFrames) {
+      reseedGrid();
+      messageDisplayStart = -1;
+  }
+
+  day += 1;
+  if (day > 30) {
+    season += 1;
+    day = 0;
+  }
+  if (season > 10) {
+   season = 0;
+   year += 1;
+   console.log('Year:', year);
+  }
+  if (year > MAX_YEAR) {  
+    year = 0;
+    window.location.href = 'patterns.html';
+  }
+
+  let updatedGrid = [];
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    updatedGrid[i] = grid[i].slice();
+  }
+
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
+      let val = grid[i][j];
+      updatedGrid[i][j] = (val + 1) % (globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS);
+
+      if (year > 5 && year < 8){
+        if (val > year && season % 2 == 0) {
+          updateNeighbors(updatedGrid, i, j);
+        }
+      }
+
+      if (year > 15 && year < 20){
+        if (val == year && season % 2 == 0) {
+          updateNeighbors(updatedGrid, i, j);
+        }
+      }
+
+      if (val == 6 - season) {
+        updateNeighbors(updatedGrid, i, j);
+      }
+
+      if (i == 0 && j == 0 && (day == 1 || day == 4) ) {
+        let soundIndex = val % 22;
+        sounds[soundIndex].play();
+      }
+
+      drawTile(i, j, val);
     }
   }
-  return false;
+
+  update3x3Blocks(updatedGrid);
+  grid = updatedGrid;
+  frameRate(24);
 }
-function is3x3BlockAllSix(x, y) {
+
+function updateNeighbors(grid, i, j) {
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      let ni = i + dx;
+      let nj = j + dy;
+      if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
+        grid[ni][nj] = (day % 2 == 0) ? 6 : 7;
+      }
+    }
+  }
+}
+
+function update3x3Blocks(grid) {
+  for (let i = 1; i < AUTOMATA_CANVAS_COLS - 1; i++) {
+    for (let j = 1; j < AUTOMATA_CANVAS_ROWS - 1; j++) {
+      if (is3x3BlockAllSix(grid, i, j)) {
+        grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
+      }
+    }
+  }
+}
+
+function is3x3BlockAllSix(grid, x, y) {
   for (let dx = -1; dx <= 1; dx++) {
     for (let dy = -1; dy <= 1; dy++) {
       if (grid[x + dx][y + dy] !== 6 + season) {
@@ -243,170 +208,13 @@ function is3x3BlockAllSix(x, y) {
   }
   return true;
 }
+function keyPressed() {
+  console.log("KeyPressed detected: Key = " + key + ", keyCode = " + keyCode);
 
-function draw() {
-  //console.log(year, season, day);
-  if (year < 1 && season < 3) {
-    displayMessage('Photosensitive Epilepsy Warning, Flashing Images', 1);
-  }
-  if (messageDisplayStart !== -1 && (frameCount - messageDisplayStart) > displayDurationFrames) {
-      reseedGrid();  // Reseed the grid to remove the message after its duration
-      messageDisplayStart = -1;
-  }
-  
-
-  day +=1;
-  if (day > 30) {
-    season += 1;
-    day = 0;
-  }
-  if (season > 10) {
-   season = 0;
-   year += 1;
-  }
-  if (year > 15) {  
-    year = 0;
+  if (key === '}') { 
     window.location.href = 'patterns.html';
-    
+  } else if (event.key === '{') {
+    window.location.href = 'keyboard.html';
   }
 
-
-  // Create a copy of the grid to store updates, so we aren't reading and writing from the same grid simultaneously.
-  let updatedGrid = [];
-  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
-    updatedGrid[i] = grid[i].slice();
-  }
-
-  
-
-  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
-    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
-      let val = grid[i][j];
-      if (year > 5 && year < 8){
-
-        if ((!isBoxTile(val) || (isBoxTile(val) && !canConnect(i, j))) && !isBoxTile(updatedGrid[i][j])) {
-          updatedGrid[i][j] = (val + 1) % (globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS);
-        } else if (isBoxTile(val)){
-          addConnectingTile(i, j, updatedGrid);
-        } else if (val > year && season % 2 == 0) {
-          for (let dx = -1; dx <= 1; dx++) {
-              for (let dy = -1; dy <= 1; dy++) {
-                  let ni = i + dx;
-                  let nj = j + dy;
-                  if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
-                      updatedGrid[ni][nj] = 6 + season;
-                  } 
-              }
-          }
-        } else {
-          updatedGrid[i][j] = (val + 1) % (globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS);
-        }
-      }
-      // If the current tile has a value of 6, set all its neighbors to 6
-      if (val == 6 - season) {
-        for (let dx = -1; dx <= 1; dx++) {
-          for (let dy = -1; dy <= 1; dy++) {
-            let ni = i + dx;
-            let nj = j + dy;
-
-            if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
-              updatedGrid[ni][nj] = 6;
-            }
-          }
-        }
-      }
-
-      /* if (year > 2 && year < 4 && season < 6){
-        initializeGridFromTMJ('box');
-        if (val == season) {
-          for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-              let ni = i + dx;
-              let nj = j + dy;
-  
-              if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT) {
-                updatedGrid[ni][nj] = season;
-              }
-            }
-          }
-        }
-      } */
-
-      if (year > 15 && year < 20){
-        if (val === WALL) {
-          updatedGrid[i][j] = WALL; // Preserve the wall tile
-          if (j + 1 < AUTOMATA_CANVAS_ROWS && grid[i][j + 1] !== WALL) {
-            updatedGrid[i][j + 1] = WALL; // Place shadow edge underneath
-          }
-          if (j + 2 < AUTOMATA_CANVAS_ROWS && grid[i][j + 2] !== SHADOW_EDGE) {
-            updatedGrid[i][j + 2] = SHADOW_EDGE; // Place shadow edge underneath
-          }
-          for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-                let ni = i + dx;
-                let nj = j + dy;
-                if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
-                  updatedGrid[ni][nj] = FLOOR;
-              }
-            }
-          }
-        }
-        // If it's a shadow edge, add wall to its right and void tile underneath
-        else if (isShadowEdgeTile(val)) {
-          updatedGrid[i][j] = SHADOW_EDGE; // Preserve the shadow edge tile
-          if (i + 1 < AUTOMATA_CANVAS_COLS) {
-            updatedGrid[i + 1][j] = WALL; // Place wall tile to the right
-          }
-          if (j + 1 < AUTOMATA_CANVAS_ROWS) {
-            updatedGrid[i][j + 1] = VOID;
-          }
-        } 
-        if (val === VOID) {
-          updatedGrid[i][j] = VOID;
-          if (j + 1 < AUTOMATA_CANVAS_ROWS && grid[i][j + 1] !== VOID) {
-            updatedGrid[i][j + 1] = VOID; // Place void
-          }
-        }
-        if (val == year && season % 2 == 0) {
-          for (let dx = -1; dx <= 1; dx++) {
-              for (let dy = -1; dy <= 1; dy++) {
-                  let ni = i + dx;
-                  let nj = j + dy;
-                  if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
-                      updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
-                  }
-              }
-          }
-        }
-  
-  
-      }
-
-      // Draw the tile on the canvas
-      drawTile(i, j, val);
-      
-      // Increment the value for the next frame
-      updatedGrid[i][j] = (val + 1) % (globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS);
-      
-      if (i == 0 && j == 0 && (day == 1 || day == 4) ) {
-        let soundIndex = val % 22;
-        sounds[soundIndex].play();
-      }
-    }
-  }
-
-  // Check for the 3x3 blocks having all values as 6
-  for (let i = 1; i < AUTOMATA_CANVAS_COLS - 1; i++) {
-    for (let j = 1; j < AUTOMATA_CANVAS_ROWS - 1; j++) {
-      if (is3x3BlockAllSix(i, j)) {
-        updatedGrid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
-      }
-    }
-  }
-
-  grid = updatedGrid;
-  frameRate(24);
-  
 }
-
-
