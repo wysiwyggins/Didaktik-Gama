@@ -71,3 +71,8 @@ function setBlackLight(state) {
         universe.update({4: state ? 255 : 0});
     }
 }
+
+// Expose judgeName through a route
+app.get('/judgeName', (req, res) => {
+    res.send({ judgeName });
+});

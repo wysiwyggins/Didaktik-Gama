@@ -4,16 +4,17 @@ let reloads = 0;
 let colorChangeFrameInterval = 120; // Number of frames between color changes
 
 function setup() {
-  try {
-    socket = io.connect(window.location.origin);
-  } catch (error) { 
-    console.error('Socket connection failed.');
-  }
+  setTimeout(() => {
+    try {
+        socket = io.connect(window.location.origin);
+    } catch (error) { 
+        console.error('Socket connection failed.');
+    }
+  }, 1000);
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set frame rate
 
   extractTilesFromSpritesheet(); 
-  selectBoxDrawingTiles();
   selectPatternTiles(); 
 
   generateBaseAndComplementaryColors();
@@ -100,19 +101,6 @@ function complementColor(c, angle) {
   return color(h, s, b);
 }
 
-
-let boxDrawingTiles = {};
-
-function selectBoxDrawingTiles() {
-    // Extract the box-drawing tiles based on the provided indices
-    const boxDrawingKeys = ["BOX_VERTICAL", "BOX_LEFT_VERTICAL", "BOX_UP_HORIZONTAL", "BOX_DOWN_HORIZONTAL", "BOX_RIGHT_VERTICAL", "BOX_HORIZONTAL", "BOX_VERTICAL_HORIZONTAL", "BOX_BOTTOM_RIGHT", "FULL_BLOCK", "BOX_TOP_LEFT", "BOX_DRAWING_HEAVY_LEFT_LIGHT_RIGHT"];
-    boxDrawingKeys.forEach(key => {
-        const [col, row] = spritesheetData.tiles[key];
-        let tile = spritesheet.get(col * spritesheetData.tilePixelWidth, row * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
-        // Store the tile with its key for easy access
-        boxDrawingTiles[key] = tile;
-    });
-}
 
 function selectPatternTiles() {
   let harmonyType = floor(random(3)); // Introduce a third type of harmony

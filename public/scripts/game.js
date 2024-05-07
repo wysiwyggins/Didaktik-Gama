@@ -3593,13 +3593,25 @@ async function setup() {
     currentLevel.upExitPosition = {x: upExitTile.x, y: upExitTile.y};
     */
 
-        
+    
+    
+    
     messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 5);
     inspector = new UIBox([], 30, 10, true);
 
     // And handle them individually
     messageList.showBox();
     messageList.showUIContainer();
+    if (socket.connected) {
+        fetch('/judgeName')
+            .then(response => response.json())
+            .then(data => {
+                const judgeName = data.judgeName;
+                console.log('Judge name:', judgeName);
+                messageList.addMessage(`Your judge is ${judgeName}.`);
+            })
+            .catch(error => console.error('Error fetching judge name:', error));
+    }
 
     PIXI.Loader.shared.onComplete.add(() => {
         for (let i = 0; i < 7; i++) { // assuming you have 4 frames of fire animation
