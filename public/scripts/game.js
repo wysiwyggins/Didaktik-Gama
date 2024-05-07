@@ -188,7 +188,7 @@ PIXI.Loader.shared.onComplete.add(() => {
 });
 //console.log(smokeFrames);
 
-fetch("data/grottoAudiosprite.json")
+fetch("./data/grottoAudiosprite.json")
   .then(response => response.json())
   .then(data => {
     audioSpriteData = data;
@@ -3538,9 +3538,9 @@ class UIBox {
 // This function will run when the spritesheet has finished loading
 async function setup() {
     try {
-    socket = io.connect(window.location.origin);
+        socket = io.connect(window.location.origin);
     } catch (error) { 
-    console.error('Socket connection failed.');
+        console.error('Socket connection failed.');
     }
     dungeonGeneration();
     addFloorsAndVoid();
@@ -3602,15 +3602,19 @@ async function setup() {
     // And handle them individually
     messageList.showBox();
     messageList.showUIContainer();
-    if (socket.connected) {
+    if (socket) {
         fetch('/judgeName')
             .then(response => response.json())
             .then(data => {
                 const judgeName = data.judgeName;
                 console.log('Judge name:', judgeName);
-                messageList.addMessage(`Your judge is ${judgeName}.`);
+                if (judgeName != null){
+                    messageList.addMessage(`Your judge is ${judgeName}.`);
+                }
             })
             .catch(error => console.error('Error fetching judge name:', error));
+    } else {
+        messageList.addMessage('You are not connected to the server.');
     }
 
     PIXI.Loader.shared.onComplete.add(() => {

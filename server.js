@@ -37,6 +37,8 @@ io.on('connection', (socket) => {
         console.log('Last figure name received:', data.name);
         // Store the received judge name in the variable
         judgeName = data.name;
+        // Send the updated judgeName back to the client immediately
+        io.emit('updateJudgeName', { judgeName });
     });
 
     socket.on('setRGBLight', (data) => {

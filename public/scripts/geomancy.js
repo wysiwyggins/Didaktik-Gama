@@ -11,11 +11,11 @@ let finalFigureDisplayedTime = null;
 let wave1, wave2, reverb;
 
 function preload() {
-  spriteSheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
-  spritesheetData = loadJSON('assets/spritesheets/spriteData.json');
-  backgroundImage = loadImage('assets/images/geomancy_stage.png');
+  spriteSheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
+  spritesheetData = loadJSON('./assets/spritesheets/spriteData.json');
+  backgroundImage = loadImage('./assets/images/geomancy_stage.png');
   for (let i = 1; i <= 10; i++) {
-    sounds.push(loadSound('assets/sound/' + i + '.wav'));
+    sounds.push(loadSound('./assets/sound/' + i + '.wav'));
   }
 }
 
@@ -27,6 +27,12 @@ function setup() {
   }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set the frame rate so that draw() is called once per second
+  socket.on('connect', () => {
+    console.log('Connected to server');
+  });
+  socket.on('updateJudgeName', (data) => {
+    console.log('Updated judge name received:', data.judgeName);
+  });
   generateGeomancyBooleans();
   initializeTileMap();  // Initialize the tile map with default values
   wave1 = new p5.Oscillator();
@@ -83,10 +89,9 @@ function draw() {
       sounds[soundIndex].play();
       if (currentFigure == 14) {  // Check if the last figure was just displayed
         finalFigureDisplayedTime = millis();
-      } else if (currentFigure == 15) {  
-        console.log("Final figure ", geomanticNames[nameIndex]);
-        socket.emit('sendJudgeName', { name: geomanticNames[nameIndex] });
-      }
+      } 
+      console.log ('Current figure:', currentFigure);
+      socket.emit('sendJudgeName', { name: geomanticNames[nameIndex] });
     }
   }
 
