@@ -1,19 +1,21 @@
 let grid = [];
-let sounds = [];
 let season = 0;
 let day = 0;
 let year = 0;
 
+AUTOMATA_CANVAS_COLS = 40;
+AUTOMATA_CANVAS_ROWS = 30;
+
 
 function preload() {
-  spritesheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
-  spritesheetData = loadJSON('assets/spritesheets/spriteData.json');
+  spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
+  spritesheetData = loadJSON('./assets/spritesheets/spriteData.json');
     
   
   //loadLayerFrames('bird'); // preload any tilemap frames by layer name
   // Load sounds
   for (let i = 1; i <= 22; i++) {
-    sounds.push(loadSound('assets/sound/' + i + '.wav'));
+    sounds.push(loadSound('./assets/sound/' + i + '.wav'));
   }
 }
 
@@ -23,13 +25,13 @@ function setup() {
   } catch (error) { 
     console.error('Socket connection failed.');
   }
-  createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
+  createCanvas(AUTOMATA_CANVAS_COLS * globalVars.TILE_WIDTH, AUTOMATA_CANVAS_ROWS * globalVars.TILE_HEIGHT);
   background(255);  // Initialize with white background
   
   // Initialize grid with random values
-  for (let i = 0 + season; i < globalVars.CANVAS_COLS; i++) {
+  for (let i = 0 + season; i < AUTOMATA_CANVAS_COLS; i++) {
     grid[i] = [];
-    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
       grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
     }
   }
@@ -60,16 +62,16 @@ function addConnectingTile(i, j, updatedGrid) {
   let randChoice = (arr) => arr[floor(random(arr.length))];
 
   if (grid[i][j] === BOX_TOP_LEFT) {
-    if (i+1 < globalVars.CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
+    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
       updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_VERTICAL_HORIZONTAL,BOX_TOP_RIGHT,]);
     }
-    if (j+1 < globalVars.CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
+    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_VERTICAL_HORIZONTAL]);
     }
   }
 
   if (grid[i][j] === BOX_HORIZONTAL) {
-    if (i+1 < globalVars.CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
+    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
       updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_RIGHT, BOX_BOTTOM_RIGHT, BOX_VERTICAL_HORIZONTAL]);
     }
     if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
@@ -78,10 +80,10 @@ function addConnectingTile(i, j, updatedGrid) {
   }
 
   if (grid[i][j] === BOX_VERTICAL && season % 2 == 0) {
-    if (j+1 < globalVars.CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
+    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_TOP_LEFT, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL]);
     }
-    if (j-1 < globalVars.CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
+    if (j-1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = BOX_VERTICAL_HORIZONTAL;
     }
   }
@@ -91,12 +93,12 @@ function addConnectingTile(i, j, updatedGrid) {
     if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
       updatedGrid[i-1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_LEFT, BOX_VERTICAL_HORIZONTAL]);
     }
-    if (j+1 < globalVars.CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
+    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_BOTTOM_LEFT, BOX_VERTICAL_HORIZONTAL]);
     }
   } 
   if (grid[i][j] === BOX_BOTTOM_LEFT) {
-    if (i+1 < globalVars.CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
+    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
       updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL]);
     }
     if (j-1 >= 0 && !isBoxTile(grid[i][j-1])) {
@@ -113,13 +115,13 @@ function addConnectingTile(i, j, updatedGrid) {
   }
 
   if (grid[i][j] === BOX_VERTICAL_HORIZONTAL) {
-    if (i+1 < globalVars.CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
+    if (i+1 < AUTOMATA_CANVAS_COLS && !isBoxTile(grid[i+1][j])) {
       updatedGrid[i+1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_RIGHT, BOX_BOTTOM_RIGHT]);
     }
     if (i-1 >= 0 && !isBoxTile(grid[i-1][j])) {
       updatedGrid[i-1][j] = randChoice([BOX_HORIZONTAL, BOX_TOP_LEFT, BOX_BOTTOM_LEFT]);
     }
-    if (j+1 < globalVars.CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
+    if (j+1 < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[i][j+1])) {
       updatedGrid[i][j+1] = randChoice([BOX_VERTICAL, BOX_TOP_LEFT, BOX_TOP_RIGHT]);
     }
     if (j-1 >= 0 && !isBoxTile(grid[i][j-1])) {
@@ -130,8 +132,8 @@ function addConnectingTile(i, j, updatedGrid) {
 
 
 function hasBoxTiles() {
-  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
-    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
       if (isBoxTile(grid[i][j])) {
         return true;
       }
@@ -141,8 +143,8 @@ function hasBoxTiles() {
 }
 
 function reseedGrid() {
-  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
-    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
       grid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
     }
   }
@@ -168,8 +170,8 @@ function displayMessage(message, seconds) {
   let messages = [message];  // Start with just the original message
 
   // Check if the message is longer than the grid width
-  if (message.length > globalVars.CANVAS_COLS) {
-    const splitPoint = message.lastIndexOf(' ', globalVars.CANVAS_COLS / 2);  // Find the last space before the midpoint
+  if (message.length > AUTOMATA_CANVAS_COLS) {
+    const splitPoint = message.lastIndexOf(' ', AUTOMATA_CANVAS_COLS / 2);  // Find the last space before the midpoint
     messages = [
       message.substring(0, splitPoint),
       message.substring(splitPoint + 1)
@@ -177,16 +179,16 @@ function displayMessage(message, seconds) {
   }
 
   // Blank the screen with tile 0
-  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
-    for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
+  for (let y = 0; y < AUTOMATA_CANVAS_ROWS; y++) {
+    for (let x = 0; x < AUTOMATA_CANVAS_COLS; x++) {
       grid[x][y] = 0;
     }
   }
 
   for (let line = 0; line < messages.length; line++) {
     const msg = messages[line];
-    const startX = Math.floor((globalVars.CANVAS_COLS - msg.length) / 2);  // Center the message
-    const startY = Math.floor(globalVars.CANVAS_ROWS / 2) + line;  // Adjusted for multiple lines
+    const startX = Math.floor((AUTOMATA_CANVAS_COLS - msg.length) / 2);  // Center the message
+    const startY = Math.floor(AUTOMATA_CANVAS_ROWS / 2) + line;  // Adjusted for multiple lines
 
     for (let i = 0; i < msg.length; i++) {
       const char = msg.charAt(i);
@@ -196,7 +198,7 @@ function displayMessage(message, seconds) {
   }
 
   messageDisplayStart = frameCount;  // Store the frame when the message starts displaying
-  displayDurationFrames = seconds * 30; 
+  displayDurationFrames = seconds * 24; 
 }
 
 function drawTile(i, j, val) {
@@ -207,13 +209,13 @@ function drawTile(i, j, val) {
     fill(255);  // White color
   }
   noStroke();
-  rect(i * globalVars.TILE_HALF_WIDTH, j * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
+  rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
   
   // Draw the tile on the canvas
   // Calculate the position of the tile in the spritesheet
-  let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_HALF_WIDTH;
-  let y = floor(val / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HALF_HEIGHT;
-  image(spritesheet, i * globalVars.TILE_HALF_WIDTH, j * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT, x, y, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
+  let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
+  let y = floor(val / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HEIGHT;
+  image(spritesheet, i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, x, y, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
 }
 function canConnect(i, j) {
   const directions = [
@@ -225,7 +227,7 @@ function canConnect(i, j) {
   for (const dir of directions) {
     let ni = i + dir.dx;
     let nj = j + dir.dy;
-    if (ni >= 0 && nj >= 0 && ni < globalVars.CANVAS_COLS && nj < globalVars.CANVAS_ROWS && !isBoxTile(grid[ni][nj])) {
+    if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS && !isBoxTile(grid[ni][nj])) {
       return true;
     }
   }
@@ -243,7 +245,7 @@ function is3x3BlockAllSix(x, y) {
 }
 
 function draw() {
-  console.log(year, season, day);
+  //console.log(year, season, day);
   if (year < 1 && season < 3) {
     displayMessage('Photosensitive Epilepsy Warning, Flashing Images', 1);
   }
@@ -271,14 +273,14 @@ function draw() {
 
   // Create a copy of the grid to store updates, so we aren't reading and writing from the same grid simultaneously.
   let updatedGrid = [];
-  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
     updatedGrid[i] = grid[i].slice();
   }
 
   
 
-  for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
-    for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
+  for (let i = 0; i < AUTOMATA_CANVAS_COLS; i++) {
+    for (let j = 0; j < AUTOMATA_CANVAS_ROWS; j++) {
       let val = grid[i][j];
       if (year > 5 && year < 8){
 
@@ -291,7 +293,7 @@ function draw() {
               for (let dy = -1; dy <= 1; dy++) {
                   let ni = i + dx;
                   let nj = j + dy;
-                  if (ni >= 0 && nj >= 0 && ni < globalVars.CANVAS_COLS && nj < globalVars.CANVAS_ROWS) {
+                  if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
                       updatedGrid[ni][nj] = 6 + season;
                   } 
               }
@@ -307,7 +309,7 @@ function draw() {
             let ni = i + dx;
             let nj = j + dy;
 
-            if (ni >= 0 && nj >= 0 && ni < globalVars.CANVAS_COLS && nj < globalVars.CANVAS_ROWS) {
+            if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
               updatedGrid[ni][nj] = 6;
             }
           }
@@ -333,17 +335,17 @@ function draw() {
       if (year > 15 && year < 20){
         if (val === WALL) {
           updatedGrid[i][j] = WALL; // Preserve the wall tile
-          if (j + 1 < globalVars.CANVAS_ROWS && grid[i][j + 1] !== WALL) {
+          if (j + 1 < AUTOMATA_CANVAS_ROWS && grid[i][j + 1] !== WALL) {
             updatedGrid[i][j + 1] = WALL; // Place shadow edge underneath
           }
-          if (j + 2 < globalVars.CANVAS_ROWS && grid[i][j + 2] !== SHADOW_EDGE) {
+          if (j + 2 < AUTOMATA_CANVAS_ROWS && grid[i][j + 2] !== SHADOW_EDGE) {
             updatedGrid[i][j + 2] = SHADOW_EDGE; // Place shadow edge underneath
           }
           for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 let ni = i + dx;
                 let nj = j + dy;
-                if (ni >= 0 && nj >= 0 && ni < globalVars.CANVAS_COLS && nj < globalVars.CANVAS_ROWS) {
+                if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
                   updatedGrid[ni][nj] = FLOOR;
               }
             }
@@ -352,16 +354,16 @@ function draw() {
         // If it's a shadow edge, add wall to its right and void tile underneath
         else if (isShadowEdgeTile(val)) {
           updatedGrid[i][j] = SHADOW_EDGE; // Preserve the shadow edge tile
-          if (i + 1 < globalVars.CANVAS_COLS) {
+          if (i + 1 < AUTOMATA_CANVAS_COLS) {
             updatedGrid[i + 1][j] = WALL; // Place wall tile to the right
           }
-          if (j + 1 < globalVars.CANVAS_ROWS) {
+          if (j + 1 < AUTOMATA_CANVAS_ROWS) {
             updatedGrid[i][j + 1] = VOID;
           }
         } 
         if (val === VOID) {
           updatedGrid[i][j] = VOID;
-          if (j + 1 < globalVars.CANVAS_ROWS && grid[i][j + 1] !== VOID) {
+          if (j + 1 < AUTOMATA_CANVAS_ROWS && grid[i][j + 1] !== VOID) {
             updatedGrid[i][j + 1] = VOID; // Place void
           }
         }
@@ -370,7 +372,7 @@ function draw() {
               for (let dy = -1; dy <= 1; dy++) {
                   let ni = i + dx;
                   let nj = j + dy;
-                  if (ni >= 0 && nj >= 0 && ni < globalVars.CANVAS_COLS && nj < globalVars.CANVAS_ROWS) {
+                  if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
                       updatedGrid[ni][nj] = day % 2 == 0 ? 6 : 7;
                   }
               }
@@ -394,8 +396,8 @@ function draw() {
   }
 
   // Check for the 3x3 blocks having all values as 6
-  for (let i = 1; i < globalVars.CANVAS_COLS - 1; i++) {
-    for (let j = 1; j < globalVars.CANVAS_ROWS - 1; j++) {
+  for (let i = 1; i < AUTOMATA_CANVAS_COLS - 1; i++) {
+    for (let j = 1; j < AUTOMATA_CANVAS_ROWS - 1; j++) {
       if (is3x3BlockAllSix(i, j)) {
         updatedGrid[i][j] = floor(random(globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS));
       }
