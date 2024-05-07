@@ -188,7 +188,7 @@ PIXI.Loader.shared.onComplete.add(() => {
 });
 //console.log(smokeFrames);
 
-fetch("./data/grottoAudiosprite.json")
+fetch("data/grottoAudiosprite.json")
   .then(response => response.json())
   .then(data => {
     audioSpriteData = data;

@@ -1,8 +1,8 @@
 {
   "urls": [
-    "~/Development/audiosprite-master/grottoAudiosprite.mp3",
-    "~/Development/audiosprite-master/grottoAudiosprite.ogg",
-    "~/Development/audiosprite-master/grottoAudiosprite.m4a"
+    "./assets/sound/grottoAudiosprite.mp3",
+    "./assets/sound/audiosprite-master/grottoAudiosprite.ogg",
+    "./assets/sound/audiosprite-master/grottoAudiosprite.m4a"
   ],
   "sprite": {
     "arrow_hit": [
