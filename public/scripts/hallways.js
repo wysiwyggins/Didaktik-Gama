@@ -1,4 +1,3 @@
-
 let hallwayFrames = []; // Initialize the frames array
 let tmjData;
 let tmjFile = './assets/maps/hallways.tmj';
@@ -6,8 +5,9 @@ let loopCounter = 0;
 let currentHallwayFrame = 0;
 let stepSound;
 let startTime;
-reverb = new p5.Reverb();
-
+let secondaryColor;
+let reverb;
+let socket; // Declare socket variable
 reverb = new p5.Reverb();
 
 function preload() {
@@ -18,23 +18,41 @@ function preload() {
 }
 
 function setup() {
-  setTimeout(() => {
-    try {
+    // Create a baseColor with random RGB values
+    baseColor = color(random(100,256), random(100,256), random(100,256));
+    
+    // Extract RGB components from the baseColor
+    let r = red(baseColor);
+    let g = green(baseColor);
+    let b = blue(baseColor);
+  
+    createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH / 2, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT / 2);
+    parseTMJ(tmjData);
+    reverb.process(stepSound, loopCounter, loopCounter + 1);
+  
+    // Delay the execution of draw function by 600 milliseconds (adjust the delay time as needed)
+    setTimeout(() => {
+      draw(); // Call the draw function after the delay
+    }, 600);
+  
+    // Connect to the server with a delay to ensure setup processes complete
+    setTimeout(() => {
+      try {
         socket = io.connect(window.location.origin);
-    } catch (error) { 
+  
+        // Event listener for successful connection
+        socket.on('connect', () => {
+          console.log('Connected to server');
+          // Emit the baseColorChanged event with the RGB values
+          socket.emit('baseColorChanged', { red: r, green: g, blue: b });
+        });
+  
+      } catch (error) {
         console.error('Socket connection failed.');
-    }
-  }, 2000);
-  createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH / 2, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT / 2);
-  parseTMJ(tmjData);
-  reverb.process(stepSound, loopCounter, loopCounter + 1);
-
-  // Delay the execution of draw function by 600 milliseconds (adjust the delay time as needed)
-  setTimeout(() => {
-    draw(); // Call the draw function after the delay
-  }, 600);
-}
-
+      }
+    }, 2000);
+  }
+  
 
 function parseTMJ(tmj) {
   frames = []; // Clear existing frames before parsing new ones
@@ -55,8 +73,8 @@ function parseTMJ(tmj) {
 }
 
 function draw() {
-  background(255);
   
+  background(baseColor);
   drawFrame(frames[currentHallwayFrame] || []); // Check if frames[currentFrame] exists, otherwise provide an empty array as default
   if (frameCount % 12 === 0) {
     currentHallwayFrame = (currentHallwayFrame + 1) % frames.length;
@@ -117,3 +135,4 @@ function keyPressed(event) {
 
 // Add an event listener to the document to handle keydown events
 document.addEventListener('keydown', keyPressed);
+
