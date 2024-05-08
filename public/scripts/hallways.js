@@ -1,23 +1,20 @@
-let colorFrames = [];
-let homeFrames = []; // Initialize the frames array
-let tmjData;
-let tmjFile = './assets/maps/flipbooks.tmj';
-let loopCounter = 0; 
-let currentHomeFrame = 0;
 
-let osc;
-let melody = [53, 55, 57, 58, 62, 60, 57, 60, 58, 57, 58, 55, 57, 53, 55, 57, 58, 62,60, 57, 60, 58, 57, 58, 55, 53]; // MIDI notes for "Home! Sweet Home!"
-let durations = [0.2, 0.2, 0.8, 0.5, 0.4, 0.8, 0.4, 0.5, 0.8, 0.2, 0.5, 0.5, 1.3, 0.2, 0.2, 0.8, 0.5, 0.4, 0.8, 0.4, 0.5, 0.8, 0.2, 0.5, 0.5, 1.5]; // Durations in seconds for each note
-durations[durations.length - 1] = 0.8; // Last note held longer
-let noteIndex = 0;
-let noteDuration = 0;
+let hallwayFrames = []; // Initialize the frames array
+let tmjData;
+let tmjFile = './assets/maps/hallways.tmj';
+let loopCounter = 0; 
+let currentHallwayFrame = 0;
+let stepSound;
 let startTime;
+reverb = new p5.Reverb();
+
 reverb = new p5.Reverb();
 
 function preload() {
   spriteSheet = loadImage(globalVars.SPRITESHEET_PATH);
   spritesheetData = loadJSON(globalVars.SPRITE_DATA_PATH);
   tmjData = loadJSON(tmjFile);
+  stepSound = loadSound('./assets/sound/20.wav');
 }
 
 function setup() {
@@ -30,10 +27,7 @@ function setup() {
   }, 2000);
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH / 2, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT / 2);
   parseTMJ(tmjData);
-  generateColors();
-  osc = new p5.Oscillator('triangle');
-  playNote();
-  reverb.process(osc, loopCounter, loopCounter + 1);
+  reverb.process(stepSound, loopCounter, loopCounter + 1);
 
   // Delay the execution of draw function by 600 milliseconds (adjust the delay time as needed)
   setTimeout(() => {
@@ -41,18 +35,6 @@ function setup() {
   }, 600);
 }
 
-function playNote() {
-  if (noteIndex >= melody.length) {
-    noteIndex = 0; // Reset to start of melody for looping
-  }
-  let midiValue = melody[noteIndex + loopCounter];
-  let freq = midiToFreq(midiValue - loopCounter * 12);
-  osc.freq(freq);
-  osc.start();
-  startTime = millis();
-  noteDuration = durations[noteIndex] * 1000; // Convert to milliseconds
-  noteIndex++;
-}
 
 function parseTMJ(tmj) {
   frames = []; // Clear existing frames before parsing new ones
@@ -66,68 +48,30 @@ function parseTMJ(tmj) {
       }
       frame[row][col] = layer.data[i];
     }
-    if (layer.name === "color") {
-      colorFrames.push(frame);
-    } else {
-      frames.push(frame);
-    }
+    
+    frames.push(frame);
+    
   });
-}
-
-function generateColors() {
-  let baseHue = floor(random(360));
-  colors.push(color(`hsl(${baseHue}, 100%, 75%)`));  // Brighter color for visibility
-  colors.push(color(`hsl(${(baseHue + 120) % 360}, 100%, 75%)`));
-  colors.push(color(`hsl(${(baseHue + 240) % 360}, 100%, 75%)`));
 }
 
 function draw() {
-  background(0);
-  drawColorLayer(colorFrames[0]); // Assume there's only one color layer
+  background(255);
   
   drawFrame(frames[currentHallwayFrame] || []); // Check if frames[currentFrame] exists, otherwise provide an empty array as default
-  if (frameCount % 6 === 0) {
+  if (frameCount % 12 === 0) {
     currentHallwayFrame = (currentHallwayFrame + 1) % frames.length;
+    stepSound.play();
     if (currentHallwayFrame === 0) {  // Check if a loop has completed
       loopCounter++;
-      corruptTiles();  // Introduce corruption
+      // shuffle tiles
     }
   }
-  if (millis() - startTime > noteDuration) {
-    osc.stop();
-    playNote(); // Play the next note or loop back to the start
-  }
-  if (loopCounter > 6) {
-    window.location.href = 'game.html';
+  if (loopCounter > 20) {
+    window.location.href = 'patterns.html';
   }
 
 }
 
-function corruptTiles() {
-  frames.forEach(frame => {
-    frame.forEach(row => {
-      row.forEach((tile, index) => {
-        if (random() < 0.1) { // 10% chance to corrupt each tile
-          row[index] = floor(random(1, 211)); // Replace with random tile index
-        }
-      });
-    });
-  });
-}
-
-function drawColorLayer(colorLayer) {
-  if (!colorLayer) {
-    return;
-  }
-  for (let y = 0; y < colorLayer.length; y++) {
-    for (let x = 0; x < colorLayer[y].length; x++) {
-      let colorIndex = (colorLayer[y][x] - 1) % 3; // Cycle through the three colors
-      fill(colors[colorIndex]);
-      noStroke();
-      rect(x * globalVars.TILE_WIDTH / 2, y * globalVars.TILE_HEIGHT / 2, globalVars.TILE_WIDTH / 2, globalVars.TILE_HEIGHT / 2);
-    }
-  }
-}
 
 function drawFrame(frame) {
   if (!frame) {
@@ -157,15 +101,17 @@ function drawFrame(frame) {
       }
       image(spriteSheet, -globalVars.TILE_WIDTH / 4, -globalVars.TILE_HEIGHT / 4, globalVars.TILE_WIDTH / 2, globalVars.TILE_HEIGHT / 2, sx, sy, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
       pop();
+      
     }
   }
+  
 }
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'game.html';
+    window.location.href = 'automata.html';
   } else if (event.key === '{') {
-    window.location.href = 'geomancy.html';
+    window.location.href = 'game.html';
   }
 }
 
