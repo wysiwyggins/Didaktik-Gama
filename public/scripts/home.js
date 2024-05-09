@@ -85,10 +85,10 @@ function draw() {
   background(0);
   drawColorLayer(colorFrames[0]); // Assume there's only one color layer
   
-  drawFrame(frames[currentHallwayFrame] || []); // Check if frames[currentFrame] exists, otherwise provide an empty array as default
+  drawFrame(frames[currentHomeFrame] || []); // Check if frames[currentFrame] exists, otherwise provide an empty array as default
   if (frameCount % 6 === 0) {
-    currentHallwayFrame = (currentHallwayFrame + 1) % frames.length;
-    if (currentHallwayFrame === 0) {  // Check if a loop has completed
+    currentHomeFrame = (currentHomeFrame + 1) % frames.length;
+    if (currentHomeFrame === 0) {  // Check if a loop has completed
       loopCounter++;
       corruptTiles();  // Introduce corruption
     }
