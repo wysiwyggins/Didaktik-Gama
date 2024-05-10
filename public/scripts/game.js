@@ -394,25 +394,13 @@ class Actor {
             this.die();
         }
     }
-    die(){
-        this.messageList.addMessage("You are dead!");
-        this.type = PlayerType.SKELETON;
+    die(){ 
         this.isDead = true;
-        this.isSkeletonized = true;
-        
-        this.skeletonize();
-        for (let i = this.inventory.length - 1; i >= 0; i--) {
-            const item = this.inventory[i];
-            if (item.type === ItemType.KEY) {
-                // Find an adjacent, walkable tile
-                const adjacentTile = this.findAdjacentWalkableTile();
-                if (adjacentTile) {
-                    // Drop the key on the tile
-                    this.dropItemOnTile(item, adjacentTile.x, adjacentTile.y);
-                }
-            }
-        }
+        this.sprite.visible = false;
+        this.scheduler.remove(this);
+        this.messageList.addMessage(`${this.name} returns to dust.`);
     }
+
     checkForItems(x, y) {
         let item = objectMap[y][x]?.item;
         if (item) this.pickUpItem(item, x, y);
@@ -728,6 +716,25 @@ class Player extends Actor{
         this.updateSprites();
     }
     
+    die(){
+        this.messageList.addMessage("You are dead!");
+        this.type = PlayerType.SKELETON;
+        this.isDead = true;
+        this.isSkeletonized = true;
+        
+        this.skeletonize();
+        for (let i = this.inventory.length - 1; i >= 0; i--) {
+            const item = this.inventory[i];
+            if (item.type === ItemType.KEY) {
+                // Find an adjacent, walkable tile
+                const adjacentTile = this.findAdjacentWalkableTile();
+                if (adjacentTile) {
+                    // Drop the key on the tile
+                    this.dropItemOnTile(item, adjacentTile.x, adjacentTile.y);
+                }
+            }
+        }
+    }
 
     getDeltaXY(direction) {
         let dx = 0, dy = 0;
@@ -1655,6 +1662,7 @@ class Monster extends Actor{
                     this.updateSpritePosition();
                     this.checkForItems(this.x, this.y);
                     moved = true; // Mark as moved
+                    this.handleTileEffects(this.x, this.y);
                 }
             }
         
@@ -1777,8 +1785,6 @@ class Monster extends Actor{
                 this.secondTilePosition = {x: 9, y: 7};
                 break;
         }
-
-        
 
         this.updateSpritePosition = function() {
             if (this.sprite.firstTile && this.sprite.secondTile) {
@@ -1906,6 +1912,7 @@ class Monster extends Actor{
             if (door && !door.isLocked && !door.isOpen) {
                 door.open(); // Automatically open unlocked doors
             }
+            this.handleTileEffects(this.x, this.y);
         }
     }
     handleTileEffects(newTileX, newTileY) {
@@ -1917,11 +1924,13 @@ class Monster extends Actor{
                 this.isBurning = true;
                 this.burningTurns = 0;
                 this.messageList.addMessage(`${this.name} stepped into fire!`);
+                this.takeDamage(10);
             }
         }
     }
 
     applyDamageEffects() {
+        console.log("tried applying damage to monster " + this.name);
         if (this.isBurning) {
             this.blood -= 20;  // Or whatever damage value is appropriate
             this.burningTurns++;
@@ -1943,7 +1952,6 @@ class Monster extends Actor{
         if (this.bleeding && Math.random() < 0.7) {
             dripBlood(this.x, this.y, this.bloodColor);
         }
-
         this.getTargetsInRange();
 
         if(this.target) {
