@@ -424,9 +424,9 @@ function handleSpecialCharacters(char) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'game.html';
+    window.location.href = 'abyss.html';
   } else if (event.key === '{') {
-    window.location.href = 'home.html';
+    window.location.href = 'game.html';
   }
 }
 

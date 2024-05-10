@@ -3,9 +3,10 @@ let season = 0;
 let day = 0;
 let year = 0;
 
-const AUTOMATA_CANVAS_COLS = 40;
-const AUTOMATA_CANVAS_ROWS = 30;
-const MAX_YEAR = 15;
+const judgeName = '';
+const AUTOMATA_CANVAS_COLS = 50;
+const AUTOMATA_CANVAS_ROWS = 40;
+const MAX_YEAR = 10;
 const MESSAGE_DISPLAY_DURATION_SECONDS = 1;
 
 function preload() {
@@ -19,11 +20,19 @@ function setup() {
   try {
     socket = io.connect(window.location.origin);
   } catch (error) { 
-    console.error('Socket connection failed.');
+      console.error('Socket connection failed.');
   }
   createCanvas(AUTOMATA_CANVAS_COLS * globalVars.TILE_WIDTH, AUTOMATA_CANVAS_ROWS * globalVars.TILE_HEIGHT);
   background(255);  // Initialize with white background
   initializeGrid();
+  if (socket) {
+    fetch('/judgeName')
+        .then(response => response.json())
+        .then(data => {
+            judgeName = data.judgeName;
+        })
+        .catch(error => console.error('Error fetching judge name:', error));
+  } 
 }
 function displayMessage(message, seconds) {
   let messages = [message];  // Start with just the original message
@@ -104,13 +113,15 @@ function getTileIndex(tileName) {
 }
 
 function drawTile(i, j, val) {
-  fill((val % 2 === 0 && val !== 0) ? (i * 10 + season) : 255);
+  fill((val % 2 === 0 && val !== 0) ? (i * 10 + season) : 100, (val % 2 === 1 && val !== 0) ? (j * 10 + judgeName.length) : 255, 100);
   noStroke();
   rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
   let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
   let y = floor(val / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HEIGHT;
   image(spritesheet, i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, x, y, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
 }
+
+
 
 function draw() {
   if (year < 1 && season < 3) {
@@ -146,19 +157,25 @@ function draw() {
       let val = grid[i][j];
       updatedGrid[i][j] = (val + 1) % (globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS);
 
-      if (year > 5 && year < 8){
+      if (year > 3 && year < 4){
+        if (val == judgeName.length) {
+          updateNeighbors(updatedGrid, i, j);
+        }
+      }
+
+      if (year > 7 && year < 8){
         if (val > year && season % 2 == 0) {
           updateNeighbors(updatedGrid, i, j);
         }
       }
 
-      if (year > 15 && year < 20){
+      if (year > 10 && year < 20){
         if (val == year && season % 2 == 0) {
           updateNeighbors(updatedGrid, i, j);
         }
       }
 
-      if (val == 6 - season) {
+      if (val == 6 - judgeName.length && season % 2 == 0) {
         updateNeighbors(updatedGrid, i, j);
       }
 
@@ -170,6 +187,7 @@ function draw() {
       drawTile(i, j, val);
     }
   }
+  
 
   update3x3Blocks(updatedGrid);
   grid = updatedGrid;
@@ -182,7 +200,7 @@ function updateNeighbors(grid, i, j) {
       let ni = i + dx;
       let nj = j + dy;
       if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
-        grid[ni][nj] = (day % 2 == 0) ? 6 : 7;
+        grid[ni][nj] = (day % 2 == 0) ? 6 : judgeName.length;
       }
     }
   }

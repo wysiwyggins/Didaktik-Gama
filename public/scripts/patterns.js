@@ -44,7 +44,7 @@ function generateBaseAndComplementaryColors() {
 
 function draw() {
   if (reloads > 40) {
-    window.location.href = 'game.html';
+    window.location.href = 'mirror.html';
   }
 
   drawColorPattern();

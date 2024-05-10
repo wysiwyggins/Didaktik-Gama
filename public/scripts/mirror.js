@@ -5,7 +5,6 @@ let soundFiles = [];
 let wordBuffer = "";
 let fileIndex;
 
-let tileMap = [];
 let cursorX = 0;
 let cursorY = 0;
 currentPenColor = null;
@@ -33,11 +32,11 @@ function getTileIndexFromChar(char) {
 
 
 function preload() {
-  spriteSheet = loadImage('/public/assets/spritesheets/libuse40x30-cp437.png');
+  spriteSheet = loadImage(globalVars.SPRITESHEET_PATH);
   fileIndex = floor(random(1, 11));
-  backgroundImage = loadImage(`/public/assets/images/${fileIndex}.png`);
-  fileText = loadStrings(`/public/data/texts/${fileIndex}.txt`);
-  spriteData = loadJSON('/public/assets/spritesheets/spriteData.json');
+  backgroundImage = loadImage(`./assets/images/${fileIndex}.png`);
+  fileText = loadStrings(`./data/texts/${fileIndex}.txt`);
+  spriteData = loadJSON(globalVars.SPRITE_DATA_PATH);
   /* for (let i = 0; i <= 22; i++) { // Assuming sound files are named 0.wav through 22.wav
     let soundPath = `/public/assets/sound/${i}.wav`;
     soundFiles.push(loadSound(soundPath));

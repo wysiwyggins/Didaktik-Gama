@@ -441,6 +441,9 @@ class Actor {
         }
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
+            if (this.flowers >= 10) {
+                window.location.href = 'patterns.html';    
+            } 
         } if (item.type === ItemType.CRADLE) { 
             window.location.href = 'cradle.html';
         }

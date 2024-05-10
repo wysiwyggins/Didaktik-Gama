@@ -164,7 +164,11 @@ function drawSpritePattern() {
 
 
 function keyPressed(event) {
-  window.location.href = 'geomancy.html';
+  if (event.key === '}') { 
+    window.location.href = 'geomancy.html';
+  } else if (event.key === '{') {
+    window.location.href = 'boot.html';
+  }
 }
 
 // Add an event listener to the document to handle keydown events
