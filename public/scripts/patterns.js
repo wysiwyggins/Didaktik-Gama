@@ -239,7 +239,7 @@ function drawSpritePattern() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'mirror.html';
+    window.location.href = 'hallways.html';
   } else if (event.key === '{') {
     window.location.href = 'keyboard.html';
   }

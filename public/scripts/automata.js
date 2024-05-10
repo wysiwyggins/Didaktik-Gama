@@ -2,12 +2,17 @@ let grid = [];
 let season = 0;
 let day = 0;
 let year = 0;
+let thisJudgeName = "";
+let soundPlaying = new Array(22).fill(false); // Array to track playing sounds
+
 
 const judgeName = '';
 const AUTOMATA_CANVAS_COLS = 50;
 const AUTOMATA_CANVAS_ROWS = 40;
 const MAX_YEAR = 10;
 const MESSAGE_DISPLAY_DURATION_SECONDS = 1;
+
+
 
 function preload() {
   spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
@@ -29,11 +34,23 @@ function setup() {
     fetch('/judgeName')
         .then(response => response.json())
         .then(data => {
-            judgeName = data.judgeName;
+            thisJudgeName = data.judgeName;
         })
         .catch(error => console.error('Error fetching judge name:', error));
   } 
 }
+
+function playSound(index) {
+  if (!soundPlaying[index]) {
+    soundPlaying[index] = true;
+    sounds[index].play();
+    sounds[index].onended(() => {
+      soundPlaying[index] = false;
+    });
+  }
+}
+
+
 function displayMessage(message, seconds) {
   let messages = [message];  // Start with just the original message
 
@@ -113,7 +130,7 @@ function getTileIndex(tileName) {
 }
 
 function drawTile(i, j, val) {
-  fill((val % 2 === 0 && val !== 0) ? (i * 10 + season) : 100, (val % 2 === 1 && val !== 0) ? (j * 10 + judgeName.length) : 255, 100);
+  fill((val % 2 === 0 && val !== 0) ? (i * 10 + season) : 0, (thisJudgeName.length * 2) ? (j * 10 + thisJudgeName.length) : 255, 100);
   noStroke();
   rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
   let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
@@ -142,7 +159,7 @@ function draw() {
    year += 1;
    console.log('Year:', year);
   }
-  if (year > MAX_YEAR) {  
+  if (year >= MAX_YEAR) {  
     year = 0;
     window.location.href = 'patterns.html';
   }
@@ -157,9 +174,9 @@ function draw() {
       let val = grid[i][j];
       updatedGrid[i][j] = (val + 1) % (globalVars.SPRITESHEET_COLS * globalVars.SPRITESHEET_ROWS);
 
-      if (year > 3 && year < 4){
-        if (val == judgeName.length) {
-          updateNeighbors(updatedGrid, i, j);
+      if (year > 2 && year < 4){
+        if (val <= thisJudgeName.length) {
+          updatedGrid[i][j] = day % 2 == 0 ? 6 : 7;
         }
       }
 
@@ -169,19 +186,19 @@ function draw() {
         }
       }
 
-      if (year > 10 && year < 20){
+      if (year > 10){
         if (val == year && season % 2 == 0) {
           updateNeighbors(updatedGrid, i, j);
         }
       }
 
-      if (val == 6 - judgeName.length && season % 2 == 0) {
+      if (val == 6 - thisJudgeName.length && season % 2 == 0) {
         updateNeighbors(updatedGrid, i, j);
       }
 
-      if (i == 0 && j == 0 && (day == 1 || day == 4) ) {
+      if (i == 0 && j == 0 && (day == 1 || day == 4)) {
         let soundIndex = val % 22;
-        sounds[soundIndex].play();
+        playSound(soundIndex);
       }
 
       drawTile(i, j, val);
@@ -200,7 +217,7 @@ function updateNeighbors(grid, i, j) {
       let ni = i + dx;
       let nj = j + dy;
       if (ni >= 0 && nj >= 0 && ni < AUTOMATA_CANVAS_COLS && nj < AUTOMATA_CANVAS_ROWS) {
-        grid[ni][nj] = (day % 2 == 0) ? 6 : judgeName.length;
+        grid[ni][nj] = (day % 2 == 0) ? 6 : thisJudgeName.length;
       }
     }
   }

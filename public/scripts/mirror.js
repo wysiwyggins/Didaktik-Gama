@@ -156,7 +156,7 @@ function setCurrentTile(tileIndex) {
 
       advanceCursor();
       tilesDisplayed++;
-      if (tilesDisplayed >= globalVars.MAX_TILES) {
+      if (tilesDisplayed >= globalVars.MAX_TILES - 100) {
         window.location.href = 'automata.html';
       }
   } else {
