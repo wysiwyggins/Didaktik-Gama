@@ -102,7 +102,32 @@ let sound;
 //ticker is a tween thing I use for things that animate in place, like fire and smoke
 createjs.Ticker.framerate = 60;
 createjs.Ticker.addEventListener("tick", createjs.Tween);
-
+// fix for freeze when wake from sleep
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        PIXI.Ticker.shared.start();  // Restart PIXI ticker
+        createjs.Ticker.paused = false;  // Resume CreateJS ticker
+        engine.start();  // Resume ROT.js engine if it was stopped
+        console.log('Game resumed');
+    } else {
+        PIXI.Ticker.shared.stop();  // Stop PIXI ticker to prevent unnecessary processing
+        createjs.Ticker.paused = true;  // Pause CreateJS ticker
+        engine.lock();  // Optionally lock ROT.js engine
+        console.log('Game paused');
+    }
+});
+function checkAndLogState() {
+    console.log('Engine running:', engine.isRunning());
+    console.log('PIXI Ticker running:', !PIXI.Ticker.shared.started);
+    console.log('CreateJS Ticker status:', createjs.Ticker.paused);
+}
+document.addEventListener('visibilitychange', checkAndLogState);
+function restartTickers() {
+    PIXI.Ticker.shared.stop();
+    PIXI.Ticker.shared.start();
+    createjs.Ticker.paused = false;
+}
+// end sleep fixes
 
 function passTurn() {
     console.log('Turn passed due to inactivity.');
