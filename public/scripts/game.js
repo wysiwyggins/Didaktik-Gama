@@ -369,6 +369,7 @@ class Entity {
 // Actor is the class that Player and Monster inherit from, it's new and probably not utilized enough yet
 
 class Actor {
+    static allActors = [];
     constructor(type, x, y, scheduler, engine, messageList, inspector) {
         this.isDead = false;
         this.type = type;
@@ -386,6 +387,7 @@ class Actor {
         this.isFlammable = true;
         this.isBurning = false;
         this.burningTurns = 0;
+        Actor.allActors.push(this);
     }
 
     takeDamage(amount) {
@@ -657,6 +659,25 @@ class Player extends Actor{
             console.log("Out of bounds");
             return;
         }
+
+        let otherActor = this.findActorAt(newTileX, newTileY);
+            if (otherActor) {
+                // Determine next tile in the direction for the other actor
+                let [nextTileX, nextTileY] = [newTileX + dx, newTileY + dy];
+
+                // Check if the next tile is walkable
+                if (this.isWalkableTile(nextTileX, nextTileY) && !this.findActorAt(nextTileX, nextTileY)) {
+                    // Move the other actor to the next tile
+                    otherActor.updatePosition(nextTileX, nextTileY);
+                    otherActor.updateSpritePosition();
+                    this.messageList.addMessage(`You shove the ${otherActor.name}.`);
+                } else {
+                    // If next tile is not walkable or occupied, prevent movement
+                    this.messageList.addMessage(`You can't move there; ${otherActor.name} blocks the way.`);
+                    return;
+                }
+            }
+
         
         let door = Door.totalDoors().find(d => d.x === newTileX && d.y === newTileY);
         if (this.isLockedDoor(door)) return;
@@ -691,6 +712,16 @@ class Player extends Actor{
             this.updateSprites();
         }
     }
+
+    findActorAt(x, y) {
+        // Assuming all actors including monsters and NPCs are stored in a list
+        for (let actor of Actor.allActors) {  // Replace 'actors' with actual list of actors
+            if (actor.x === x && actor.y === y && !actor.isDead) {
+                return actor;
+            }
+        }
+        return null;
+    }
     
     handleExit(exit) {
         let currentLevelIndex = levels.indexOf(dungeon);
@@ -711,7 +742,6 @@ class Player extends Actor{
             }
         }
     
-        // Play a sound or animation if you like
         playExitSound();
         this.updateSprites();
     }
@@ -1868,6 +1898,7 @@ class Monster extends Actor{
             // Move towards the target
             this.x = nextX;
             this.y = nextY;
+            this.handleTileEffects(this.x, this.y);
             this.updateSpritePosition();
         }
     };
