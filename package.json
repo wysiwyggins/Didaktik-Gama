@@ -2,10 +2,11 @@
   "name": "console",
   "version": "1.0.0",
   "description": "This repository aims to unify several disparate JavaScript projects, envisioning them as different programs on an imaginary (haunted) alternate history computing device. Each sketch utilizes the 'Libuše' tileset in unique ways.",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . Console --platform=win32,darwin --arch=x64 --out=dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
     "dev": "node server.js"
   },
   "repository": {
@@ -21,10 +22,14 @@
   "dependencies": {
     "@serialport/bindings": "^8.0.8",
     "express": "^4.17.1",
+    "node-osc": "^4.0.2",
     "onoff": "^6.0.0",
     "open": "^8.0.4",
-    "socket.io": "^4.0.0",
-    "node-osc": "^4.0.2"
+    "socket.io": "^4.0.0"
   },
-  "homepage": "https://github.com/wysiwyggins/Console#readme"
+  "homepage": "https://github.com/wysiwyggins/Console#readme",
+  "devDependencies": {
+    "electron": "^30.0.3",
+    "electron-packager": "^17.0.0"
+  }
 }

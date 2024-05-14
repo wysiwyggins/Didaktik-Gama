@@ -97,7 +97,7 @@ function draw() {
     osc.stop();
     playNote(); // Play the next note or loop back to the start
   }
-  if (loopCounter > 6) {
+  if (loopCounter > 3) {
     window.location.href = 'game.html';
   }
 
