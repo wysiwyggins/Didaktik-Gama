@@ -686,22 +686,22 @@ class Player extends Actor{
         }
 
         let otherActor = this.findActorAt(newTileX, newTileY);
-            if (otherActor) {
-                // Determine next tile in the direction for the other actor
-                let [nextTileX, nextTileY] = [newTileX + dx, newTileY + dy];
+        if (otherActor && otherActor instanceof Monster) {
+            // Determine next tile in the direction for the other actor
+            let [nextTileX, nextTileY] = [newTileX + dx, newTileY + dy];
 
-                // Check if the next tile is walkable
-                if (this.isWalkableTile(nextTileX, nextTileY) && !this.findActorAt(nextTileX, nextTileY)) {
-                    // Move the other actor to the next tile
-                    otherActor.updatePosition(nextTileX, nextTileY);
-                    otherActor.updateSpritePosition();
-                    this.messageList.addMessage(`You shove the ${otherActor.name}.`);
-                } else {
-                    // If next tile is not walkable or occupied, prevent movement
-                    this.messageList.addMessage(`You can't move there; ${otherActor.name} blocks the way.`);
-                    return;
-                }
+            // Check if the next tile is walkable
+            if (this.isWalkableTile(nextTileX, nextTileY) && !this.findActorAt(nextTileX, nextTileY)) {
+                // Move the other actor to the next tile
+                otherActor.updatePosition(nextTileX, nextTileY);
+                otherActor.updateSpritePosition();
+                this.messageList.addMessage(`You shove the ${otherActor.name}.`);
+            } else {
+                // If next tile is not walkable or occupied, prevent movement
+                this.messageList.addMessage(`You can't move there; ${otherActor.name} blocks the way.`);
+                return;
             }
+        }
 
         
         let door = Door.totalDoors().find(d => d.x === newTileX && d.y === newTileY);
@@ -1093,6 +1093,16 @@ class Player extends Actor{
             this.removeTargetingSprite();
             return;
         }
+        if (this.isMining) {
+            const direction = this.getDirectionFromKey(event.key);
+            if (direction) {
+                const [dx, dy] = this.getDeltaXY(direction);
+                const targetX = this.x + dx;
+                const targetY = this.y + dy;
+                this.performMine(targetX, targetY);
+            }
+            return; // Stop further processing if in mining mode
+        }
         let newDirection = null;
         switch (event.key) {
             case 'ArrowUp':
@@ -1161,9 +1171,22 @@ class Player extends Actor{
             this.handleArrowAim();
             console.log("bow attack");
         }
-        if (event.key === 'c' || event.code === 'KeyC') {
+        if (event.key === 'x' || event.code === 'KeyX') {
             this.handleCloseDoor();
             console.log("close door");
+        }
+        if (event.key === 'i' || event.code === 'KeyI') {
+            messageList.hideBox(); 
+            player.printStats();
+            inspector.showBox();  
+            inspector.render();  
+        } else if (event.key !== 'i'|| event.code !== 'KeyI'){
+            inspector.hideBox(); 
+            messageList.showBox(); 
+            messageList.render();  
+        }
+        if (event.key === 'm' || event.code === 'KeyM') {
+            this.handleMine();
         }
     }
     
@@ -1176,6 +1199,8 @@ class Player extends Actor{
             this.messageList.addMessage("You have no bow to shoot with.");
         }
     }
+
+
 
     performArrowAttack(targetX, targetY) {
         // Check if player has enough arrows
@@ -1245,6 +1270,47 @@ class Player extends Actor{
             playArrowSound(false);
         } 
     }
+
+
+    handleMine() {
+        const hasMattock = this.inventory.some(item => item.type === ItemType.MATTOCK);
+        if (hasMattock) {
+           this.isMining = true;
+           this.messageList.addMessage("Mine where?");
+        } else {
+            this.messageList.addMessage("You have no mattock to mine with.");
+        }
+    }
+
+    performMine(targetX, targetY) {
+        console.log("Mining at", targetX, targetY);
+        if (this.isOutOfBounds(targetX, targetY)) {
+            this.messageList.addMessage("You've reached the edge of the underworld.");
+            return;
+        }
+    
+        if (wallMap[targetY][targetX] !== null) {
+            // Remove the wall sprite
+            gameContainer.removeChild(wallMap[targetY][targetX].sprite);
+            wallMap[targetY][targetX] = null; // Remove wall from the map
+            // Create a floor at the mined location
+            createRoughFloor(targetX, targetY);
+            
+            this.messageList.addMessage("You mined the wall.");
+            //
+            // Chance to break the mattock
+            if (Math.random() < 1/6) {
+                this.removeItemOfType(ItemType.MATTOCK);
+                this.messageList.addMessage("Your mattock broke!");
+                this.isMining = false;
+            }
+        } else {
+            this.messageList.addMessage("There is no wall to mine.");
+        }
+        this.isMining = false; // Exit mining mode regardless of outcome
+        //evaluateMapAndCreateWalls(); //this isn't preserving the walkable floor for some reason.
+    }
+    
     
     findMonsterAt(x, y) {
         for (let monster of Monster.allMonsters) {  
@@ -1419,6 +1485,12 @@ class Player extends Actor{
         }
         this.inspector.addMessage( "Arrows: " + this.arrows);
         this.inspector.addMessage( "Flowers: " + this.flowers);
+        this.inspector.addMessage( "Controls: ");
+        this.inspector.addMessage( "Arrow keys/WASD: Move");
+        this.inspector.addMessage( "B: Aim bow");
+        this.inspector.addMessage( "X: Close door");
+        this.inspector.addMessage( "M: Mine");
+        this.inspector.addMessage( "I: Character Info");
     }
     act() {
         this.engine.lock(); // Lock the engine until we get a valid move
@@ -3077,6 +3149,16 @@ function createChasmWall(x, y) {
 
 function createFloor(x, y) {
     createSprite(x, y, {x: 19, y: 6}, floorMap, 157);
+}
+
+function createRoughFloor(x, y) {
+    const possibleSprites = [
+        {x: 8, y: 6},
+        {x: 20, y: 6}
+    ];
+    const randomIndex = Math.floor(Math.random() * possibleSprites.length);
+    const chosenSprite = possibleSprites[randomIndex];
+    createSprite(x, y, chosenSprite, floorMap, 157);
 }
 
 function createWall(x, y) {
