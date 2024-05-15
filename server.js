@@ -48,6 +48,7 @@ function start() {
   });
 
   app.get('/judgeName', (req, res) => {
+    console.log('Returning judge name:', judgeName);
     res.send({ judgeName });
   });
 

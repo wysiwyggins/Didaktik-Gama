@@ -23,9 +23,9 @@ function preload() {
 
 function setup() {
   try {
-    socket = io.connect(window.location.origin);
-  } catch (error) { 
-      console.error('Socket connection failed.');
+    socket = io.connect('http://localhost:3000');
+  } catch (error) {
+    console.error('Socket connection failed.', error);
   }
   createCanvas(AUTOMATA_CANVAS_COLS * globalVars.TILE_WIDTH, AUTOMATA_CANVAS_ROWS * globalVars.TILE_HEIGHT);
   background(255);  // Initialize with white background

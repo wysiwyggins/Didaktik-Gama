@@ -38,8 +38,11 @@ function setup() {
     // Connect to the server with a delay to ensure setup processes complete
     setTimeout(() => {
       try {
-        socket = io.connect(window.location.origin);
-  
+        try {
+          socket = io.connect('http://localhost:3000');
+        } catch (error) {
+          console.error('Socket connection failed.', error);
+        }
         // Event listener for successful connection
         socket.on('connect', () => {
           console.log('Connected to server');

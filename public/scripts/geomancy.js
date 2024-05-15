@@ -21,9 +21,9 @@ function preload() {
 
 function setup() {
   try {
-    socket = io.connect(window.location.origin);
-  } catch (error) { 
-    console.error('Socket connection failed.');
+    socket = io.connect('http://localhost:3000');
+  } catch (error) {
+    console.error('Socket connection failed.', error);
   }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   frameRate(30); // Set the frame rate so that draw() is called once per second

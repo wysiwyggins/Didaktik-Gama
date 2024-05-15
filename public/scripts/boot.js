@@ -1,14 +1,14 @@
-
 let selectedTiles = [];
 let reloads = 0;
 let colorChangeFrameInterval = 120; // Number of frames between color changes
+let socket;
 
 function setup() {
   setTimeout(() => {
     try {
-        socket = io.connect(window.location.origin);
-    } catch (error) { 
-        console.error('Socket connection failed.');
+      socket = io.connect('http://localhost:3000');
+    } catch (error) {
+      console.error('Socket connection failed.', error);
     }
   }, 1000);
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
@@ -26,7 +26,6 @@ function setup() {
 }
 
 function preload() {
-
   spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
   spritesheetData = loadJSON('./assets/spritesheets/spriteData.json');
   backgroundImage = loadImage('./assets/images/boot.png');
@@ -34,62 +33,52 @@ function preload() {
 }
 
 function generateBaseAndComplementaryColors() {
-    colors = []; // Clear the previous colors
-    baseColor = color(random(255), random(255), random(255));
-    colors.push(baseColor);
-    for (let i = 1; i <= 3; i++) {
-        colors.push(complementColor(baseColor, i * 90)); // Generate and push complementary colors
-    }
-    
+  colors = []; // Clear the previous colors
+  baseColor = color(random(255), random(255), random(255));
+  colors.push(baseColor);
+  for (let i = 1; i <= 3; i++) {
+    colors.push(complementColor(baseColor, i * 90)); // Generate and push complementary colors
+  }
 }
-
 
 function draw() {
   let cyclePhase = frameCount % colorChangeFrameInterval;
   background(colors[0]);
-  
+
   if (cyclePhase === 0) {
-      generateBaseAndComplementaryColors();
-      wave1.start();
-      wave2.start();
+    generateBaseAndComplementaryColors();
+    wave1.start();
+    wave2.start();
   }
 
   if (cyclePhase < 5) {
-      drawColorPattern();  // Show animated rows briefly at the beginning of each cycle
-      wave1.freq(random(50, 100));
-      wave2.freq(random(10, 100));
+    drawColorPattern();  // Show animated rows briefly at the beginning of each cycle
+    wave1.freq(random(50, 100));
+    wave2.freq(random(10, 100));
   } else {
     background(colors[0]);  // Fill screen with a single color for the rest of the cycle
-    
   }
 
   image(backgroundImage, 0, 0, width, height);  // Display background image
-  
-  let chance = floor(random(1, 5));
-  
-  
-  reloads++;
-  if (reloads > 1000 ) {
-    window.location.href = 'geomancy.html';
-  } 
-}
 
+  reloads++;
+  if (reloads > 1000) {
+    window.location.href = 'geomancy.html';
+  }
+}
 
 function drawColorPattern() {
-    let chance = floor(random(1, 5));
-    let offset = floor(frameCount / colorChangeFrameInterval + chance)  % 2; // Alternate color starting index
-    for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
-        let colorIndex = (y + offset) % 2; // Change starting index every interval
-        for (let x = 0; x < globalVars.CANVAS_COLS; x++) { // Loop for columns added here
-            fill(colors[colorIndex % colors.length]);
-            noStroke();
-            rect(x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
-            
-            
-        }
+  let chance = floor(random(1, 5));
+  let offset = floor(frameCount / colorChangeFrameInterval + chance) % 2; // Alternate color starting index
+  for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
+    let colorIndex = (y + offset) % 2; // Change starting index every interval
+    for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
+      fill(colors[colorIndex % colors.length]);
+      noStroke();
+      rect(x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
     }
+  }
 }
-
 
 function complementColor(c, angle) {
   // Convert RGB to HSB, adjust hue, then convert back to RGB
@@ -101,11 +90,10 @@ function complementColor(c, angle) {
   return color(h, s, b);
 }
 
-
 function selectPatternTiles() {
   let harmonyType = floor(random(3)); // Introduce a third type of harmony
   let selectedTileIndices = [0]; // Include blank tile
-  
+
   switch (harmonyType) {
     case 0: // Adjacent tiles
       let startIndex = floor(random(tiles.length - 3));
@@ -127,7 +115,7 @@ function selectPatternTiles() {
       }
       break;
   }
-  
+
   // Ensure four unique tiles are selected
   selectedTiles = selectedTileIndices.map(index => tiles[index]);
 }
@@ -145,7 +133,7 @@ function extractTilesFromSpritesheet() {
 
 function drawSpritePattern() {
   console.log(`Drawing sprite pattern with ${selectedTiles.length} tiles.`);
-  
+
   for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
     for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
       let tile = random(selectedTiles);
@@ -161,10 +149,8 @@ function drawSpritePattern() {
   }
 }
 
-
-
 function keyPressed(event) {
-  if (event.key === '}') { 
+  if (event.key === '}') {
     window.location.href = 'geomancy.html';
   } else if (event.key === '{') {
     window.location.href = 'boot.html';
@@ -173,5 +159,3 @@ function keyPressed(event) {
 
 // Add an event listener to the document to handle keydown events
 document.addEventListener('keydown', keyPressed);
-
-

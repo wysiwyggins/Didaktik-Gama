@@ -20,6 +20,8 @@ function createWindow() {
 
   mainWindow.loadFile('public/index.html'); // Adjust the path to your entry HTML file
 
+  mainWindow.webContents.openDevTools(); // Enable DevTools
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -41,8 +43,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-ipcMain.handle('get-shared-state', () => sharedState);
-
-ipcMain.handle('set-shared-state', (event, newState) => {
-  sharedState = { ...sharedState, ...newState };
+ipcMain.handle('get-shared-state', () => {
+  console.log('Shared state updated:', sharedState);
 });

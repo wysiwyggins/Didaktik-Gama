@@ -1485,12 +1485,13 @@ class Player extends Actor{
         }
         this.inspector.addMessage( "Arrows: " + this.arrows);
         this.inspector.addMessage( "Flowers: " + this.flowers);
+        this.inspector.addMessage( "" );
         this.inspector.addMessage( "Controls: ");
-        this.inspector.addMessage( "Arrow keys/WASD: Move");
-        this.inspector.addMessage( "B: Aim bow");
-        this.inspector.addMessage( "X: Close door");
-        this.inspector.addMessage( "M: Mine");
-        this.inspector.addMessage( "I: Character Info");
+        this.inspector.addMessage( "   Arrow keys/WASD: Move");
+        this.inspector.addMessage( "   B: Aim bow");
+        this.inspector.addMessage( "   X: Close door");
+        this.inspector.addMessage( "   M: Mine");
+        this.inspector.addMessage( "   I: Character Info");
     }
     act() {
         this.engine.lock(); // Lock the engine until we get a valid move
@@ -1997,6 +1998,9 @@ class Monster extends Actor{
             this.y = nextY;
             this.handleTileEffects(this.x, this.y);
             this.updateSpritePosition();
+        } else {
+            // If the target is blocked, move randomly
+            this.moveRandomly();
         }
     };
     isOutOfBounds(x, y) {
@@ -3687,9 +3691,9 @@ class UIBox {
 // This function will run when the spritesheet has finished loading
 async function setup() {
     try {
-        socket = io.connect(window.location.origin);
-    } catch (error) { 
-        console.error('Socket connection failed.');
+        socket = io.connect('http://localhost:3000');
+    } catch (error) {
+        console.error('Socket connection failed.', error);
     }
     dungeonGeneration();
     addFloorsAndVoid();
@@ -3746,13 +3750,13 @@ async function setup() {
     
     
     messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 5);
-    inspector = new UIBox([], 30, 10, true);
+    inspector = new UIBox([], 30, 15, true);
 
     // And handle them individually
     messageList.showBox();
     messageList.showUIContainer();
     if (socket) {
-        fetch('/judgeName')
+        fetch('http://localhost:3000/judgeName')
             .then(response => response.json())
             .then(data => {
                 const judgeName = data.judgeName;
