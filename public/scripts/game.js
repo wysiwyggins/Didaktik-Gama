@@ -117,7 +117,6 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 function checkAndLogState() {
-    console.log('Engine running:', engine.isRunning());
     console.log('PIXI Ticker running:', !PIXI.Ticker.shared.started);
     console.log('CreateJS Ticker status:', createjs.Ticker.paused);
 }
@@ -457,10 +456,10 @@ class Actor {
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
             if (this.flowers >= 10) {
-                window.location.href = 'patterns.html';    
+                window.api.navigate('patterns.html');  
             } 
         } if (item.type === ItemType.CRADLE) { 
-            window.location.href = 'cradle.html';
+            window.api.navigate('cradle.html');
         }
 
         // Log a message about the item picked up
@@ -1188,6 +1187,12 @@ class Player extends Actor{
         if (event.key === 'm' || event.code === 'KeyM') {
             this.handleMine();
         }
+        if (event.key === 'r' || event.code === 'KeyR') {
+            this.die();
+            if (engine._lock) {
+                engine.unlock();
+            }
+        }
     }
     
     handleArrowAim() {
@@ -1200,7 +1205,12 @@ class Player extends Actor{
         }
     }
 
-
+    removeItemOfType(itemType) {
+        const index = this.inventory.findIndex(item => item.type === itemType);
+        if (index !== -1) {
+            this.inventory.splice(index, 1);
+        }
+    }
 
     performArrowAttack(targetX, targetY) {
         // Check if player has enough arrows
@@ -1284,32 +1294,45 @@ class Player extends Actor{
 
     performMine(targetX, targetY) {
         console.log("Mining at", targetX, targetY);
-        if (this.isOutOfBounds(targetX, targetY)) {
-            this.messageList.addMessage("You've reached the edge of the underworld.");
-            return;
-        }
-    
-        if (wallMap[targetY][targetX] !== null) {
-            // Remove the wall sprite
-            gameContainer.removeChild(wallMap[targetY][targetX].sprite);
-            wallMap[targetY][targetX] = null; // Remove wall from the map
-            // Create a floor at the mined location
-            createRoughFloor(targetX, targetY);
-            
-            this.messageList.addMessage("You mined the wall.");
-            //
-            // Chance to break the mattock
-            if (Math.random() < 1/6) {
-                this.removeItemOfType(ItemType.MATTOCK);
-                this.messageList.addMessage("Your mattock broke!");
-                this.isMining = false;
+        if (floorMap[targetY][targetX]?.value != null) {
+            if (this.isOutOfBounds(targetX, targetY)) {
+                this.messageList.addMessage("You've reached the edge of the underworld.");
+                return;
+            }
+        
+            if (wallMap[targetY][targetX]?.value !== null) {
+                // Remove the wall sprite
+                gameContainer.removeChild(wallMap[targetY][targetX].sprite);
+                if (wallMap[targetY][targetX]?.value) {
+                    wallMap[targetY][targetX].value = null; // Remove wall from the map
+                }
+                // Create a floor at the mined location
+                createRoughFloor(targetX, targetY);
+                playBumpSound();
+                this.messageList.addMessage("You mined the wall.");
+        
+                // Random chance to place Uranium
+                if (Math.random() < 1/5) {
+                    let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
+                    this.scheduler.add(uranium, true); // Add Uranium to the scheduler
+                    this.messageList.addMessage("You found Uranium!");
+                }
+        
+                // Chance to break the mattock
+                if (Math.random() < 1/20) {
+                    this.removeItemOfType(ItemType.MATTOCK);
+                    this.messageList.addMessage("Your mattock broke!");
+                    this.isMining = false;
+                }
+            } else {
+                this.messageList.addMessage("There is no wall to mine.");
             }
         } else {
-            this.messageList.addMessage("There is no wall to mine.");
+            this.messageList.addMessage("You can't mine here.");
         }
         this.isMining = false; // Exit mining mode regardless of outcome
-        //evaluateMapAndCreateWalls(); //this isn't preserving the walkable floor for some reason.
     }
+    
     
     
     findMonsterAt(x, y) {
@@ -1492,6 +1515,17 @@ class Player extends Actor{
         this.inspector.addMessage( "   X: Close door");
         this.inspector.addMessage( "   M: Mine");
         this.inspector.addMessage( "   I: Character Info");
+        this.inspector.addMessage( "   R: Suicide");
+    }
+
+    getDirectionFromKey(key) {
+        switch (key) {
+            case 'ArrowUp': case 'Numpad8': case '8': case 'w': return 'up';
+            case 'ArrowDown': case 'Numpad2': case '2': case 's': return 'down';
+            case 'ArrowLeft': case 'Numpad4': case '4': case 'a': return 'left';
+            case 'ArrowRight': case 'Numpad6': case '6': case 'd': return 'right';
+            default: return null;
+        }
     }
     act() {
         this.engine.lock(); // Lock the engine until we get a valid move
@@ -1705,7 +1739,6 @@ class Monster extends Actor{
         this.bleeding = false;
         this.name = ""; // To be set by a monster-specific code.
         this.description = ""; // To be set by a monster-specific code.
-
         // An array of attacks a monster can perform. Can be set by a monster-specific code.
         this.attacks = []; 
         this.spriteFlip = {
@@ -1798,6 +1831,64 @@ class Monster extends Actor{
                 console.log("Skeleton couldn't find an unblocked path to move randomly.");
             }
         };
+        this.moveRandomlyAndMine = function() {
+            let moved = false;
+    
+            while (!moved) {
+                let adjacentTiles = this.getAdjacentTiles();
+    
+                // Filter out tiles that have a locked door or are blocked.
+                adjacentTiles = adjacentTiles.filter(tile => {
+                    let door = Door.totalDoors().find(door => door.x === tile.x && door.y === tile.y);
+                    return !door || !this.isLockedDoor(door); // Allow open doors or tiles without doors
+                }).filter(tile => !this.isBlocked(tile.x, tile.y)); // Ensure the tile is not blocked
+    
+                if (adjacentTiles.length > 0) {
+                    let randomTile = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
+                    this.x = randomTile.x;
+                    this.y = randomTile.y;
+    
+                    // Open any unlocked door on the tile.
+                    let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
+                    if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
+                        doorOnTile.open();
+                        this.messageList.addMessage("You hear a crashing noise.");
+                    }
+    
+                    this.updateSpritePosition();
+                    this.checkForItems(this.x, this.y);
+                    moved = true; // Mark as moved
+    
+                    this.handleTileEffects(this.x, this.y);
+    
+                    // After moving, attempt to mine adjacent walls
+                    let directions = ['up', 'down', 'left', 'right'];
+                    for (let direction of directions) {
+                        let [dx, dy] = this.getDeltaXY(direction);
+                        let targetX = this.x + dx;
+                        let targetY = this.y + dy;
+                        if (!this.isOutOfBounds(targetX, targetY) && wallMap[targetY][targetX]?.value !== null && backgroundMap[targetY][targetX]?.value !== 216) {
+                            // Remove the wall sprite
+                            gameContainer.removeChild(wallMap[targetY][targetX].sprite);
+                            if (wallMap[targetY][targetX]?.value){
+                                wallMap[targetY][targetX].value = null; // Remove wall from the map
+                            }
+                            // Create a floor at the mined location
+                            createRoughFloor(targetX, targetY);
+    
+                            this.messageList.addMessage("A " + this.name + " chisels away at a wall.");
+                            playBumpSound();
+                            break; // Break after one successful mine action
+                        } else {
+                            playBumpSound();
+                        }
+                    }
+                } else {
+                    console.log(this.name + " couldn't find an unblocked path to move randomly.");
+                    moved = true; // Exit loop if no move is possible
+                }
+            }
+        };
         
         switch(type) {
             case MonsterType.BASILISK:
@@ -1882,6 +1973,8 @@ class Monster extends Actor{
                 this.name = "Skeleton";
                 this.upright = true;
                 this.attacks = ["CLAW"];
+                this.speed = 1;
+                this.actFrequency = 2;
                 this.isFlammable = true;
                 this.firstTilePosition = {x: 8, y: 7};
                 this.secondTilePosition = {x: 9, y: 7};
@@ -1906,6 +1999,17 @@ class Monster extends Actor{
                     }
                 };
                 break;
+                case MonsterType.ROBOT:
+                    this.name = "Robot";
+                    this.upright = true;
+                    this.isFlammable = false;
+                    this.firstTilePosition = {x: 10, y: 5};
+                    this.secondTilePosition = {x: 13, y: 6};
+                    this.act = function() {
+                        this.moveRandomlyAndMine();
+                    };
+                    break;
+     
             default:
                 this.name = monster;
                 this.upright = true;
@@ -2006,7 +2110,16 @@ class Monster extends Actor{
     isOutOfBounds(x, y) {
         return x < 0 || y < 0 || x >= MAP_WIDTH || y >= MAP_HEIGHT;
     }
-
+    getDeltaXY(direction) {
+        let dx = 0, dy = 0;
+        switch (direction) {
+            case 'up': dy = -1; break;
+            case 'down': dy = 1; break;
+            case 'left': dx = -1; break;
+            case 'right': dx = 1; break;
+        }
+        return [dx, dy];
+    }
     isWalkableTile(x, y) {
         // Assuming floorMap is a globally accessible structure
         return floorMap[y][x].value === 157; // Only floor tiles are walkable
@@ -2523,6 +2636,73 @@ class Kudzu extends Entity {
     
 }
 
+class Uranium extends Entity {
+    constructor(x, y, scheduler, color = '0xADFF2F') {
+        super(x, y, scheduler, [], 2, growthMap); 
+        this._tileIndex = {x: 8, y: 0};
+        this.name = "Uranium";
+        this.color = color;
+        this.isFlammable = false;
+
+        this.sprite.tint = this.color;  // apply the tint
+        this.sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+        this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
+        // Updating the atmosphere map to include this Uranium instance
+        if (!atmosphereMap[this.y]) {
+            atmosphereMap[this.y] = [];
+        }
+        atmosphereMap[this.y][this.x] = { value: 400, sprite: this.sprite }; // Use a unique value for Uranium
+
+        // Specific tween for the Uranium instance
+        let colorVariation = generateColorVariation(color, 0x101010); // color variation of flicker
+        this.tween = new createjs.Tween.get(this.sprite)
+            .to({ tint: colorVariation.lighter }, 20) 
+            .wait(20)
+            .to({ tint: color }, 100)
+            .wait(100)
+            .to({ tint: colorVariation.darker }, 10)
+            .wait(10)
+            .call(() => {
+                this.tween.gotoAndPlay(0); // Restart the animation from the beginning
+            });
+    }
+
+    act() {
+        // Check adjacent tiles for the player and potentially harm them
+        let directions = [
+            [-1, 0], // left
+            [1, 0], // right
+            [0, -1], // up
+            [0, 1] // down
+        ];
+        for (let direction of directions) {
+            let newX = this.x + direction[0];
+            let newY = this.y + direction[1];
+            if (!this.isOutOfBounds(newX, newY) && player.x === newX && player.y === newY) {
+                if (Math.random() < 1 / 3) { // 1 in 3 chance to harm the player
+                    player.takeDamage(1);
+                    this.messageList.addMessage("You feel sick.");
+                }
+            }
+        }
+    }
+
+    isOutOfBounds(x, y) {
+        return x < 0 || y < 0 || x >= MAP_WIDTH || y >= MAP_HEIGHT;
+    }
+}
+
+function generateColorVariation(baseColor, variation) {
+    const lighter = (baseColor & 0xFFFFFF) + (variation & 0xFFFFFF);
+    const darker = (baseColor & 0xFFFFFF) - (variation & 0xFFFFFF);
+    return {
+        lighter: lighter > 0xFFFFFF ? 0xFFFFFF : lighter,
+        darker: darker < 0 ? 0 : darker
+    };
+}
+
+
+
 
 
 
@@ -2541,7 +2721,8 @@ const ItemType = Object.freeze({
     "KEY": 2,
     "ARROW": 3,
     "FLOWER": 4,
-    "CRADLE": 5
+    "CRADLE": 5,
+    "MATTOCK": 6
 });
 
 class Item {
@@ -2587,8 +2768,15 @@ class Item {
             case ItemType.CRADLE:
                 this._name = 'Cradle';
                 this._type = type;
-                this._tileIndex = {x: 8, y: 0};
+                this._tileIndex = {x: 14, y: 10};
                 this._objectNumber = 3;
+                this.colorValue = colorValue;
+                break;
+            case ItemType.MATTOCK:
+                this._name = 'Mattock';
+                this._type = type;
+                this._tileIndex = {x: 3, y: 8};
+                this._objectNumber = 4;
                 this.colorValue = colorValue;
                 break;
         }
@@ -3012,86 +3200,6 @@ function createSprite(x, y, index, layer, value = null, overlay = false, tint = 
     return layer[y][x]; 
 }
 
-function createSprite(x, y, index, layer, value = null, overlay = false, tint = null) {
-    if (!layer[y]) {
-        layer[y] = [];
-    }
-    let container;
-    if (layer === uiMaskMap){
-        container = uiMaskContainer;
-    } else if (layer === uiMap || layer === overlayMap) {
-        container = uiContainer;
-    } else {
-        container = gameContainer;
-    }
-    if (layer?.[y]?.[x]?.sprite) {
-        container.removeChild(layer[y][x].sprite);
-    }
-
-    let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
-    let texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
-        index.x * globalVars.TILE_WIDTH,
-        index.y * globalVars.TILE_HEIGHT,
-        globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT));
-
-    let sprite = new PIXI.Sprite(texture);
-    sprite.scale.set(SCALE_FACTOR);
-    sprite.x = x * globalVars.TILE_WIDTH * SCALE_FACTOR;
-    sprite.y = y * globalVars.TILE_HEIGHT * SCALE_FACTOR;
-    if (tint) {
-        sprite.tint = tint;
-    }
-    // Set initial opacity to 1
-    if (layer === wallMap || layer === uiMap) {
-        sprite.alpha = 1;
-    }
-    if (layer === atmosphereMap){
-        sprite.zIndex = 3.9;
-    }
-    if (layer === wallMap) {
-        sprite.zIndex = 3;
-
-        // Remove sprites on layers beneath the wall layer if they exist at the same position
-        if (wallMap?.[y]?.[x]?.sprite) {
-            container.removeChild(wallMap[y][x].sprite);
-            wallMap[y][x].sprite = null;
-        }
-        if (floorMap?.[y]?.[x]?.sprite) {
-            container.removeChild(floorMap[y][x].sprite);
-            floorMap[y][x].sprite = null;
-        }
-        if (backgroundMap?.[y]?.[x]?.sprite) {
-            container.removeChild(backgroundMap[y][x].sprite);
-            backgroundMap[y][x].sprite = null;
-        }
-    } else if (layer === objectMap || layer === doorMap || layer === growthMap) {
-        sprite.zIndex = 2; // Set zIndex for objectMap
-    } else if (layer === floorMap) {
-        sprite.zIndex = 1;
-        
-        // Remove sprites on the background layer if they exist at the same position
-        if (backgroundMap?.[y]?.[x]?.sprite) {
-            container.removeChild(backgroundMap[y][x].sprite);         
-        }
-    } else if (layer === bloodMap) { 
-        sprite.zIndex = 1.1;
-    }
-
-
-    container.addChild(sprite);
-
-    let existingValue = layer[y][x] ? layer[y][x].value : null;
-    layer[y][x] = {value: value !== null ? value : existingValue, sprite: sprite};
-    // Update zIndex for objectMap based on y position compared to walls
-    if (layer === objectMap || layer === doorMap && wallMap?.[y]?.[x]?.sprite) {
-        if (y * globalVars.TILE_HEIGHT * SCALE_FACTOR < wallMap[y][x].sprite.y) {
-            sprite.zIndex = 4; // Object is behind the wall
-        }
-    }
-    
-    //return sprite;
-    return layer[y][x]; 
-}
 function getComplimentaryColor(color) {
     // Extract the RGB components from the color
     const r = (color >> 16) & 0xFF;
@@ -3729,6 +3837,8 @@ async function setup() {
     let randomTile6 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile7 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile8 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
+    let randomTile9 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
+    let randomTile10 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     //add exits, they don't work yet
    /*  let downExitTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let upExitTile;
@@ -3799,9 +3909,13 @@ async function setup() {
         let skeleton3 = new Monster(MonsterType.SKELETON, randomTile8.x, randomTile8.y, scheduler, engine, messageList, inspector);
         createMonsterSprite(skeleton3);
         scheduler.add(skeleton3, true);
+        let robot1 = new Monster(MonsterType.ROBOT, randomTile9.x, randomTile9.y, scheduler, engine, messageList, inspector);
+        createMonsterSprite(robot1);
+        scheduler.add(robot1, true);
         new Item(ItemType.BOW,randomTile3.x, randomTile3.y, 0xFFFFFF, 1);
         new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, 0xFFFFFF, 3);
         new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
+        new Item(ItemType.MATTOCK,randomTile10.x, randomTile10.y, 0x00FF00, 2);
         /* let chimera = new Monster(MonsterType.CHIMERA, randomTile3.x, randomTile3.y, scheduler, engine, messageList);
         createMonsterSprite(chimera);
         scheduler.add(chimera, true); */

@@ -10,8 +10,8 @@ function xyToIndex(x, y) {
   return y * 23 + x;
 }
 
-
 const globalVars = {
+  
   SPRITESHEET_PATH: './assets/spritesheets/libuse40x30-cp437.png',
   SPRITE_DATA_PATH: './assets/spritesheets/spriteData.json',
   TILE_WIDTH: 40,

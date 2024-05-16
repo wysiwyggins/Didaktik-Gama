@@ -157,7 +157,7 @@ function setCurrentTile(tileIndex) {
       advanceCursor();
       tilesDisplayed++;
       if (tilesDisplayed >= globalVars.MAX_TILES - 100) {
-        window.location.href = 'automata.html';
+        window.api.navigate('automata.html');
       }
   } else {
       console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -429,9 +429,9 @@ function handleSpecialCharacters(char) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'automata.html';
+    window.api.navigate('hallways.html');
   } else if (event.key === '{') {
-    window.location.href = 'patterns.html';
+    window.api.navigate('patterns.html');
   }
 }
 

@@ -31,13 +31,19 @@ function setup() {
   background(255);  // Initialize with white background
   initializeGrid();
   if (socket) {
-    fetch('/judgeName')
+    fetch('http://localhost:3000/judgeName')
         .then(response => response.json())
         .then(data => {
-            thisJudgeName = data.judgeName;
+            const judgeName = data.judgeName;
+            console.log('Judge name:', judgeName);
+            if (judgeName != ""){
+                messageList.addMessage(`Your judge is ${judgeName}.`);
+            }
         })
         .catch(error => console.error('Error fetching judge name:', error));
-  } 
+} else {
+    messageList.addMessage('You are not connected to the server.');
+} 
 }
 
 function playSound(index) {

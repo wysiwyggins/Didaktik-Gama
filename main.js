@@ -20,7 +20,9 @@ function createWindow() {
 
   mainWindow.loadFile('public/index.html'); // Adjust the path to your entry HTML file
 
-  mainWindow.webContents.openDevTools(); // Enable DevTools
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools(); // Enable DevTools only in development
+  }
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -44,5 +46,18 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.handle('get-shared-state', () => {
+  console.log('Shared state retrieved:', sharedState);
+  return sharedState;
+});
+
+ipcMain.handle('set-shared-state', (event, newState) => {
+  sharedState = { ...sharedState, ...newState };
   console.log('Shared state updated:', sharedState);
+});
+
+// Handle navigation IPC
+ipcMain.on('navigate', (event, url) => {
+  if (mainWindow) {
+    mainWindow.loadFile(`public/${url}`);
+  }
 });

@@ -98,6 +98,7 @@ function draw() {
     playNote(); // Play the next note or loop back to the start
   }
   if (loopCounter > 3) {
+    console.log('loops' + loopCounter);
     window.location.href = 'game.html';
   }
 

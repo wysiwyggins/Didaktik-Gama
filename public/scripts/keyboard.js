@@ -6,7 +6,7 @@ let soundFiles = [];
 
 let cursorX = 0;
 let cursorY = 0;
-currentPenColor = null;
+currentPenColor = 0xFFFFFF;
 let tilesDisplayed = 0;
 
 
@@ -143,7 +143,7 @@ function setCurrentTile(tileIndex) {
     advanceCursor();
     tilesDisplayed++;
     if (tilesDisplayed >= globalVars.MAX_TILES) {
-      window.location.href = 'automata.html';
+      window.api.navigate('automata.html');
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);

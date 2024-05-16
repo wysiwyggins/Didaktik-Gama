@@ -1,5 +1,6 @@
-
+let lastDrawTime = 0;
 let abysses = 0;
+
 
 const BOX_TILE_INDICES = [215, 195, 178, 215, 28, 214, 196, 192, 179, 194, 193, 250];
 
@@ -25,17 +26,13 @@ function setup() {
     } catch (error) {
       console.error('Socket connection failed.', error);
     }
-    globalVars.CANVAS_COLS = floor(windowWidth / globalVars.TILE_WIDTH) * 2;
-    globalVars.CANVAS_ROWS = floor(windowHeight / globalVars.TILE_HEIGHT) * 2;
-    createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT);
+   
     pixelDensity(1); // Avoid automatic scaling with displayDensity
     
     // Scale down the canvas with CSS
-    let cnv = select('canvas'); // If using p5.js's select() function, or use document.querySelector in plain JS
-    cnv.style('width', '100vw');
-    cnv.style('height', '100vh');
-    cnv.style('overflow', 'hidden');
-
+    globalVars.CANVAS_COLS = floor(windowWidth / globalVars.TILE_WIDTH) * 2;
+    globalVars.CANVAS_ROWS = floor(windowHeight / globalVars.TILE_HEIGHT) * 2;
+    createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT);
 
     // Slice the spritesheet into individual tiles
     for (let y = 0; y < globalVars.SPRITESHEET_ROWS; y++) {
@@ -56,8 +53,11 @@ function setup() {
     wave2 = new p5.Oscillator();
     wave2.setType('sine');
     reverb = new p5.Reverb();
+
+    reverb.process(wave1, 2, 4);
     //noLoop();
 }
+
 function generateColorPalette(baseColor) {
   wave1.start();
   wave2.start(); 
@@ -96,13 +96,11 @@ function generateColorPalette(baseColor) {
         colors[2] = lightestColor;
       }
     }
-    reverb.process(wave1, i, 2);
-    reverb.process(wave2, 3, i);
   });
   
-  socket.emit('setDMXColor', baseColor);
   return colors;
 }
+
 function placeTiledLayer(grid, tiledData) {
  
   if (tiledData && tiledData.layers) {
@@ -167,9 +165,19 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 }
 
 function draw() {
-  if (abysses > 20) {
-    window.location.href = 'keyboard.html';
+  const currentAbyssTime = millis();
+  if (abysses > 10) {
+    console.log('Abysses:', abysses);
+    if (window.api) {
+      window.api.navigate('keyboard.html');
+    } else {
+      console.error('api is not available');
+    }
   }
+  if (currentAbyssTime - lastDrawTime < 2000) {
+    return; // Skip this draw call if 1 second hasn't passed
+  }
+  lastDrawTime = currentAbyssTime;
   background(255);
   noStroke();
   let baseColor = color(random(256), random(256), random(256));
@@ -202,9 +210,8 @@ function draw() {
           grid[i + 1][j + 1] = 127;
       }
     }
-    
-    
   }
+
   for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
     for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       if (grid[i][j] === 127) {
@@ -231,6 +238,7 @@ function draw() {
       }
     }
   }
+
   for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
     for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       let tileIndex = grid[i][j];
@@ -259,7 +267,9 @@ function draw() {
       }
     }
   }
+
   // placeTiledLayer(grid, tiledData); // tiled stuff was responsible for the weirdness
+
   // Second loop to draw the tiles and the backgrounds
   wave1.start();
   wave2.start(); 
@@ -298,9 +308,7 @@ function draw() {
     }
   }
   abysses++;
-  
 }
-
 
 function keyPressed(event) {
   if (event.key === '}') { 

@@ -130,9 +130,9 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'automata.html';
+    window.location.href = 'home.html';
   } else if (event.key === '{') {
-    window.location.href = 'game.html';
+    window.location.href = 'mirror.html';
   }
 }
 
