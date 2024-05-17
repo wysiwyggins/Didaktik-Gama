@@ -1,11 +1,11 @@
 {
   "name": "Didaktik Gama",
-  "version": "1.0.0",
+  "version": "1.0ɑ",
   "description": "This repository aims to unify several disparate JavaScript projects, envisioning them as different programs on an imaginary (haunted) alternate history computing device. Each sketch utilizes the 'Libuše' tileset in unique ways.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package": "electron-packager . Console --platform=win32,darwin --arch=x64 --out=dist",
+    "package": "electron-packager . Didaktic_Gama --platform=win32,darwin --arch=x64 --out=dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node server.js"
   },

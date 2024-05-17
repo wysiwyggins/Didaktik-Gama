@@ -5,7 +5,7 @@ let reloads = 0;
 
 function preload() {
 
-  spritesheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
+  auto2Spritesheet = loadImage('assets/spritesheets/libuse40x30-cp437.png');
   spritesheetData = loadJSON('assets/spritesheets/spriteData.json');
   
 }
@@ -44,7 +44,7 @@ function generateBaseAndComplementaryColors() {
 
 function draw() {
   if (reloads > 40) {
-    window.location.href = 'mirror.html';
+    window.api.navigate('mirror.html');
   }
 
   drawColorPattern();
@@ -109,7 +109,7 @@ function selectBoxDrawingTiles() {
     const boxDrawingKeys = ["BOX_VERTICAL", "BOX_LEFT_VERTICAL", "BOX_UP_HORIZONTAL", "BOX_DOWN_HORIZONTAL", "BOX_RIGHT_VERTICAL", "BOX_HORIZONTAL", "BOX_VERTICAL_HORIZONTAL", "BOX_BOTTOM_RIGHT", "FULL_BLOCK", "BOX_TOP_LEFT", "BOX_DRAWING_HEAVY_LEFT_LIGHT_RIGHT"];
     boxDrawingKeys.forEach(key => {
         const [col, row] = spritesheetData.tiles[key];
-        let tile = spritesheet.get(col * spritesheetData.tilePixelWidth, row * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
+        let tile = auto2Spritesheet.get(col * spritesheetData.tilePixelWidth, row * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
         // Store the tile with its key for easy access
         boxDrawingTiles[key] = tile;
     });
@@ -210,7 +210,7 @@ function extractTilesFromSpritesheet() {
   for (let y = 0; y < spritesheetData.spritesheetRows; y++) {
     for (let x = 0; x < spritesheetData.spritesheetCols; x++) {
       // Extract each tile at its full original size
-      let tile = spritesheet.get(x * spritesheetData.tilePixelWidth, y * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
+      let tile = auto2Spritesheet.get(x * spritesheetData.tilePixelWidth, y * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
       // Do not resize here, keep the original resolution
       tiles.push(tile);
     }
@@ -239,9 +239,9 @@ function drawSpritePattern() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'hallways.html';
+    window.api.navigate('hallways.html');
   } else if (event.key === '{') {
-    window.location.href = 'keyboard.html';
+    window.api.navigate('keyboard.html');
   }
 }
 

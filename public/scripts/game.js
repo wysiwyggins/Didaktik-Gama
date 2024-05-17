@@ -3862,6 +3862,7 @@ async function setup() {
     messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 5);
     inspector = new UIBox([], 30, 15, true);
 
+
     // And handle them individually
     messageList.showBox();
     messageList.showUIContainer();
@@ -3879,6 +3880,7 @@ async function setup() {
     } else {
         messageList.addMessage('You are not connected to the server.');
     }
+    messageList.addMessage(`Press 'i' for key commands.`);
 
     PIXI.Loader.shared.onComplete.add(() => {
         for (let i = 0; i < 7; i++) { // assuming you have 4 frames of fire animation

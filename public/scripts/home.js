@@ -99,7 +99,7 @@ function draw() {
   }
   if (loopCounter > 3) {
     console.log('loops' + loopCounter);
-    window.location.href = 'game.html';
+    window.api.navigate('game.html');
   }
 
 }
@@ -164,9 +164,9 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'game.html';
+    window.api.navigate('game.html');
   } else if (event.key === '{') {
-    window.location.href = 'geomancy.html';
+    window.api.navigate('geomancy.html');
   }
 }
 

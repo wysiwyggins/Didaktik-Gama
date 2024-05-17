@@ -980,13 +980,13 @@
  "nextobjectid":531,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.10.0",
+ "tiledversion":"1.10.1",
  "tileheight":30,
  "tilesets":[
         {
          "columns":23,
          "firstgid":1,
-         "image":"..\/spritesheets\/grotto40x30-cp437@1x.png",
+         "image":"..\/spritesheets\/libuse40x30-cp437.png",
          "imageheight":330,
          "imagewidth":920,
          "margin":0,

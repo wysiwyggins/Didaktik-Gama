@@ -11,6 +11,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1250,
     height: 900,
+    fullscreen: true, // Set fullscreen to true
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

@@ -8,7 +8,7 @@ let tiledData;
 
 function preload() {
   // Load the spritesheet
-  spritesheet = loadImage("assets/spritesheets/libuse40x30-cp437.png");
+  auto2Spritesheet = loadImage("assets/spritesheets/libuse40x30-cp437.png");
   //noLoop();
   // Load the Tiled data
   loadJSON("data/ruins.json", function (data) {
@@ -37,7 +37,7 @@ function setup() {
     // Slice the spritesheet into individual tiles
     for (let y = 0; y < globalVars.SPRITESHEET_ROWS; y++) {
         for (let x = 0; x < globalVars.SPRITESHEET_COLS; x++) {
-            let tile = spritesheet.get(
+            let tile = auto2Spritesheet.get(
             x * globalVars.TILE_WIDTH,
             y * globalVars.TILE_HEIGHT,
             globalVars.TILE_WIDTH,
@@ -166,7 +166,7 @@ function drawTile(tile, x, y, flipHorizontally, flipVertically) {
 
 function draw() {
   const currentAbyssTime = millis();
-  if (abysses > 10) {
+  if (abysses > 20) {
     console.log('Abysses:', abysses);
     if (window.api) {
       window.api.navigate('keyboard.html');
@@ -174,9 +174,7 @@ function draw() {
       console.error('api is not available');
     }
   }
-  if (currentAbyssTime - lastDrawTime < 2000) {
-    return; // Skip this draw call if 1 second hasn't passed
-  }
+  
   lastDrawTime = currentAbyssTime;
   background(255);
   noStroke();
@@ -308,13 +306,16 @@ function draw() {
     }
   }
   abysses++;
+  if (currentAbyssTime - lastDrawTime < 3000) {
+    return; // Skip this draw call if 1 second hasn't passed
+  }
 }
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'keyboard.html';
+    window.api.navigate('keyboard.html');
   } else if (event.key === '{') {
-    window.location.href = 'game.html';
+    window.api.navigate('game.html');
   }
 }
 

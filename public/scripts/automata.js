@@ -15,7 +15,7 @@ const MESSAGE_DISPLAY_DURATION_SECONDS = 1;
 
 
 function preload() {
-  spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
+  auto2Spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
   for (let i = 1; i <= 22; i++) {
     sounds.push(loadSound('./assets/sound/' + i + '.wav'));
   }
@@ -27,9 +27,6 @@ function setup() {
   } catch (error) {
     console.error('Socket connection failed.', error);
   }
-  createCanvas(AUTOMATA_CANVAS_COLS * globalVars.TILE_WIDTH, AUTOMATA_CANVAS_ROWS * globalVars.TILE_HEIGHT);
-  background(255);  // Initialize with white background
-  initializeGrid();
   if (socket) {
     fetch('http://localhost:3000/judgeName')
         .then(response => response.json())
@@ -37,13 +34,16 @@ function setup() {
             const judgeName = data.judgeName;
             console.log('Judge name:', judgeName);
             if (judgeName != ""){
-                messageList.addMessage(`Your judge is ${judgeName}.`);
+                console.log(`Your judge is ${judgeName}.`);
             }
         })
         .catch(error => console.error('Error fetching judge name:', error));
-} else {
-    messageList.addMessage('You are not connected to the server.');
-} 
+  } else {
+      messageList.addMessage('You are not connected to the server.');
+  }
+  createCanvas(AUTOMATA_CANVAS_COLS * globalVars.TILE_WIDTH, AUTOMATA_CANVAS_ROWS * globalVars.TILE_HEIGHT);
+  background(255);  // Initialize with white background
+  initializeGrid();
 }
 
 function playSound(index) {
@@ -136,12 +136,12 @@ function getTileIndex(tileName) {
 }
 
 function drawTile(i, j, val) {
-  fill((val % 2 === 0 && val !== 0) ? (i * 10 + season) : 0, (thisJudgeName.length * 2) ? (j * 10 + thisJudgeName.length) : 255, 100);
+  fill((val % 2 === 0 && val !== 0) ? (i * 10 + thisJudgeName.length) : 10, (year * 10) ? (j * judgeName.length) : 255, 100);
   noStroke();
   rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
   let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
   let y = floor(val / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HEIGHT;
-  image(spritesheet, i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, x, y, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+  image(auto2Spritesheet, i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, x, y, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
 }
 
 

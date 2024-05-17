@@ -88,7 +88,7 @@ function draw() {
     }
   }
   if (loopCounter > 20) {
-    window.location.href = 'patterns.html';
+    window.location.href = 'automata2.html';
   }
 
 }
@@ -130,7 +130,7 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'home.html';
+    window.location.href = 'automata2.html';
   } else if (event.key === '{') {
     window.location.href = 'mirror.html';
   }

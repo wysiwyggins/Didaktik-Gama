@@ -26,7 +26,7 @@ function setup() {
 }
 
 function preload() {
-  spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
+  auto2Spritesheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
   spritesheetData = loadJSON('./assets/spritesheets/spriteData.json');
   backgroundImage = loadImage('./assets/images/boot.png');
   console.log('boot loaded');
@@ -124,7 +124,7 @@ function extractTilesFromSpritesheet() {
   for (let y = 0; y < spritesheetData.spritesheetRows; y++) {
     for (let x = 0; x < spritesheetData.spritesheetCols; x++) {
       // Extract each tile at its full original size
-      let tile = spritesheet.get(x * spritesheetData.tilePixelWidth, y * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
+      let tile = auto2Spritesheet.get(x * spritesheetData.tilePixelWidth, y * spritesheetData.tilePixelHeight, spritesheetData.tilePixelWidth, spritesheetData.tilePixelHeight);
       // Do not resize here, keep the original resolution
       tiles.push(tile);
     }
