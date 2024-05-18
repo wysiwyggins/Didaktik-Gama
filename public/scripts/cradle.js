@@ -8,7 +8,7 @@ let fileIndex;
 
 let cursorX = 0;
 let cursorY = 0;
-currentPenColor = null;
+currentPenColor = 'x0FFFFFF';
 let tilesDisplayed = 0;
 
 

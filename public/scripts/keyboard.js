@@ -136,7 +136,7 @@ function setCurrentTile(tileIndex) {
     
     rect(cursorX * globalVars.TILE_HALF_WIDTH, cursorY * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
     
-    tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: 'x0FFFFFF33' };
+    tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: 'x0FFFFFF' };
     if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
      /*  let randomSoundIndex = Math.floor(Math.random() * soundFiles.length);
       soundFiles[randomSoundIndex].play();
