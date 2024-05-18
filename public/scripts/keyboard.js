@@ -9,17 +9,14 @@ let cursorY = 0;
 currentPenColor = 0xFFFFFF;
 let tilesDisplayed = 0;
 
-
 //input pause
 let typingPaused = false;
 let lastUserInputTime = 0;
 const pauseDuration = 5000;
 
-
 function mapAltCharacterToTileName(char) {
   return altCharToTileName[char]; 
 }
-
 
 function getTileIndexFromChar(char) {
   const tileName = mapAltCharacterToTileName(char);
@@ -29,7 +26,6 @@ function getTileIndexFromChar(char) {
   // Handle case where character does not have a mapping or fallback logic
   return null;
 }
-
 
 function preload() {
   spriteSheet = loadImage('./assets/spritesheets/libuse40x30-cp437.png');
@@ -43,7 +39,6 @@ function preload() {
   } */
 }
 
-
 function setup() {
   try {
     socket = io.connect('http://localhost:3000');
@@ -52,6 +47,11 @@ function setup() {
   }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
   console.log(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
+
+  // Set cursorX to start near the center column
+  cursorX = floor(globalVars.CANVAS_COLS / 2);
+  cursorY = 0;
+
   for (let y = 0; y < globalVars.CANVAS_ROWS; y++) {
     let currentRow = [];  // Renamed from 'row' to avoid name conflict
     for (let x = 0; x < globalVars.CANVAS_COLS; x++) {
@@ -87,7 +87,7 @@ function draw() {
         
         let sx = (tileData.tile % globalVars.SPRITESHEET_COLS) * (globalVars.TILE_HALF_WIDTH * 2);
         let sy = Math.floor(tileData.tile / globalVars.SPRITESHEET_COLS) * (globalVars.TILE_HALF_HEIGHT * 2);
-  
+
         if (tileData.bgColor) {
           fill(tileData.bgColor);
           rect(x * globalVars.TILE_HALF_WIDTH, y * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
@@ -120,19 +120,23 @@ function penColor(hexValue) {
   if (hexValue) {
       currentPenColor = color(hexValue);
   } else {
-      currentPenColor = null; // Reset to no background color
+      currentPenColor = 'x0FFFFFF'; // Reset to no background color
   }
 }
 
 function drawCursor() {
-  stroke(10, 10, 10);
+  noStroke();
   noFill();
   rect(cursorX * globalVars.TILE_HALF_WIDTH, cursorY * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
 }
 
 function setCurrentTile(tileIndex) {
   if (cursorY >= 0 && cursorY < tileMap.length && cursorX >= 0 && cursorX < tileMap[cursorY].length) {
-    tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
+    // Draw semi-transparent white rectangle as background for each tile
+    
+    rect(cursorX * globalVars.TILE_HALF_WIDTH, cursorY * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
+    
+    tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: 'x0FFFFFF33' };
     if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
      /*  let randomSoundIndex = Math.floor(Math.random() * soundFiles.length);
       soundFiles[randomSoundIndex].play();
@@ -409,8 +413,6 @@ function displayTileForCharacter(char) {
       }
     }
 }
-
-
 
 // Add an event listener to the document to handle keydown events
 document.addEventListener('keydown', keyPressed);

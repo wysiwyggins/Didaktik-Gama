@@ -455,7 +455,7 @@ class Actor {
         }
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
-            if (this.flowers >= 10) {
+            if (this.flowers >= 15) {
                 window.api.navigate('patterns.html');  
             } 
         } if (item.type === ItemType.CRADLE) { 
@@ -1158,6 +1158,13 @@ class Player extends Actor{
                 messageList.addMessage('Time passes.');
                 break;
         }
+
+        if (this.isClosingDoor) {
+            if (newDirection) {
+                this.attemptCloseDoor(newDirection);
+            }
+            return;
+        }
         
         if (newDirection) {
             this.move(newDirection);
@@ -1172,7 +1179,7 @@ class Player extends Actor{
         }
         if (event.key === 'x' || event.code === 'KeyX') {
             this.handleCloseDoor();
-            console.log("close door");
+            console.log("try close door");
         }
         if (event.key === 'i' || event.code === 'KeyI') {
             messageList.hideBox(); 
@@ -1359,7 +1366,32 @@ class Player extends Actor{
         }
     }
     handleCloseDoor() {
-        //oops
+        this.isClosingDoor = true;
+        this.messageList.addMessage("Close which direction?");
+    }
+
+    attemptCloseDoor(direction) {
+        let [dx, dy] = this.getDeltaXY(direction);
+        let targetX = this.x + dx;
+        let targetY = this.y + dy;
+        
+        if (this.isOutOfBounds(targetX, targetY)) {
+            this.messageList.addMessage("No door there.");
+            return;
+        }
+
+        let door = Door.totalDoors().find(door => door.x === targetX && door.y === targetY);
+        if (door) {
+            if (!door.isLocked && door.isOpen) {
+                door.close();
+                this.messageList.addMessage("You close the door.");
+            } else {
+                this.messageList.addMessage("No door there.");
+            }
+        } else {
+            this.messageList.addMessage("No door there.");
+        }
+        this.isClosingDoor = false; // Exit closing door mode
     }
 
     dropItemOnTile(item, x, y) {
@@ -1833,34 +1865,34 @@ class Monster extends Actor{
         };
         this.moveRandomlyAndMine = function() {
             let moved = false;
-    
+        
             while (!moved) {
                 let adjacentTiles = this.getAdjacentTiles();
-    
+        
                 // Filter out tiles that have a locked door or are blocked.
                 adjacentTiles = adjacentTiles.filter(tile => {
                     let door = Door.totalDoors().find(door => door.x === tile.x && door.y === tile.y);
                     return !door || !this.isLockedDoor(door); // Allow open doors or tiles without doors
                 }).filter(tile => !this.isBlocked(tile.x, tile.y)); // Ensure the tile is not blocked
-    
+        
                 if (adjacentTiles.length > 0) {
                     let randomTile = adjacentTiles[Math.floor(Math.random() * adjacentTiles.length)];
                     this.x = randomTile.x;
                     this.y = randomTile.y;
-    
+        
                     // Open any unlocked door on the tile.
                     let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
                     if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
                         doorOnTile.open();
                         this.messageList.addMessage("You hear a crashing noise.");
                     }
-    
+        
                     this.updateSpritePosition();
                     this.checkForItems(this.x, this.y);
                     moved = true; // Mark as moved
-    
+        
                     this.handleTileEffects(this.x, this.y);
-    
+        
                     // After moving, attempt to mine adjacent walls
                     let directions = ['up', 'down', 'left', 'right'];
                     for (let direction of directions) {
@@ -1870,14 +1902,22 @@ class Monster extends Actor{
                         if (!this.isOutOfBounds(targetX, targetY) && wallMap[targetY][targetX]?.value !== null && backgroundMap[targetY][targetX]?.value !== 216) {
                             // Remove the wall sprite
                             gameContainer.removeChild(wallMap[targetY][targetX].sprite);
-                            if (wallMap[targetY][targetX]?.value){
+                            if (wallMap[targetY][targetX]?.value) {
                                 wallMap[targetY][targetX].value = null; // Remove wall from the map
                             }
                             // Create a floor at the mined location
                             createRoughFloor(targetX, targetY);
-    
+        
                             this.messageList.addMessage("A " + this.name + " chisels away at a wall.");
                             playBumpSound();
+        
+                            // Random chance to place Uranium
+                            if (Math.random() < 1/5) {
+                                let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
+                                this.scheduler.add(uranium, true); // Add Uranium to the scheduler
+                                this.messageList.addMessage("The robot found Uranium!");
+                            }
+        
                             break; // Break after one successful mine action
                         } else {
                             playBumpSound();
@@ -1889,6 +1929,8 @@ class Monster extends Actor{
                 }
             }
         };
+        
+        
         
         switch(type) {
             case MonsterType.BASILISK:
@@ -2198,8 +2240,8 @@ class Monster extends Actor{
             dripBlood(this.x, this.y, this.bloodColor);
         }
         this.getTargetsInRange();
-
-        if(this.target) {
+    
+        if (this.target) {
             if (this.canSeeTarget(this.target)) {
                 this.sighted = true;
                 for (let attackKey of this.attacks) {
@@ -2210,24 +2252,22 @@ class Monster extends Actor{
             }
             this.target = null;
         }
-
+    
         if (this.sighted) {
             this.followTarget();
-        } else if(this.turnsWaited >= this.actFrequency) {
-            for(let i = 0; i < this.speed; i++) {
+        } else if (this.turnsWaited >= this.actFrequency) {
+            for (let i = 0; i < this.speed; i++) {
                 this.moveRandomly();
             }
             this.turnsWaited = 0;
         } else {
             this.turnsWaited++;
         }
-
-        this.applyDamageEffects();  // Apply effects like burning from fire tiles
-        this.engine.unlock();       // Unlock the engine after actions
+    
+        this.applyDamageEffects(); // Apply effects like burning from fire tiles
+        this.engine.unlock(); // Unlock the engine after actions
     }
-    decideNextMove() {
-        //logic for move decision here?
-    }
+    
 }
 
 Monster.prototype.findClosestPlayer = function() {
@@ -2637,16 +2677,21 @@ class Kudzu extends Entity {
 }
 
 class Uranium extends Entity {
-    constructor(x, y, scheduler, color = '0xADFF2F') {
+    constructor(x, y, scheduler, color = '0xE0FF00') {
         super(x, y, scheduler, [], 2, growthMap); 
         this._tileIndex = {x: 8, y: 0};
         this.name = "Uranium";
         this.color = color;
         this.isFlammable = false;
 
+        // Create the sprite
+        this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
+        this.sprite = this.spriteData.sprite; // Assign the created sprite to this instance
+
+        // Set sprite properties
         this.sprite.tint = this.color;  // apply the tint
         this.sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-        this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
+
         // Updating the atmosphere map to include this Uranium instance
         if (!atmosphereMap[this.y]) {
             atmosphereMap[this.y] = [];
@@ -2654,7 +2699,7 @@ class Uranium extends Entity {
         atmosphereMap[this.y][this.x] = { value: 400, sprite: this.sprite }; // Use a unique value for Uranium
 
         // Specific tween for the Uranium instance
-        let colorVariation = generateColorVariation(color, 0x101010); // color variation of flicker
+        let colorVariation = generateColorVariation(color, 0xEDFFAC); 
         this.tween = new createjs.Tween.get(this.sprite)
             .to({ tint: colorVariation.lighter }, 20) 
             .wait(20)
@@ -2691,6 +2736,8 @@ class Uranium extends Entity {
         return x < 0 || y < 0 || x >= MAP_WIDTH || y >= MAP_HEIGHT;
     }
 }
+
+
 
 function generateColorVariation(baseColor, variation) {
     const lighter = (baseColor & 0xFFFFFF) + (variation & 0xFFFFFF);
