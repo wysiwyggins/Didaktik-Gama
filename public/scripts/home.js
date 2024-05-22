@@ -167,6 +167,8 @@ function keyPressed(event) {
     window.api.navigate('game.html');
   } else if (event.key === '{') {
     window.api.navigate('geomancy.html');
+  } else if (event.key === 'Escape') {
+    ipcRenderer.send('quit-app');
   }
 }
 

@@ -242,6 +242,10 @@ function keyPressed(event) {
     window.api.navigate('hallways.html');
   } else if (event.key === '{') {
     window.api.navigate('keyboard.html');
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
 }
 

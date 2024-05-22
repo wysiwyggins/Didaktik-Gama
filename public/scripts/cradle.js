@@ -427,6 +427,10 @@ function keyPressed(event) {
     window.location.href = 'abyss.html';
   } else if (event.key === '{') {
     window.location.href = 'game.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
 }
 

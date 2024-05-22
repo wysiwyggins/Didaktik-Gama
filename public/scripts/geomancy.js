@@ -197,5 +197,9 @@ function keyPressed(event) {
     window.location.href = 'home.html';
   } else if (event.key === '{') {
     window.location.href = 'index.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
 }

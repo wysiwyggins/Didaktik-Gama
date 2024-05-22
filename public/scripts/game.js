@@ -1157,8 +1157,10 @@ class Player extends Actor{
             default:
                 messageList.addMessage('Time passes.');
                 break;
+            case 'Escape':
+                window.api.quitApp();
+                break;
         }
-
         if (this.isClosingDoor) {
             if (newDirection) {
                 this.attemptCloseDoor(newDirection);
@@ -1912,7 +1914,7 @@ class Monster extends Actor{
                             playBumpSound();
         
                             // Random chance to place Uranium
-                            if (Math.random() < 1/5) {
+                            if (Math.random() < 1/8) {
                                 let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
                                 this.scheduler.add(uranium, true); // Add Uranium to the scheduler
                                 this.messageList.addMessage("The robot found Uranium!");

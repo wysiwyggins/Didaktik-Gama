@@ -133,6 +133,10 @@ function keyPressed(event) {
     window.location.href = 'automata2.html';
   } else if (event.key === '{') {
     window.location.href = 'mirror.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
 }
 

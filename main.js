@@ -11,7 +11,9 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1250,
     height: 900,
-    fullscreen: true, // Set fullscreen to true
+    fullscreen: true, // Open in fullscreen mode
+    fullscreenable: true, // Allow fullscreen toggle
+    autoHideMenuBar: true, // Hide menu bar in fullscreen
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -61,4 +63,9 @@ ipcMain.on('navigate', (event, url) => {
   if (mainWindow) {
     mainWindow.loadFile(`public/${url}`);
   }
+});
+
+// Handle quit IPC
+ipcMain.on('quit-app', () => {
+  app.quit();
 });

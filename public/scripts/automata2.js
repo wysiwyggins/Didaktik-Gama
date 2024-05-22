@@ -456,6 +456,10 @@ function keyPressed() {
       window.location.href = 'home.html';
     } else if (event.key === '{') {
       window.location.href = 'hallways.html';
+    } else if (event.key === 'Escape') {
+      if (window.api) {
+        window.api.quitApp();
+      }
     }
   
   }

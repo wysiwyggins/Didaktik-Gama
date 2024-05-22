@@ -256,6 +256,10 @@ function keyPressed() {
     window.location.href = 'patterns.html';
   } else if (event.key === '{') {
     window.location.href = 'keyboard.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
 
 }

@@ -241,6 +241,10 @@ function keyPressed() {
     window.location.href = 'automata.html';
   } else if (event.key === '{') {
     window.location.href = 'abyss.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
   // Handle alphanumeric characters
   if (!keyIsDown(CONTROL) && !keyIsDown(ALT)) {

@@ -154,6 +154,10 @@ function keyPressed(event) {
     window.location.href = 'geomancy.html';
   } else if (event.key === '{') {
     window.location.href = 'boot.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
   }
 }
 
