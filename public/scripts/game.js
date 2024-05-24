@@ -1,11 +1,16 @@
+const displayWidth = Math.floor(window.innerWidth * 2);
+const displayHeight = Math.floor(window.innerHeight * 2);
 // Create a new Pixi Application
 let app = new PIXI.Application({
-    width: 1300,
-    height: 900,
+    width: displayWidth,
+    height: displayHeight,
     backgroundColor: 0xf5f5ee,
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true
+    autoDensity: true,
+    resolution: 1
 });
+
+const MAP_WIDTH = Math.floor(displayWidth / globalVars.TILE_WIDTH);
+const MAP_HEIGHT = Math.floor(displayHeight / globalVars.TILE_HEIGHT);
 
 app.stage.sortableChildren = true;
 // pixi uses this to switch zIndex layering within one of it's containers
@@ -35,10 +40,7 @@ let turnTimeout; // timer for passing turns
 
 // Set up some constants
 const rect = app.view.getBoundingClientRect();
-const MAP_WIDTH = 65;
-const MAP_HEIGHT = 60;
-const SCALE_FACTOR = 0.5; // Scaling factor for HiDPI displays
-const SPRITE_POSITION = 5; // Position of the sprite (in tiles)
+const SCALE_FACTOR = 1; // Scaling factor for HiDPI displays
 //dungeon is used by rot.js' dungeon drawing functions, we need a global stub to get things like
 //door locations
 let dungeon = null;
@@ -1376,14 +1378,21 @@ class Player extends Actor{
         let [dx, dy] = this.getDeltaXY(direction);
         let targetX = this.x + dx;
         let targetY = this.y + dy;
-        
+    
         if (this.isOutOfBounds(targetX, targetY)) {
             this.messageList.addMessage("No door there.");
             return;
         }
-
+    
         let door = Door.totalDoors().find(door => door.x === targetX && door.y === targetY);
         if (door) {
+            // Check for an actor on the same tile as the door
+            let actor = Actor.allActors.find(actor => actor.x === targetX && actor.y === targetY && !actor.isDead);
+            if (actor) {
+                this.messageList.addMessage("There's an actor in the way, you can't close the door.");
+                return;
+            }
+    
             if (!door.isLocked && door.isOpen) {
                 door.close();
                 this.messageList.addMessage("You close the door.");
@@ -1395,6 +1404,7 @@ class Player extends Actor{
         }
         this.isClosingDoor = false; // Exit closing door mode
     }
+    
 
     dropItemOnTile(item, x, y) {
         // Remove the item from the player's inventory
@@ -1545,7 +1555,7 @@ class Player extends Actor{
         this.inspector.addMessage( "" );
         this.inspector.addMessage( "Controls: ");
         this.inspector.addMessage( "   Arrow keys/WASD: Move");
-        this.inspector.addMessage( "   B: Aim bow");
+        this.inspector.addMessage( "   B: Aim bow (mouse aim)");
         this.inspector.addMessage( "   X: Close door");
         this.inspector.addMessage( "   M: Mine");
         this.inspector.addMessage( "   I: Character Info");
@@ -3965,7 +3975,7 @@ async function setup() {
         scheduler.add(robot1, true);
         new Item(ItemType.BOW,randomTile3.x, randomTile3.y, 0xFFFFFF, 1);
         new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, 0xFFFFFF, 3);
-        new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
+        //new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
         new Item(ItemType.MATTOCK,randomTile10.x, randomTile10.y, 0x00FF00, 2);
         /* let chimera = new Monster(MonsterType.CHIMERA, randomTile3.x, randomTile3.y, scheduler, engine, messageList);
         createMonsterSprite(chimera);

@@ -1,6 +1,6 @@
 {
   "name": "Didaktik Gama",
-  "version": "1.2ɑ",
+  "version": "1.3ɑ",
   "description": "This repository aims to unify several disparate JavaScript projects, envisioning them as different programs on an imaginary (haunted) alternate history computing device. Each sketch utilizes the 'Libuše' tileset in unique ways.",
   "main": "main.js",
   "scripts": {
