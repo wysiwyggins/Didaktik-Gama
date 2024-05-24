@@ -26,7 +26,7 @@ function setup() {
     console.error('Socket connection failed.', error);
   }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
-  frameRate(30); // Set the frame rate so that draw() is called once per second
+  frameRate(24); // Set the frame rate so that draw() is called once per second
   socket.on('connect', () => {
     console.log('Connected to server');
   });
@@ -61,14 +61,14 @@ function booleansToNameIndex(booleans) {
 
 function draw() {
   if (currentFigure > 13) {
-    background(random(255), random(255), 0);
+    background(random(200,255), random(200,255), 255);
   } else {
     background(255);
   }
   
   image(backgroundImage, 0, 0, width, height);
 
-  if (frameCount > 30) {
+  if (frameCount > 20) {
     for (let i = 0; i <= currentFigure; i++) {
       let pos = getPositionForFigure(i);
       let booleansIndex = i * 4;
