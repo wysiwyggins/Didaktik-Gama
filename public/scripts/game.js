@@ -1,5 +1,14 @@
-const displayWidth = Math.floor(window.innerWidth * 2);
-const displayHeight = Math.floor(window.innerHeight * 2);
+// Get the display resolution and device pixel ratio
+const devicePixelRatio = window.devicePixelRatio || 1;
+const displayWidth = Math.floor(window.innerWidth * devicePixelRatio);
+const displayHeight = Math.floor(window.innerHeight * devicePixelRatio);
+
+// Calculate map dimensions based on tile size
+const TILE_WIDTH = 40; // width of one tile in pixels
+const TILE_HEIGHT = 30; // height of one tile in pixels
+const MAP_WIDTH = Math.floor(displayWidth / TILE_WIDTH);
+const MAP_HEIGHT = Math.floor(displayHeight / TILE_HEIGHT);
+
 // Create a new Pixi Application
 let app = new PIXI.Application({
     width: displayWidth,
@@ -9,8 +18,6 @@ let app = new PIXI.Application({
     resolution: 1
 });
 
-const MAP_WIDTH = Math.floor(displayWidth / globalVars.TILE_WIDTH);
-const MAP_HEIGHT = Math.floor(displayHeight / globalVars.TILE_HEIGHT);
 
 app.stage.sortableChildren = true;
 // pixi uses this to switch zIndex layering within one of it's containers
@@ -331,7 +338,7 @@ function goToNextLevel(currentLevelIndex) {
 // in most roguelikes everything would inherit from entity, but here it's just plants, smoke, fire and gas etc. 
 
 class Entity {
-    constructor(x, y, scheduler, frames, zIndex, map) {
+    constructor(x, y, scheduler, frames, messageList, zIndex, map) {
         activeEntities.push(this);
         this.x = x;
         this.y = y;
@@ -339,13 +346,14 @@ class Entity {
         this.map = map;
         this.name = "Entity";
         this.isFlammable = false;
+        this.messageList = messageList;
         if (frames.length > 0) {
             this.sprite = new PIXI.AnimatedSprite(frames);
             this.sprite.animationSpeed = 0.1;
             this.sprite.loop = true;
             this.sprite.play();
             this.sprite.position.set(x * globalVars.TILE_WIDTH * SCALE_FACTOR, y * globalVars.TILE_HEIGHT * SCALE_FACTOR); 
-            this.sprite.scale.set(SCALE_FACTOR);
+            //this.sprite.scale.set(SCALE_FACTOR);
             this.sprite.zIndex = zIndex;
             gameContainer.addChild(this.sprite);
 
@@ -3201,9 +3209,8 @@ function createSprite(x, y, index, layer, value = null, overlay = false, tint = 
         globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT));
 
     let sprite = new PIXI.Sprite(texture);
-    sprite.scale.set(SCALE_FACTOR);
-    sprite.x = x * globalVars.TILE_WIDTH * SCALE_FACTOR;
-    sprite.y = y * globalVars.TILE_HEIGHT * SCALE_FACTOR;
+    sprite.x = Math.floor(x * globalVars.TILE_WIDTH);
+    sprite.y = Math.floor(y * globalVars.TILE_HEIGHT);
     if (tint) {
         sprite.tint = tint;
     }

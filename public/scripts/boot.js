@@ -150,14 +150,10 @@ function drawSpritePattern() {
 }
 
 function keyPressed(event) {
-  if (event.key === '}') {
-    window.location.href = 'geomancy.html';
-  } else if (event.key === '{') {
-    window.location.href = 'boot.html';
-  } else if (event.key === 'Escape') {
-    if (window.api) {
-      window.api.quitApp();
-    }
+  if (event.key === 'Escape') {
+    ipcRenderer.send('quit-app');
+  } else {
+    window.api.navigate('geomancy.html');
   }
 }
 
