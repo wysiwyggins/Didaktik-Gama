@@ -1397,7 +1397,7 @@ class Player extends Actor{
             // Check for an actor on the same tile as the door
             let actor = Actor.allActors.find(actor => actor.x === targetX && actor.y === targetY && !actor.isDead);
             if (actor) {
-                this.messageList.addMessage("There's an actor in the way, you can't close the door.");
+                this.messageList.addMessage("A "+ actor.name + " is in the way, you can't close the door.");
                 return;
             }
     
@@ -1718,6 +1718,51 @@ function findNearestItem(px, py) {
         }
     });
     return nearest;
+}
+function keyHoleZoom(player) {
+   
+    const BLANK_TILE = { x: 0, y: 0 };
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+        for (let x = 0; x < MAP_WIDTH; x++) {
+            createSprite(x, y, {x: 9, y: 9}, overlayMap, 0);
+        }
+    }
+
+    // Step 2: Locate the player
+    let playerX = player.x;
+    let playerY = player.y;
+
+    // Step 3: Clear the tile at the player's position
+    createSprite(playerX, playerY, BLANK_TILE, overlayMap, 0);
+
+    // Step 4: Gradually clear the tiles in a growing circle
+    let radius = 1;
+    let maxRadius = Math.max(MAP_WIDTH, MAP_HEIGHT);
+    sound.play('levelout');
+    function revealCircle() {
+        let tilesCleared = false;
+        for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance <= radius) {
+                    let x = playerX + dx;
+                    let y = playerY + dy;
+                    if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+                        if (overlayMap[y][x] !== BLANK_TILE) {
+                            createSprite(x, y, BLANK_TILE, overlayMap, 0);
+                            tilesCleared = true;
+                        }
+                    }
+                }
+            }
+        }
+        if (radius < maxRadius && tilesCleared) {
+            radius = radius * 2;
+            setTimeout(revealCircle, 50); // Adjust the speed of the reveal here
+        }
+    }
+
+    revealCircle();
 }
 
 const MonsterType = Object.freeze({
@@ -3959,6 +4004,7 @@ async function setup() {
         engine = new ROT.Engine(scheduler);
         player = new Player(PlayerType.HUMAN, randomTile.x, randomTile.y, scheduler, engine, messageList, inspector);
         createPlayerSprite(player);
+        keyHoleZoom(player);
         scheduler.add(player, true); // the player takes turns
 
         /* player2 = new Player(PlayerType.ROBOT, randomTile5.x, randomTile5.y, scheduler, engine, messageList, inspector);
