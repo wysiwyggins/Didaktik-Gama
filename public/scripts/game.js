@@ -546,13 +546,16 @@ class Player extends Actor{
         });
         window.addEventListener('mousemove', (event) => {
             if (this.isTargeting) {
-                // calculate tile coordinates from pixel coordinates
-                let relativeX = event.clientX - rect.left;
-                let relativeY = event.clientY - rect.top;
-                
-                let x = Math.floor(relativeX / (globalVars.TILE_WIDTH * SCALE_FACTOR));
-                let y = Math.floor(relativeY / (globalVars.TILE_HEIGHT * SCALE_FACTOR));
-                
+                // Get canvas bounding rectangle
+                const rect = app.view.getBoundingClientRect();
+        
+                // Calculate tile coordinates from pixel coordinates
+                let relativeX = (event.clientX - rect.left) * devicePixelRatio;
+                let relativeY = (event.clientY - rect.top) * devicePixelRatio;
+        
+                let x = Math.floor(relativeX / TILE_WIDTH);
+                let y = Math.floor(relativeY / TILE_HEIGHT);
+        
                 // Update the targeting sprite
                 this.removeTargetingSprite();
                 this.displayTargetingSprite(x, y);
@@ -677,7 +680,21 @@ class Player extends Actor{
                 this.moveTo(x, y);
             }
         }
-    }    
+    }
+    checkUIBoxes() {
+        if (this.y <= messageList.height + 1 && messageList.position === "top") {
+            console.log("Player is near the message list.");
+            messageList.moveToBottom();
+        } else if (this.y > messageList.height + 1 && messageList.position === "bottom") {
+            messageList.moveToTop();
+        }
+
+        if (this.y <= inspector.height + 1 && inspector.position === "top") {
+            inspector.moveToBottom();
+        } else if (this.y > inspector.height + 1 && inspector.position === "bottom") {
+            inspector.moveToTop();
+        }
+    }
     //moving with arrow keys
     
     move(direction) {
@@ -743,6 +760,7 @@ class Player extends Actor{
             this.y = newTileY;
             playFootstepSound();
             this.checkForItems(newTileX, newTileY);
+            this.checkUIBoxes();
             this.updateSprites();
         }
     }
@@ -1455,9 +1473,11 @@ class Player extends Actor{
     applyDamageEffects() {
         if (this.isBurning) {
             this.blood -= 20;
-            sound.play('ouch');
+            if (!this.isDead){
+                sound.play('ouch');
+                this.messageList.addMessage("You are on fire!");
+            }
             this.burningTurns++;
-            this.messageList.addMessage("You are on fire!");
             
             // Increase chance of burning ending after 4 turns, with a guarantee to stop after 6 turns
             if (this.burningTurns > 3 || (this.burningTurns > 3 && Math.random() < 0.5) || this.burningTurns > 5 && atmosphereMap[this.y][this.x].value != 300) {
@@ -2742,13 +2762,13 @@ class Kudzu extends Entity {
 }
 
 class Uranium extends Entity {
-    constructor(x, y, scheduler, color = '0xE0FF00') {
+    constructor(x, y, scheduler, messageList, color = '0xE0FF00') {
         super(x, y, scheduler, [], 2, growthMap); 
         this._tileIndex = {x: 8, y: 0};
         this.name = "Uranium";
         this.color = color;
         this.isFlammable = false;
-
+        this.messageList = messageList;
         // Create the sprite
         this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
         this.sprite = this.spriteData.sprite; // Assign the created sprite to this instance
@@ -3717,70 +3737,64 @@ function evaluateMapAndCreateWalls() {
 
 // a class for screen text
 class UIBox {
-    constructor(textBuffer = [""], width = MAP_WIDTH, height = null, hidden = false) {
+    constructor(textBuffer = [""], width = MAP_WIDTH, height = null, hidden = false, position = "top") {
         this.textBuffer = textBuffer;
         this.width = width;
         this.height = height || textBuffer.length;
         this.hidden = hidden;
         this.height = Math.min(this.height, MAP_HEIGHT);
         this.originalTiles = [];
+        this.position = position; // 'top' or 'bottom'
+        this.yOffset = this.position === "top" ? 0 : MAP_HEIGHT - this.height - 1;
     }
-    
+
     maskBox() {
         const WHITE_TILE = { x: 21, y: 7 };
-        for(let y = 0; y < this.height +1; y++) {
-            for(let x = 0; x < this.width; x++) {
-                createSprite(x, y, WHITE_TILE, uiMaskMap, 0);
+        for (let y = 0; y < this.height + 1; y++) {
+            for (let x = 0; x < this.width; x++) {
+                createSprite(x, y + this.yOffset, WHITE_TILE, uiMaskMap, 0);
             }
         }
     }
 
-    clearBox(){
+    clearBox() {
         const BLANK_TILE = { x: 0, y: 0 };
-        for(let y = 0; y < this.height+1; y++) {
-            for(let x = 0; x < this.width; x++) {
-                createSprite(x, y, BLANK_TILE, uiMap, 0);
-                createSprite(x, y, BLANK_TILE, uiMaskMap, 0);
+        for (let y = 0; y < this.height + 1; y++) {
+            for (let x = 0; x < this.width; x++) {
+                createSprite(x, y + this.yOffset, BLANK_TILE, uiMap, 0);
+                createSprite(x, y + this.yOffset, BLANK_TILE, uiMaskMap, 0);
             }
         }
     }
-    // a function to draw a box with sprites
-    drawUIBox() {
-        if (this.hidden) return; // If box is hidden, don't draw it
-        //const WHITE_TILE = { x: 21, y: 7};
 
-        // Adjust box height based on number of lines in textBuffer, but not more than MAP_HEIGHT
-        if (this.height == null){this.height = Math.min(this.textBuffer.length, MAP_HEIGHT );}
-        if (this.width == null){this.width = MAP_WIDTH};
+    drawUIBox() {
+        if (this.hidden) return;
 
         this.maskBox();
-        createSprite(0, 0, BOX_TOP_LEFT,uiMap, 214);
+        createSprite(0, this.yOffset, BOX_TOP_LEFT, uiMap, 214);
         for (let x = 1; x < this.width - 1; x++) {
-            createSprite(x, 0, BOX_HORIZONTAL,uiMap, 196);
+            createSprite(x, this.yOffset, BOX_HORIZONTAL, uiMap, 196);
         }
-        createSprite(this.width - 1, 0, BOX_TOP_RIGHT,uiMap, 191);
+        createSprite(this.width - 1, this.yOffset, BOX_TOP_RIGHT, uiMap, 191);
 
         for (let y = 1; y < this.height; y++) {
-            createSprite(0, y, BOX_VERTICAL, uiMap, 179);
-            createSprite(this.width - 1, y, BOX_VERTICAL, uiMap, 179);
-            /* for(let x = 1; x < this.width - 1; x++) {
-                createSprite(x, y, WHITE_TILE, uiMap, 0);
-            } */
-            // Write the message
-            let message = this.textBuffer[y - 1]; // get the message from the buffer
+            createSprite(0, y + this.yOffset, BOX_VERTICAL, uiMap, 179);
+            createSprite(this.width - 1, y + this.yOffset, BOX_VERTICAL, uiMap, 179);
+
+            let message = this.textBuffer[y - 1];
             if (message) {
                 for (let i = 0; i < message.length; i++) {
                     let spriteLocation = this.charToSpriteLocation(message.charAt(i));
-                    createSprite(i + 1, y, spriteLocation, uiMap, message.charCodeAt(i));
+                    createSprite(i + 1, y + this.yOffset, spriteLocation, uiMap, message.charCodeAt(i));
                 }
             }
 
             if (y === this.height - 1) {
-                createSprite(0, y + 1, BOX_BOTTOM_LEFT, uiMap, 192);
+                createSprite(0, y + 1 + this.yOffset, BOX_BOTTOM_LEFT, uiMap, 192);
                 for (let x = 1; x < this.width - 1; x++) {
-                    createSprite(x, y + 1, BOX_HORIZONTAL, uiMap, 196);
+                    createSprite(x, y + 1 + this.yOffset, BOX_HORIZONTAL, uiMap, 196);
                 }
-                createSprite(this.width - 1, y + 1, BOX_BOTTOM_RIGHT, uiMap, 217);
+                createSprite(this.width - 1, y + 1 + this.yOffset, BOX_BOTTOM_RIGHT, uiMap, 217);
             }
         }
     }
@@ -3791,29 +3805,47 @@ class UIBox {
         let spriteColumn = tileNumber % globalVars.SPRITESHEET_COLS;
         let spriteRow = Math.floor(tileNumber / globalVars.SPRITESHEET_COLS);
         
-        if(spriteColumn >= globalVars.SPRITESHEET_COLS) {
+        if (spriteColumn >= globalVars.SPRITESHEET_COLS) {
             spriteColumn = 0;
             spriteRow++;
         }
 
-        //console.log(`Character ${char}, sprite coordinates: ${spriteColumn}, ${spriteRow}`);
         return { x: spriteColumn, y: spriteRow };
     }
+
+    moveToBottom() {
+        this.clearBox(); // Clear current position
+        this.yOffset = MAP_HEIGHT - this.height - 1;
+        this.position = "bottom";
+        this.render();
+    }
+
+    moveToTop() {
+        this.clearBox(); // Clear current position
+        this.yOffset = 0;
+        this.position = "top";
+        this.render();
+    }
+
+    render() {
+        this.clearBox();
+        this.drawUIBox();
+    }
+
+    // Other existing methods unchanged
     showUIContainer() {
-        //console.log("I thought I turned on the UI Mask");
-        createjs.Tween.get(uiMaskContainer).to({alpha: 1}, 100) // fade in
-        .call(() => {
+        createjs.Tween.get(uiMaskContainer).to({alpha: 1}, 100).call(() => {
             uiContainerShown = true;
         });
         uiMaskContainer.alpha = 1;
     }
     
     hideUIContainer() {
-        createjs.Tween.get(uiMaskContainer).to({alpha: 0}, 600) // fade out
-        .call(() => {
+        createjs.Tween.get(uiMaskContainer).to({alpha: 0}, 600).call(() => {
             uiContainerShown = false;
         });
     }
+    
     showBox() {
         if (!uiContainerShown) {
             this.showUIContainer();
@@ -3829,82 +3861,70 @@ class UIBox {
 
     toggleVisibility() {
         this.hidden = !this.hidden;
-        if(this.hidden) {
+        if (this.hidden) {
             this.hideBox();
         } else {
             this.showBox();
         }
     }
-    // Adds a message to the list
+
     addMessage(template, parameters = []) {
         if (!uiContainerShown) {
             this.showUIContainer();
         }
         let message = template;
-        for(let i = 0; i < parameters.length; i++) {
+        for (let i = 0; i < parameters.length; i++) {
             message = message.replace(`{${i}}`, parameters[i]);
         }
         this.clearText();
         this.textBuffer.push(message);
         this.render();
     }
+
     addDotToEndOfLastMessage() {
         let lastMessageIndex = this.textBuffer.length - 1;
-    
+
         if (lastMessageIndex >= 0) {
             let lastMessage = this.textBuffer[lastMessageIndex];
-            if (lastMessage.length < this.width - 2) { // -2 to leave space for the borders
+            if (lastMessage.length < this.width - 2) {
                 this.textBuffer[lastMessageIndex] += ".";
                 this.render();
             }
         }
     }
-    clearMessages(){
+    charToSpriteLocation(char) {
+        let charCode = char.charCodeAt(0);
+        let tileNumber = charCode; 
+        let spriteColumn = tileNumber % globalVars.SPRITESHEET_COLS;
+        let spriteRow = Math.floor(tileNumber / globalVars.SPRITESHEET_COLS);
+        
+        if(spriteColumn >= globalVars.SPRITESHEET_COLS) {
+            spriteColumn = 0;
+            spriteRow++;
+        }
+
+        //console.log(`Character ${char}, sprite coordinates: ${spriteColumn}, ${spriteRow}`);
+        return { x: spriteColumn, y: spriteRow };
+    }
+    clearMessages() {
         this.textBuffer = [];
     }
 
-    clearText(){
+    clearText() {
         const BLANK_TILE = { x: 0, y: 0 };
-        for(let y = 1; y < this.height - 1; y++) {
-            for(let x = 1; x < this.width - 1; x++) {
-                createSprite(x, y, BLANK_TILE, uiMap, 0);
+        for (let y = 1; y < this.height - 1; y++) {
+            for (let x = 1; x < this.width - 1; x++) {
+                createSprite(x, y + this.yOffset, BLANK_TILE, uiMap, 0);
             }
         }
     }
-    
-    // Toggles the active state
+
     toggleActive() {
         this.active = !this.active;
     }
 
     toggleVisibility() {
         this.hidden = !this.hidden;
-    }
-
-    render() {
-        this.drawUIBox();
-        if (!this.hidden && this.textBuffer.length > 0) {
-            this.clearText();
-            this.maskBox();
-            const BLANK_TILE = { x: 0, y: 0 };
-            const lastMessages = this.textBuffer.slice(-this.height + 2);
-            for(let i = 0; i < lastMessages.length; i++) {
-                let message = lastMessages[i];
-                let y = 2 + i;
-                for(let j = 0; j < this.width - 2; j++) { // Leave space for the border
-                    let spriteLocation;
-                    if (j < message.length) {
-                        spriteLocation = this.charToSpriteLocation(message.charAt(j));
-                    } else {
-                        spriteLocation = BLANK_TILE;  // if it's after the end of the message, it's a blank tile
-                    }
-                    createSprite(j + 1, y, spriteLocation, uiMap, j < message.length ? message.charCodeAt(j) : 0);
-                }
-            }
-            while (this.textBuffer.length > this.height - 2) {
-                this.textBuffer.shift();
-            }
-        }
     }
 }
 // This function will run when the spritesheet has finished loading
