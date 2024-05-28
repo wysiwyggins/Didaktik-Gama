@@ -55,6 +55,9 @@ let currentTreasureRoom; // right now one room has locked doors.
 let globalDoorCounter = 0;
 let currentLevelIndex = 1;
 
+let walkableTiles = [];
+let publicTiles = [];
+
 const BOX_TOP_LEFT = {x: 8, y: 9};
 const BOX_HORIZONTAL = {x: 11, y: 8};
 const BOX_VERTICAL = {x: 17, y: 7};
@@ -121,8 +124,10 @@ document.addEventListener('visibilitychange', function() {
     } else {
         PIXI.Ticker.shared.stop();  // Stop PIXI ticker to prevent unnecessary processing
         createjs.Ticker.paused = true;  // Pause CreateJS ticker
-        engine.lock();  // Optionally lock ROT.js engine
-        console.log('Game paused');
+        if (engine) {
+            engine.lock(); 
+            console.log('Game paused');
+        }
     }
 });
 function checkAndLogState() {
@@ -144,7 +149,7 @@ function passTurn() {
         if (!player.isDead) {
             player.inactiveTurns++;
             console.log(`Player inactive turns: ${player.inactiveTurns}`);
-            if (player.inactiveTurns >= 3) {
+            if (player.inactiveTurns >= 10) {
                 player.zeroPlayerMode = true; // Set zero-player mode
                 console.log("Entering zero-player mode");
                 moveToNearestItem(player);
@@ -321,84 +326,22 @@ function loadLevel(levelIndex) {
 }
 
 function goToNextLevel(currentLevelIndex) {
-    // Save current level state
-    saveLevel(currentLevelIndex);
-
-    // Transition to the next level (either load it or generate a new one)
     if (levels[currentLevelIndex + 1]) {
         loadLevel(currentLevelIndex + 1);
     } else {
-        // Generate and store a new level if it doesn't exist yet
-        let newLevel = generateNewLevel();  // Assumes you have a level generation function
+        let newLevel = generateNewLevel(); 
         levels.push(newLevel);
-        // Render or set up this new level in your game
     }
 }
+
+function generateNewLevel() {
+    console.log('Generating new level...');
+}
+
 
 // in most roguelikes everything would inherit from entity, but here it's just plants, smoke, fire and gas etc. 
 
-class Entity {
-    constructor(x, y, scheduler, frames, messageList, zIndex, map) {
-        activeEntities.push(this);
-        this.x = x;
-        this.y = y;
-        this.scheduler = scheduler;
-        this.map = map;
-        this.name = "Entity";
-        this.isFlammable = false;
-        this.messageList = messageList;
-        if (frames.length > 0) {
-            this.sprite = new PIXI.AnimatedSprite(frames);
-            this.sprite.animationSpeed = 0.1;
-            this.sprite.loop = true;
-            this.sprite.play();
-            this.sprite.position.set(x * globalVars.TILE_WIDTH * SCALE_FACTOR, y * globalVars.TILE_HEIGHT * SCALE_FACTOR); 
-            //this.sprite.scale.set(SCALE_FACTOR);
-            this.sprite.zIndex = zIndex;
-            gameContainer.addChild(this.sprite);
 
-            this.sprite.interactive = true;
-            this.sprite.on('mouseover', () => {
-                messageList.hideBox(); 
-                this.showInspectorInfo();
-                inspector.showBox();  
-                inspector.render();  
-            });
-            this.sprite.on('mouseout', () => {
-                inspector.hideBox();
-                messageList.showBox();
-            });
-        } else {
-            this.sprite = null;
-        }
-        this.destroy = () => {
-            // Check if the map and the specific tile in the map exist
-            if (this.map[this.y] && this.map[this.y][this.x]) {
-                this.map[this.y][this.x] = null; // Clear the tile from the map
-            }
-
-            // Destroy sprite and remove from scheduler
-            if (this.sprite) {
-                this.sprite.destroy();
-            }
-            this.scheduler.remove(this);
-            let index = activeEntities.indexOf(this);
-            if (index !== -1) {
-                activeEntities.splice(index, 1);
-            }
-        };
-    }
-
-    showInspectorInfo() {
-        // This method should be overridden by subclasses to display specific information
-        inspector.clearMessages();
-        inspector.addMessage(`${this.name}`);
-    }
-
-    act() {
-        // This method should be implemented by subclasses
-    }
-}
 
 // Actor is the class that Player and Monster inherit from, it's new and probably not utilized enough yet
 
@@ -421,6 +364,9 @@ class Actor {
         this.isFlammable = true;
         this.isBurning = false;
         this.burningTurns = 0;
+        if (!this.messageList) {
+            console.error('messageList is not assigned in Actor');
+        }
         Actor.allActors.push(this);
     }
 
@@ -430,46 +376,45 @@ class Actor {
             this.die();
         }
     }
-    die(){ 
+
+    die() { 
         this.isDead = true;
         this.sprite.visible = false;
         this.scheduler.remove(this);
-        this.messageList.addMessage(`${this.name} returns to dust.`);
+        messageList.addMessage(`${this.name} returns to dust.`);
     }
 
     checkForItems(x, y) {
         let item = objectMap[y][x]?.item;
         if (item) this.pickUpItem(item, x, y);
     }
+
     updatePosition(newTileX, newTileY) {
-        //console.log('update player position');
         this.prevX = this.x;
         this.prevY = this.y;
         this.x = newTileX;
         this.y = newTileY;
-        
     }
+
     pickUpItem(item, x, y) {
         // Remove the item from the object map and the game container
         objectMap[y][x] = null;
         gameContainer.removeChild(item.sprite);
         playPickupSound();
         this.updatePosition(x, y); 
-    
-        // Add the item to the player's inventory
-        if (item.type != ItemType.ARROW && item.type != ItemType.FLOWER) {
+        
+        // Add the item to the actor's inventory
+        if (item.type !== ItemType.ARROW && item.type !== ItemType.FLOWER) {
             this.inventory.push(item);
         }
         if (item.type === ItemType.BOW || item.type === ItemType.ARROW) {
-            this.arrows++;
-        }
+            this.arrows = (this.arrows || 0) + 1;
+        } 
         if (item.type === ItemType.FLOWER) {
             this.flowers++;
             if (this.flowers >= 15) {
                 window.api.navigate('patterns.html');  
             } 
-        } if (item.type === ItemType.CRADLE) { 
-            window.api.navigate('cradle.html');
         }
 
         // Log a message about the item picked up
@@ -478,17 +423,19 @@ class Actor {
         // Check the type of actor and set the message accordingly
         if (this instanceof Player) {
             message = `You picked up a ${item.name}.`;
+            console.log('Player picked up item:', item.name);
         } else if (this instanceof Monster) {
             message = `The ${this.name} picked up a ${item.name}.`;
         }
 
         // Add a check to ensure message is not undefined or empty
-        if (message) {
+        if (message && message.length > 0) {
+            console.log('Adding message to messageList:', message);
             this.messageList.addMessage(message);
         }
-        
     }
 }
+
 
 // there are different player sprites for PLayerTypes, not yet used but they do work
 
@@ -521,7 +468,7 @@ class Player extends Actor{
         this.name = "You";
         this.isSkeletonized = false;
         this.isTargeting = false;
-        
+        this.messageList = messageList;
         //players are made of two tiles, a head and feet, they also have some shadow tiles
         //that do complex stuff to show or hide on walls and floors
         this.footprintTile;
@@ -655,17 +602,20 @@ class Player extends Actor{
         return false;
     }
     handleClick(event) {
-        // prevent default behavior of the event
+        // Prevent default behavior of the event
         event.preventDefault();
-
-        // calculate tile coordinates from pixel coordinates
-        // use relative positions since we center the canvas with CSS
-        let relativeX = event.clientX - rect.left;
-        let relativeY = event.clientY - rect.top;
-
-        let x = Math.floor(relativeX / (globalVars.TILE_WIDTH * SCALE_FACTOR));
-        let y = Math.floor(relativeY / (globalVars.TILE_HEIGHT * SCALE_FACTOR));
-
+    
+        // Get canvas bounding rectangle
+        const rect = app.view.getBoundingClientRect();
+    
+        // Calculate tile coordinates from pixel coordinates
+        // Use devicePixelRatio to account for high-DPI screens
+        let relativeX = (event.clientX - rect.left) * devicePixelRatio;
+        let relativeY = (event.clientY - rect.top) * devicePixelRatio;
+    
+        let x = Math.floor(relativeX / TILE_WIDTH);
+        let y = Math.floor(relativeY / TILE_HEIGHT);
+    
         // If player is in targeting mode
         if (this.isTargeting) {
             this.performArrowAttack(x, y);
@@ -674,19 +624,20 @@ class Player extends Actor{
         } 
         // If the player is not in targeting mode
         else {
-            // make sure the click is inside the map
+            // Make sure the click is inside the map
             if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
                 this.messageList.addMessage("Walking.");
                 this.moveTo(x, y);
             }
         }
     }
+    
     checkUIBoxes() {
-        if (this.y <= messageList.height + 1 && messageList.position === "top") {
+        if (this.y <= this.messageList.height + 1 && this.messageList.position === "top") {
             console.log("Player is near the message list.");
-            messageList.moveToBottom();
-        } else if (this.y > messageList.height + 1 && messageList.position === "bottom") {
-            messageList.moveToTop();
+            this.messageList.moveToBottom();
+        } else if (this.y > this.messageList.height + 1 && this.messageList.position === "bottom") {
+            this.messageList.moveToTop();
         }
 
         if (this.y <= inspector.height + 1 && inspector.position === "top") {
@@ -745,11 +696,7 @@ class Player extends Actor{
             this.updateSprites(newTileX, newTileY);
             return;  // Exit after handling the door.
         }
-        let exit = Exit.allExits.find(e => e.x === newTileX && e.y === newTileY);
-        if (exit) {
-            this.handleExit(exit);
-            return; // Exit the function after handling the exit tile
-        }
+        
     
         // Handle fire tile effects
         this.handleTileEffects(newTileX, newTileY, direction);
@@ -795,6 +742,7 @@ class Player extends Actor{
         }
     
         playExitSound();
+        this.checkUIBoxes();
         this.updateSprites();
     }
     
@@ -869,11 +817,11 @@ class Player extends Actor{
                 door.unlock();
                 this.removeItem(keyItem);
                 sound.play('lock');
-                messageList.addMessage(`You unlocked the ${door.name} with your key.`);
+                this.messageList.addMessage(`You unlocked the ${door.name} with your key.`);
                 return false;
             } else {
                 // Player doesn't have the right key
-                messageList.addMessage(`The ${door.name} is locked.`);
+                this.messageList.addMessage(`The ${door.name} is locked.`);
                 playBumpSound()
                 return true;
             }
@@ -1053,7 +1001,7 @@ class Player extends Actor{
                 direction = 'up';
             } else if (y > this.y) {
                 direction = 'down';
-            }
+            } 
     
             // Save old position
             let oldX = this.x;
@@ -1183,11 +1131,9 @@ class Player extends Actor{
                 window.location.href = 'home.html';
                 break;
             default:
-                messageList.addMessage('Time passes.');
+                this.messageList.addMessage('Time passes.');
                 break;
-            case 'Escape':
-                window.api.quitApp();
-                break;
+            
         }
         if (this.isClosingDoor) {
             if (newDirection) {
@@ -1212,14 +1158,14 @@ class Player extends Actor{
             console.log("try close door");
         }
         if (event.key === 'i' || event.code === 'KeyI') {
-            messageList.hideBox(); 
+            this.messageList.hideBox(); 
             player.printStats();
             inspector.showBox();  
             inspector.render();  
         } else if (event.key !== 'i'|| event.code !== 'KeyI'){
             inspector.hideBox(); 
-            messageList.showBox(); 
-            messageList.render();  
+            this.messageList.showBox(); 
+            this.messageList.render();  
         }
         if (event.key === 'm' || event.code === 'KeyM') {
             this.handleMine();
@@ -1255,10 +1201,10 @@ class Player extends Actor{
             this.messageList.addMessage("You have no arrows left.");
             return;
         }
-        
+    
         // Draw a line from the player's position to the target's position
         let path = line({ x: this.x, y: this.y }, { x: targetX, y: targetY });
-        
+    
         let arrowX = this.x;
         let arrowY = this.y;
         let monsterHit = null;
@@ -1268,11 +1214,9 @@ class Player extends Actor{
             let y = point.y;
             console.log(`Checking (${x}, ${y})` + " " + floorMap[y][x]?.value);
             // Check if there's a wall or door at this point
-            /* if (floorMap[y][x]?.value !== 157 || (doorMap[y] && doorMap[y][x].value != null)) {
-                break;
-              } */
-            if ((floorMap[y][x] && floorMap[y][x].value !== 157) || (doorMap[y] && doorMap[y][x] && doorMap[y][x].value !== null && !Door.isOpenAt(x, y))) {
-                console.log("Wall or door hit! " +  floorMap[y][x]?.value + " " + doorMap[y][x]?.value);
+            if ((floorMap[y][x] && floorMap[y][x].value !== 157) || 
+                (doorMap[y] && doorMap[y][x] && doorMap[y][x].value !== null && !Door.isOpenAt(x, y))) {
+                console.log("Wall or door hit! " + floorMap[y][x]?.value + " " + doorMap[y][x]?.value);
                 break;
             }
     
@@ -1280,7 +1224,7 @@ class Player extends Actor{
             let monster = this.findMonsterAt(x, y);  // Assuming findMonsterAt returns null if no monster is found
             if (monster) {
                 monsterHit = monster;
-                console.log("Monster hit!");
+                console.log("Monster hit: " + monster.name);
                 inspector.hideBox(); 
                 this.messageList.addMessage("You hit the " + monster.name + "!");
                 monster.bleeding = true;
@@ -1297,7 +1241,7 @@ class Player extends Actor{
             arrowY = y;
         }
         if (fireHit) {
-            new Fire(arrowX, arrowY, this.scheduler, '0xFFCC33');
+            new Fire(arrowX, arrowY,this.scheduler, this.messageList, '0xFFCC33');
         }
         // Create the arrow sprite at the final position
         setTimeout(function() {
@@ -1307,16 +1251,18 @@ class Player extends Actor{
     
         // Decrement player's arrows by 1
         this.arrows--;
-        
+    
         if (monsterHit) {
             // Deal damage to the monster
-            monsterHit.blood -= 10;
+            console.log("Dealing damage to monster: " + monsterHit.name);
+            monsterHit.takeDamage(10);  // Use the takeDamage method
             playArrowSound(true);
         } else {
             this.messageList.addMessage("You missed.");
             playArrowSound(false);
-        } 
+        }
     }
+    
 
 
     handleMine() {
@@ -1415,7 +1361,7 @@ class Player extends Actor{
             // Check for an actor on the same tile as the door
             let actor = Actor.allActors.find(actor => actor.x === targetX && actor.y === targetY && !actor.isDead);
             if (actor) {
-                this.messageList.addMessage("A "+ actor.name + " is in the way, you can't close the door.");
+                this.messageList.addMessage("The "+ actor.name + " is in the way, you can't close the door.");
                 return;
             }
     
@@ -1473,11 +1419,9 @@ class Player extends Actor{
     applyDamageEffects() {
         if (this.isBurning) {
             this.blood -= 20;
-            if (!this.isDead){
-                sound.play('ouch');
-                this.messageList.addMessage("You are on fire!");
-            }
+            sound.play('ouch');
             this.burningTurns++;
+            this.messageList.addMessage("You are on fire!");
             
             // Increase chance of burning ending after 4 turns, with a guarantee to stop after 6 turns
             if (this.burningTurns > 3 || (this.burningTurns > 3 && Math.random() < 0.5) || this.burningTurns > 5 && atmosphereMap[this.y][this.x].value != 300) {
@@ -1637,7 +1581,7 @@ function createPlayerSprite(player) {
     
     spriteFootprint.interactive = true;  // Make the footprint sprite respond to interactivity
     spriteFootprint.on('mouseover', () => {
-        messageList.hideBox(); 
+        this.messageList.hideBox(); 
         player.printStats();
         inspector.showBox();  
         inspector.render();  
@@ -1645,19 +1589,19 @@ function createPlayerSprite(player) {
 
     spriteOverlay.interactive = true;  
     spriteOverlay.on('mouseover', () => {
-        messageList.hideBox();  
+        this.messageList.hideBox();  
         player.printStats();
         inspector.showBox();  
         inspector.render();  
     });
     spriteFootprint.on('mouseout', () => {
         inspector.hideBox();
-        messageList.showBox();
+        this.messageList.showBox();
     });
     
     spriteOverlay.on('mouseout', () => {
         inspector.hideBox();
-        messageList.showBox();
+        this.messageList.showBox();
     });
     player.sprite = { footprint: spriteFootprint, overlay: spriteOverlay };
     let shadowTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
@@ -1706,10 +1650,7 @@ async function moveToNearestItem(player) {
     } else {
         console.log("No items or immediate threats detected.");
         player.failedMoveAttempts++;
-        if (player.failedMoveAttempts >= 3) {
-            console.log("No movement possible, redirecting...");
-            window.location.href = 'knit.html'; 
-        }
+        
     }
     player.inactiveTurns = 0; // Reset the counter after attempting to move
 }
@@ -1739,6 +1680,7 @@ function findNearestItem(px, py) {
     });
     return nearest;
 }
+
 function keyHoleZoom(player) {
    
     const BLANK_TILE = { x: 0, y: 0 };
@@ -1785,6 +1727,8 @@ function keyHoleZoom(player) {
     revealCircle();
 }
 
+
+
 const MonsterType = Object.freeze({
     "BASILISK": 0,
     "CHIMERA": 1,
@@ -1796,7 +1740,7 @@ const Attacks = {
     FIREBREATH: function(monster, target) {
         target.isBurning = true;
         let fireTilesCount = Math.floor(Math.random() * 4) + 2; // 2 to 5 fire tiles
-        let fire1 = new Fire(target.x, target.y, monster.scheduler, '0xFF0000');//one fire directly on the player
+        let fire1 = new Fire(target.x, target.y, monster.scheduler, monster.messageList, '0xFF0000');//one fire directly on the player
         monster.scheduler.add(fire1, true);
         while (fireTilesCount-- > 0) {
             let dx = Math.floor(Math.random() * 7) - 3; // -3 to 3
@@ -1804,16 +1748,16 @@ const Attacks = {
             let newX = target.x + dx;
             let newY = target.y + dy;
             if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && floorMap[newY][newX].value === 157) {
-                let fire = new Fire(newX, newY, monster.scheduler, '0xFF0000');
+                let fire = new Fire(newX, newY, monster.scheduler, monster.messageList, '0xFF0000');
                 monster.scheduler.add(fire, true);
             }
         }
         sound.play('fireball');
-        messageList.addMessage("The {0} breathes flames!", [monster.name]);
+        monster.messageList.addMessage("The {0} breathes flames!", [monster.name]);
     },
     CLAW: function(monster, target) {
         if (monster.isAdjacent(target) && target.isDead == false) {
-            messageList.addMessage(`The ${monster.name} claws at you!`);
+            monster.messageList.addMessage(`The ${monster.name} claws at you!`);
             if (target.isDead == false){
                 sound.play('ouch');
             } else {
@@ -1984,28 +1928,30 @@ class Monster extends Actor{
                         let [dx, dy] = this.getDeltaXY(direction);
                         let targetX = this.x + dx;
                         let targetY = this.y + dy;
-                        if (!this.isOutOfBounds(targetX, targetY) && wallMap[targetY][targetX]?.value !== null && backgroundMap[targetY][targetX]?.value !== 216) {
-                            // Remove the wall sprite
-                            gameContainer.removeChild(wallMap[targetY][targetX].sprite);
-                            if (wallMap[targetY][targetX]?.value) {
-                                wallMap[targetY][targetX].value = null; // Remove wall from the map
+                        if (Math.random() < 1/3) {
+                            if (!this.isOutOfBounds(targetX, targetY) && wallMap[targetY][targetX]?.value !== null && backgroundMap[targetY][targetX]?.value !== 216) {
+                                // Remove the wall sprite
+                                gameContainer.removeChild(wallMap[targetY][targetX].sprite);
+                                if (wallMap[targetY][targetX]?.value) {
+                                    wallMap[targetY][targetX].value = null; // Remove wall from the map
+                                }
+                                // Create a floor at the mined location
+                                createRoughFloor(targetX, targetY);
+            
+                                //this.messageList.addMessage("A " + this.name + " chisels away at a wall.");
+                                playBumpSound();
+            
+                                // Random chance to place Uranium
+                                if (Math.random() < 1/8) {
+                                    let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
+                                    this.scheduler.add(uranium, true); // Add Uranium to the scheduler
+                                    this.messageList.addMessage("The robot found Uranium!");
+                                }
+            
+                                break; // Break after one successful mine action
+                            } else {
+                                playBumpSound();
                             }
-                            // Create a floor at the mined location
-                            createRoughFloor(targetX, targetY);
-        
-                            this.messageList.addMessage("A " + this.name + " chisels away at a wall.");
-                            playBumpSound();
-        
-                            // Random chance to place Uranium
-                            if (Math.random() < 1/8) {
-                                let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
-                                this.scheduler.add(uranium, true); // Add Uranium to the scheduler
-                                this.messageList.addMessage("The robot found Uranium!");
-                            }
-        
-                            break; // Break after one successful mine action
-                        } else {
-                            playBumpSound();
                         }
                     }
                 } else {
@@ -2507,26 +2453,84 @@ function generateColorVariation(color, variation) {
     };
 }
 
-class Fire extends Entity {
-    constructor(x, y, scheduler, color='0xFFA500') {
-        super(x, y, scheduler, fireFrames, 2); // Call the Entity constructor
+class Entity {
+    constructor(x, y, scheduler, frames, zIndex, map, messageList) {
+        activeEntities.push(this);
+        this.x = x;
+        this.y = y;
+        this.scheduler = scheduler;
+        this.map = map;
+        this.messageList = messageList; // Ensure this.messageList is properly assigned
+        this.name = "Entity";
+        this.isFlammable = false;
+        if (frames.length > 0) {
+            this.sprite = new PIXI.AnimatedSprite(frames);
+            this.sprite.animationSpeed = 0.1;
+            this.sprite.loop = true;
+            this.sprite.play();
+            this.sprite.position.set(x * globalVars.TILE_WIDTH * SCALE_FACTOR, y * globalVars.TILE_HEIGHT * SCALE_FACTOR); 
+            this.sprite.zIndex = zIndex;
+            gameContainer.addChild(this.sprite);
 
+            this.sprite.interactive = true;
+            this.sprite.on('mouseover', () => {
+                this.messageList.hideBox(); 
+                this.showInspectorInfo();
+                inspector.showBox();  
+                inspector.render();  
+            });
+            this.sprite.on('mouseout', () => {
+                inspector.hideBox();
+                this.messageList.showBox();
+            });
+        } else {
+            this.sprite = null;
+        }
+        this.destroy = () => {
+            if (this.map[this.y] && this.map[this.y][this.x]) {
+                this.map[this.y][this.x] = null; 
+            }
+
+            if (this.sprite) {
+                this.sprite.destroy();
+            }
+            scheduler.remove(this);
+            let index = activeEntities.indexOf(this);
+            if (index !== -1) {
+                activeEntities.splice(index, 1);
+            }
+        };
+    }
+
+    showInspectorInfo() {
+        inspector.clearMessages();
+        inspector.addMessage(`${this.name}`);
+    }
+
+    act() {
+        // This method should be implemented by subclasses
+    }
+}
+
+
+class Fire extends Entity {
+    constructor(x, y, scheduler, messageList, color='0xFFA500') {
+        super(x, y, scheduler, fireFrames, 2, undefined, messageList); // Pass messageList to Entity constructor
         this.name = "Fire";
-        this.turnsLeft = 5; // maximum number of turns this fire can create more fires
+        this.turnsLeft = 5; 
         this.color = color;
         this.isFlammable = true;
-        // Setting specific properties for the Fire instance
-        this.sprite.tint = this.color;  // apply the tint
+        this.messageList = messageList; // Redundant but ensures messageList is set
+
+        this.sprite.tint = this.color;  
         this.sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 
-        // Updating the atmosphere map to include this fire instance
         if (!atmosphereMap[this.y]) {
             atmosphereMap[this.y] = [];
         }
         atmosphereMap[this.y][this.x] = { value: 300, sprite: this.sprite };
 
-        // Specific tween for the Fire instance
-        let colorVariation = generateColorVariation(color, 0x101010); // color variation of flicker
+        let colorVariation = generateColorVariation(color, 0x101010);
         this.tween = new createjs.Tween.get(this.sprite)
             .to({ tint: colorVariation.lighter }, 20) 
             .wait(20)
@@ -2535,16 +2539,12 @@ class Fire extends Entity {
             .to({ tint: colorVariation.darker }, 10)
             .wait(10)
             .call(() => {
-                this.tween.gotoAndPlay(0); // Restart the animation from the beginning
+                this.tween.gotoAndPlay(0); 
             });
-        //this.checkAndDestroyKudzu(x, y);
         this.checkAndDestroyFlammable(x, y);
     }
 
     act() {
-        //createjs.Tween.tick();
-        // Decrease turns left, if it reaches 0, stop spreading and destroy the sprite
-        //console.log("fire turn");
         if (--this.turnsLeft <= 0) {
             this.sprite.destroy();
             this.scheduler.remove(this);
@@ -2554,42 +2554,29 @@ class Fire extends Entity {
                 activeEntities.splice(index, 1);
             }
             return;
-
         }
     
-        // 30% chance to spread the fire
         if (Math.random() < 0.3) {
             let directions = [
-                [-1, 0], // left
-                [1, 0], // right
-                [0, -1], // up
-                [0, 1] // down
+                [-1, 0], 
+                [1, 0], 
+                [0, -1], 
+                [0, 1] 
             ];
             for (let direction of directions) {
                 let newX = this.x + direction[0];
                 let newY = this.y + direction[1];
-                // Check if the new spot is valid and not already on fire
                 if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && 
                     floorMap[newY][newX].value === 157 && 
                     (!atmosphereMap[newY][newX] || atmosphereMap[newY][newX].value !== 300)) {
                     
-                    // Check and destroy Kudzu on the new tile
-                    //this.checkAndDestroyKudzu(newX, newY);
-
                     this.checkAndDestroyFlammable(newX, newY);
-
-                    // Create new fire
-                    let fire = new Fire(newX, newY, this.scheduler, '0xFFCC33');
+                    let fire = new Fire(newX, newY, this.scheduler, this.messageList, '0xFFCC33');
                     atmosphereMap[newY][newX].value = 300;
                                     
-                    if (direction[0] !== 0) { // If the fire spread to the left or right, flip the sprite horizontally
-                        // Set the transformation origin to the center of the sprite
+                    if (direction[0] !== 0) { 
                         fire.sprite.anchor.set(0.5, 0.5);
-                
-                        // Flip horizontally
                         fire.sprite.scale.x *= -1;
-                
-                        // Adjust sprite's position due to anchor change
                         fire.sprite.x += globalVars.TILE_WIDTH * SCALE_FACTOR / 2;
                         fire.sprite.y += globalVars.TILE_HEIGHT * SCALE_FACTOR / 2;
                     }
@@ -2600,29 +2587,27 @@ class Fire extends Entity {
             }
         }
         if (Math.random() < 0.7) {
-            let newY = this.y - 1; // the tile above the current one
+            let newY = this.y - 1;
             if (newY >= 0 && floorMap[newY][this.x].value !== 177 && atmosphereMap[newY][this.x] === null) {
-                let smoke = new Smoke(this.x, newY, this.scheduler);
+                let smoke = new Smoke(this.x, newY, this.scheduler, this.messageList);
                 this.scheduler.add(smoke, true);
             }
         }
     }
+
     checkAndDestroyFlammable(x, y) {
-        // Check and destroy flammable entities
         if (growthMap[y] && growthMap[y][x] && growthMap[y][x].value) {
             let entity = growthMap[y][x].sprite;
             if (entity && entity.isFlammable && entity._texture) {
                 entity.destroy();
             }
         }
-    
-        // Check and destroy flammable items
+
         if (objectMap[y] && objectMap[y][x] && objectMap[y][x].item && objectMap[y][x].item.isFlammable) {
             let item = objectMap[y][x].item;
             if (item && item.sprite && item.sprite.texture) {
                 item.destroy();
-                messageList.addMessage(`The ${item.name} disappears in flames.`);
-               //console.log("Destroyed flammable item");
+                this.messageList.addMessage(`The ${item.name} disappears in flames.`);
             }
         }
 
@@ -2633,9 +2618,9 @@ class Fire extends Entity {
 }
 
 class Smoke extends Entity {
-    constructor(x, y, scheduler) {
-        super(x, y, scheduler, smokeFrames, 2.5); // Call the Entity constructor with smoke frames
-
+    constructor(x, y, scheduler, messageList) {
+        super(x, y, scheduler, smokeFrames, 2.5, undefined, messageList); // Pass messageList to Entity constructor
+        this.messageList = messageList; // Redundant but ensures messageList is set
         this.name = "Smoke";
         if (!atmosphereMap[this.y]) {
             atmosphereMap[this.y] = [];
@@ -2644,7 +2629,6 @@ class Smoke extends Entity {
     }
 
     act() {
-        // Smoke's behavior when it acts...
         if (Math.random() < 0.5) {
             atmosphereMap[this.y][this.x] = null;
             this.sprite.destroy();
@@ -2655,63 +2639,59 @@ class Smoke extends Entity {
             }
         }
     }
-
 }
 
 class Kudzu extends Entity {
-    constructor(x, y, scheduler, parentDirection = null) {
-        super(x, y, scheduler, [], 2);
+    constructor(x, y, scheduler, messageList, parentDirection = null) {
+        super(x, y, scheduler, [], 2, undefined, messageList); // Pass messageList to Entity constructor
         this.name = "Kudzu";
         this.hasFlower = false;
         scheduler.add(this, true);
         this.parentDirection = parentDirection;
-        // Initialize the sprite using createSprite with an appropriate box drawing tile
+        this.messageList = messageList; // Redundant but ensures messageList is set
         this.spriteData = createSprite(this.x, this.y, this.getBoxTileBasedOnDirection(parentDirection), growthMap);
         this.sprite = this.spriteData.sprite;
         this.sprite.isFlammable = true;
-        // Mark this tile as occupied by Kudzu
         growthMap[this.y][this.x] = { value: 800, sprite: this.sprite };
         if (this.sprite) {
             this.sprite.interactive = true;
             this.sprite.on('mouseover', () => {
-                console.log("Kudzu mouseover triggered"); // Debugging log
-                messageList.hideBox(); 
+                console.log("Kudzu mouseover triggered");
+                this.messageList.hideBox(); 
                 this.showInspectorInfo();
                 inspector.showBox();  
                 inspector.render();  
             });
             this.sprite.on('mouseout', () => {
                 inspector.hideBox();
-                messageList.showBox();
+                this.messageList.showBox();
             });
         }
     }
 
     act() {
-        // 1% chance to turn into a flower
         if (!this.hasFlower && Math.random() < 0.01) {
             this.addFlower();
             return;
         }
 
-        // 10% chance to spread
         if (Math.random() < 0.1) {
             const directions = [
-                [-1, 0, 'left'], // left
-                [1, 0, 'right'],  // right
-                [0, -1, 'up'],    // up
-                [0, 1, 'down']    // down
+                [-1, 0, 'left'],
+                [1, 0, 'right'],
+                [0, -1, 'up'],
+                [0, 1, 'down']
             ];
 
             const availableTiles = directions
                 .map(d => ({ x: this.x + d[0], y: this.y + d[1], direction: d[2] }))
                 .filter(t => 
                     t.x >= 0 && t.x < MAP_WIDTH && t.y >= 0 && t.y < MAP_HEIGHT &&
-                    floorMap[t.y][t.x].value === 157 && // Walkable tile
-                    doorMap[t.y][t.x].value == null && // Not a door
-                    objectMap[t.y][t.x]?.item?.value == null &&// No objects
-                    atmosphereMap[t.y][t.x]?.value != 300 && // Not already occupied by Fire, using optional chaining
-                    !growthMap[t.y][t.x] // Not already occupied by Kudzu or Flower
+                    floorMap[t.y][t.x].value === 157 &&
+                    doorMap[t.y][t.x].value == null &&
+                    objectMap[t.y][t.x]?.item?.value == null &&
+                    atmosphereMap[t.y][t.x]?.value != 300 &&
+                    !growthMap[t.y][t.x]
                 );
 
             if (availableTiles.length > 0) {
@@ -2722,29 +2702,23 @@ class Kudzu extends Entity {
     }
 
     spreadTo(x, y, direction) {
-        new Kudzu(x, y, this.scheduler, direction);
+        new Kudzu(x, y, this.scheduler, this.messageList, direction);
     }
 
     addFlower() {
-        // Introduce a delay before turning into a flower
         setTimeout(() => {
-            // Generate a random tint for the flower
-            const baseColor = 0xDDA0DD; // Light violet as the base color
-            const colorVariation = Math.floor(Math.random() * 0x20); // Slight variation in color
-            const randomTint = Math.min(baseColor + colorVariation, 0xFFFFFF); // Ensure the color value does not exceed the maximum
-            //const colorValue = parseInt(randomTint.hex.slice(1), 16);
-            // Create a new Item instance for the flower
+            const baseColor = 0xDDA0DD;
+            const colorVariation = Math.floor(Math.random() * 0x20);
+            const randomTint = Math.min(baseColor + colorVariation, 0xFFFFFF);
+
             const flowerItem = new Item(ItemType.FLOWER, this.x, this.y, 0, randomTint, "Flower");
-    
-            // Use the sprite from the flower item
             this.spriteData = flowerItem.sprite;
             this.hasFlower = true;
             playBloomSound();
-        }, Math.random() * 1000); // Delay between 0 to 1000 milliseconds
+        }, Math.random() * 1000);
     }
 
     getBoxTileBasedOnDirection(direction) {
-        // Define the tile sets for each direction
         const tilesForDirection = {
             'left': [BOX_RIGHT_VERTICAL, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL, BOX_DOWN_HORIZONTAL, BOX_UP_HORIZONTAL, BOX_HORIZONTAL],
             'right': [BOX_LEFT_VERTICAL, BOX_TOP_LEFT, BOX_VERTICAL_HORIZONTAL, BOX_DOWN_HORIZONTAL, BOX_UP_HORIZONTAL, BOX_HORIZONTAL],
@@ -2752,39 +2726,32 @@ class Kudzu extends Entity {
             'down': [BOX_UP_HORIZONTAL, BOX_TOP_LEFT, BOX_TOP_RIGHT, BOX_VERTICAL_HORIZONTAL, BOX_LEFT_VERTICAL, BOX_RIGHT_VERTICAL, BOX_VERTICAL]
         };
 
-        // Get the appropriate tile set based on direction
         const tileSet = tilesForDirection[direction] || [BOX_VERTICAL_HORIZONTAL];
-
-        // Return a random tile from the tile set
         return tileSet[Math.floor(Math.random() * tileSet.length)];
     }
-    
 }
 
 class Uranium extends Entity {
     constructor(x, y, scheduler, messageList, color = '0xE0FF00') {
-        super(x, y, scheduler, [], 2, growthMap); 
+        super(x, y, scheduler, [], 2, growthMap, messageList); // Pass messageList to Entity constructor
         this._tileIndex = {x: 8, y: 0};
         this.name = "Uranium";
         this.color = color;
         this.isFlammable = false;
-        this.messageList = messageList;
-        // Create the sprite
-        this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
-        this.sprite = this.spriteData.sprite; // Assign the created sprite to this instance
+        this.messageList = messageList; // Redundant but ensures messageList is set
 
-        // Set sprite properties
-        this.sprite.tint = this.color;  // apply the tint
+        this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
+        this.sprite = this.spriteData.sprite;
+
+        this.sprite.tint = this.color;
         this.sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 
-        // Updating the atmosphere map to include this Uranium instance
         if (!atmosphereMap[this.y]) {
             atmosphereMap[this.y] = [];
         }
-        atmosphereMap[this.y][this.x] = { value: 400, sprite: this.sprite }; // Use a unique value for Uranium
+        atmosphereMap[this.y][this.x] = { value: 400, sprite: this.sprite };
 
-        // Specific tween for the Uranium instance
-        let colorVariation = generateColorVariation(color, 0xEDFFAC); 
+        let colorVariation = generateColorVariation(color, 0xEDFFAC);
         this.tween = new createjs.Tween.get(this.sprite)
             .to({ tint: colorVariation.lighter }, 20) 
             .wait(20)
@@ -2793,23 +2760,22 @@ class Uranium extends Entity {
             .to({ tint: colorVariation.darker }, 10)
             .wait(10)
             .call(() => {
-                this.tween.gotoAndPlay(0); // Restart the animation from the beginning
+                this.tween.gotoAndPlay(0); 
             });
     }
 
     act() {
-        // Check adjacent tiles for the player and potentially harm them
         let directions = [
-            [-1, 0], // left
-            [1, 0], // right
-            [0, -1], // up
-            [0, 1] // down
+            [-1, 0], 
+            [1, 0], 
+            [0, -1], 
+            [0, 1] 
         ];
         for (let direction of directions) {
             let newX = this.x + direction[0];
             let newY = this.y + direction[1];
             if (!this.isOutOfBounds(newX, newY) && player.x === newX && player.y === newY) {
-                if (Math.random() < 1 / 3) { // 1 in 3 chance to harm the player
+                if (Math.random() < 1 / 3) {
                     player.takeDamage(1);
                     this.messageList.addMessage("You feel sick.");
                 }
@@ -2821,6 +2787,7 @@ class Uranium extends Entity {
         return x < 0 || y < 0 || x >= MAP_WIDTH || y >= MAP_HEIGHT;
     }
 }
+
 
 
 
@@ -2854,7 +2821,7 @@ const ItemType = Object.freeze({
     "ARROW": 3,
     "FLOWER": 4,
     "CRADLE": 5,
-    "MATTOCK": 6
+    "MATTOCK": 6,
 });
 
 class Item {
@@ -2923,7 +2890,7 @@ class Item {
         this.sprite.interactive = true;
         this.sprite.on('mouseover', () => {
             messageList.hideBox(); 
-            this.showInspectorInfo();
+            showInspectorInfo();
             inspector.showBox();  
             inspector.render();  
         });
@@ -2999,10 +2966,11 @@ function capitalizeFirstLetter(string) {
 
 class Door {
     static allDoors = [];
-    constructor(id, x, y, colorValue, isLocked = false) {
+    constructor(id, x, y, colorValue, messageList, isLocked = false) {
         this.id = id;
         this.x = x;
         this.y = y;
+        this.messageList = messageList;
         this.colorValue = colorValue;
         this.name = ''; 
         this.isLocked = isLocked;
@@ -3038,7 +3006,7 @@ class Door {
             // Interactivity
             sprite.interactive = true;
             sprite.on('mouseover', () => {
-                messageList.hideBox(); 
+                this.messageList.hideBox(); 
                 this.showInspectorInfo();
                 inspector.showBox();  
                 inspector.render();  
@@ -3046,7 +3014,7 @@ class Door {
 
             sprite.on('mouseout', () => {
                 inspector.hideBox();
-                messageList.showBox();
+                this.messageList.showBox();
             });
 
             sprite.on('click', () => {
@@ -3057,10 +3025,10 @@ class Door {
                         if (keyItem) {
                             this.unlock();
                             player.removeItem(keyItem); // Assuming the Player class has a removeItem method
-                            messageList.addMessage(`You unlocked the ${this.name} with your key.`);
+                            this.messageList.addMessage(`You unlocked the ${this.name} with your key.`);
                         } else {
                             // Player doesn't have the right key
-                            messageList.addMessage(`The ${this.name} is locked.`);
+                            this.messageList.addMessage(`The ${this.name} is locked.`);
                             return;
                         }
                     }
@@ -3104,12 +3072,12 @@ class Door {
     toggleDoor() {
         if (this.isOpen) {
             this.close();
-            messageList.addMessage("You close a door.")
+            this.messageList.addMessage("You close a door.")
             this.updateDoorStateInMap(100);
             playDoorSound();
         } else {
             this.open();
-            messageList.addMessage("You open a door.")
+            this.messageList.addMessage("You open a door.")
             this.updateDoorStateInMap(null);
             playDoorSound();
         }
@@ -3128,6 +3096,7 @@ class Door {
             const closedSpriteIndices = [{x: 11, y: 6}, {x: 10, y: 6}, {x: 21, y: 8}];
             this.updateSprites(closedSpriteIndices);
             this.isOpen = false;
+            this.updateDoorStateInMap(100);
         }
     }
 
@@ -3160,49 +3129,6 @@ class Door {
         }
     }
 
-}
-
-class Exit {
-    static allExits = [];
-    constructor(x, y, type) {
-        this.x = x;
-        this.y = y;
-        this.type = type; // "up" or "down"
-        this.createExit();
-        Exit.allExits.push(this);
-    }
-
-    createExit() {
-        let spriteIndices = this.type === "up" ? 
-            [{x: 22, y: 5, flipV: true}, {x: 21, y: 0}] : 
-            [{x: 22, y: 5, flipH: true, flipV: true}, {x: 20, y: 0}];
-    
-        this.sprites = [];
-    
-        for (let i = 0; i < spriteIndices.length; i++) {
-            let spriteInfo = spriteIndices[i];
-    
-            // For the upper tile, we adjust the y-coordinate
-            let yOffset = i === 0 ? -1 : 0;
-    
-            let sprite = createSprite(this.x, this.y + yOffset, {x: spriteInfo.x, y: spriteInfo.y}, floorMap, 157);
-    
-            // Positioning for flipping logic
-            if (spriteInfo.flipH) {
-                sprite.scale.x *= -1;
-                sprite.x += globalVars.TILE_WIDTH * SCALE_FACTOR;
-            }
-    
-            if (spriteInfo.flipV) {
-                sprite.scale.y *= -1;
-                sprite.y += globalVars.TILE_HEIGHT * SCALE_FACTOR;
-            }
-    
-            this.sprites.push(sprite);
-        }
-    }
-    
-    
 }
 
 
@@ -3453,7 +3379,7 @@ async function addDoors() {
     treasureRoom.getDoors((x, y) => {
         const colorIndex = Math.floor(Math.random() * colors.length); 
         const colorValue = parseInt(colors[colorIndex].hex.slice(1), 16);
-        let door = new Door(globalDoorCounter++, x, y, colorValue, true);  // Locked door with unique ID
+        let door = new Door(globalDoorCounter++, x, y, colorValue, messageList, true);  // Locked door with unique ID
         door.name = capitalizeFirstLetter(colors[colorIndex].color) + " door ";
         placeKeyForDoor(door, colors[colorIndex].color);  // Add a key for this door
     });
@@ -3465,7 +3391,7 @@ async function addDoors() {
                 if (Math.random() >= 0.5) {  // 50% chance for a door
                     const colorIndex = Math.floor(Math.random() * colors.length); 
                     const colorValue = parseInt(colors[colorIndex].hex.slice(1), 16);
-                    new Door(globalDoorCounter++, x, y, colorValue);  // Unlocked door with unique ID
+                    new Door(globalDoorCounter++, x, y, colorValue, messageList);  // Unlocked door with unique ID
                     //console.log("door color " + colorValue);
                 }
             });
@@ -3489,15 +3415,9 @@ function isTileWithDoor(tile, doorMap) {
 }
 
 function placeKeyForDoor(door, doorName) {
-    let walkableTiles = [];
-    for (let y = 0; y < MAP_HEIGHT; y++) {
-        for (let x = 0; x < MAP_WIDTH; x++) {
-            if (floorMap[y][x].value === 157) {
-                walkableTiles.push({x: x, y: y});
-            }
-        }
-    }
-    let randomTile = walkableTiles[Math.floor(Math.random() * walkableTiles.length)];
+    
+    
+    let randomTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
 
     let keyName = `${doorName} key`;
     new Item(ItemType.KEY, randomTile.x, randomTile.y, door.id, door.colorValue, keyName);
@@ -3927,6 +3847,8 @@ class UIBox {
         this.hidden = !this.hidden;
     }
 }
+
+
 // This function will run when the spritesheet has finished loading
 async function setup() {
     try {
@@ -3938,8 +3860,6 @@ async function setup() {
     addFloorsAndVoid();
     evaluateMapAndCreateWalls();
     addBaseAndShadows();    
-    let walkableTiles = [];
-    let publicTiles = []
     let currentLevel = new Level();
     levels.push(currentLevel);
 
@@ -3950,17 +3870,16 @@ async function setup() {
                 let tile = {x: x, y: y};
     
                 // If the tile is neither in the treasure room nor has a door, then it's public
-                if (!isTileInTreasureRoom(tile, currentTreasureRoom)) {
+                if (!isTileInTreasureRoom(tile, currentTreasureRoom) ) {
                     publicTiles.push({x: tile.x,y: tile.y});
                 } 
             }
         }
     }
-    
-    //console.log(publicTiles.length);
+    //console.log(publicTiles.length, publicTiles)
     let randomTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
 
-    let randomTile2 = walkableTiles[Math.floor(Math.random() * walkableTiles.length)];
+    let randomTile2 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
 
     let randomTile3 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile4 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
@@ -3970,31 +3889,10 @@ async function setup() {
     let randomTile8 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile9 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile10 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
-    //add exits, they don't work yet
-   /*  let downExitTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
-    let upExitTile;
-    do {
-        upExitTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
-    } while (upExitTile.x === downExitTile.x && upExitTile.y === downExitTile.y); // Make sure it's not the same tile
+    
+    messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 5, false, "top");
+    inspector = new UIBox([], 30, 15, true, "top");
 
-    
-    // Create the exits
-    let downExit = new Exit(downExitTile.x, downExitTile.y, "down");
-    let upExit = new Exit(upExitTile.x, upExitTile.y, "up");
-    
-    
-    currentLevel.downExitPosition = {x: downExitTile.x, y: downExitTile.y};
-    currentLevel.upExitPosition = {x: upExitTile.x, y: upExitTile.y};
-    */
-
-    
-    
-    
-    messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 5);
-    inspector = new UIBox([], 30, 15, true);
-
-
-    // And handle them individually
     messageList.showBox();
     messageList.showUIContainer();
     if (socket) {
@@ -4014,7 +3912,7 @@ async function setup() {
     messageList.addMessage(`Press 'i' for key commands.`);
 
     PIXI.Loader.shared.onComplete.add(() => {
-        for (let i = 0; i < 7; i++) { // assuming you have 4 frames of fire animation
+        for (let i = 0; i < 7; i++) { 
             let rect = new PIXI.Rectangle(i * globalVars.TILE_WIDTH, 0, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
             let texture = new PIXI.Texture(PIXI.Loader.shared.resources.fire.texture.baseTexture, rect);
             fireFrames.push(texture);
@@ -4022,7 +3920,7 @@ async function setup() {
 
         let scheduler = new ROT.Scheduler.Simple();
         engine = new ROT.Engine(scheduler);
-        player = new Player(PlayerType.HUMAN, randomTile.x, randomTile.y, scheduler, engine, messageList, inspector);
+        player = new Player(PlayerType.HUMAN, randomTile.x, randomTile.y, scheduler, engine,messageList, inspector);
         createPlayerSprite(player);
         keyHoleZoom(player);
         scheduler.add(player, true); // the player takes turns
@@ -4034,22 +3932,22 @@ async function setup() {
         let basilisk = new Monster(MonsterType.BASILISK, randomTile2.x, randomTile2.y, scheduler, engine, messageList, inspector);
         createMonsterSprite(basilisk);
         scheduler.add(basilisk, true);
-        let skeleton1 = new Monster(MonsterType.SKELETON, randomTile6.x, randomTile6.y, scheduler, engine, messageList, inspector);
+        let skeleton1 = new Monster(MonsterType.SKELETON, randomTile6.x, randomTile6.y, scheduler, engine,messageList, inspector);
         createMonsterSprite(skeleton1);
         scheduler.add(skeleton1, true);
-        let skeleton2 = new Monster(MonsterType.SKELETON, randomTile7.x, randomTile7.y, scheduler, engine, messageList, inspector);
+        let skeleton2 = new Monster(MonsterType.SKELETON, randomTile7.x, randomTile7.y, scheduler, engine,messageList, inspector);
         createMonsterSprite(skeleton2);
         scheduler.add(skeleton2, true);
-        let skeleton3 = new Monster(MonsterType.SKELETON, randomTile8.x, randomTile8.y, scheduler, engine, messageList, inspector);
+        let skeleton3 = new Monster(MonsterType.SKELETON, randomTile8.x, randomTile8.y, scheduler, engine,messageList, inspector);
         createMonsterSprite(skeleton3);
         scheduler.add(skeleton3, true);
-        let robot1 = new Monster(MonsterType.ROBOT, randomTile9.x, randomTile9.y, scheduler, engine, messageList, inspector);
+        let robot1 = new Monster(MonsterType.ROBOT, randomTile9.x, randomTile9.y, scheduler, engine,messageList, inspector);
         createMonsterSprite(robot1);
         scheduler.add(robot1, true);
         new Item(ItemType.BOW,randomTile3.x, randomTile3.y, 0xFFFFFF, 1);
         new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, 0xFFFFFF, 3);
         //new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
-        new Item(ItemType.MATTOCK,randomTile10.x, randomTile10.y, 0x00FF00, 2);
+        new Item(ItemType.MATTOCK,randomTile10.x, randomTile10.y, 0xFFFFFF, 2);
         /* let chimera = new Monster(MonsterType.CHIMERA, randomTile3.x, randomTile3.y, scheduler, engine, messageList);
         createMonsterSprite(chimera);
         scheduler.add(chimera, true); */
@@ -4057,13 +3955,13 @@ async function setup() {
         //add some fire
         for (let i = 0; i < 3; i++) {
             let randomFireTile = walkableTiles[Math.floor(Math.random() * walkableTiles.length)];
-            let fire = new Fire(randomFireTile.x, randomFireTile.y, scheduler, '0xFFCC33', 2, atmosphereMap);
+            let fire = new Fire(randomFireTile.x, randomFireTile.y, scheduler, messageList, '0xFFCC33');
             scheduler.add(fire, true); // the fire takes turns
         }
 
         for (let i = 0; i < 3; i++) {
             let randomKudzuTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
-            let kudzu = new Kudzu(randomKudzuTile.x, randomKudzuTile.y, scheduler, 'left', 2, growthMap);
+            let kudzu = new Kudzu(randomKudzuTile.x, randomKudzuTile.y, scheduler, messageList, 'left');
             scheduler.add(kudzu, true); // the fire takes turns
         }
  
