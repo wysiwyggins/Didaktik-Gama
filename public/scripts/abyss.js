@@ -173,8 +173,9 @@ function draw() {
     } else {
       console.error('api is not available');
     }
+    return; // Stop further drawing after navigation
   }
-  
+
   lastDrawTime = currentAbyssTime;
   background(255);
   noStroke();
@@ -188,7 +189,6 @@ function draw() {
 
   // First loop to set the tile indices based on the rules
   for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
-
     grid[i] = [];
     for (let j = 0; j < globalVars.CANVAS_ROWS; j++) {
       let tileIndex = floor(random(tiles.length));
@@ -266,9 +266,6 @@ function draw() {
     }
   }
 
-  // placeTiledLayer(grid, tiledData); // tiled stuff was responsible for the weirdness
-
-  // Second loop to draw the tiles and the backgrounds
   wave1.start();
   wave2.start(); 
   for (let i = 0; i < globalVars.CANVAS_COLS; i++) {
@@ -306,10 +303,8 @@ function draw() {
     }
   }
   abysses++;
-  if (currentAbyssTime - lastDrawTime < 3000) {
-    return; // Skip this draw call if 1 second hasn't passed
-  }
 }
+
 
 function keyPressed(event) {
   if (event.key === '}') { 
