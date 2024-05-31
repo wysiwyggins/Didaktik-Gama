@@ -99,14 +99,14 @@ let uiMap = createEmptyMap();
 let overlayMap = createEmptyMap();
 // the content of uiboxes
 
-
+var messageList;
+var inspector;
 let engine;
 let gameOver = false;
 var players = [];
 let activeEntities = [];
 let activeItems = [];
-var messageList;
-var inspector;
+
 
 let audioSpriteData;
 let sound;
@@ -149,7 +149,7 @@ function passTurn() {
         if (!player.isDead) {
             player.inactiveTurns++;
             console.log(`Player inactive turns: ${player.inactiveTurns}`);
-            if (player.inactiveTurns >= 10) {
+            if (player.inactiveTurns >= 2) {
                 player.zeroPlayerMode = true; // Set zero-player mode
                 console.log("Entering zero-player mode");
                 moveToNearestItem(player);
@@ -347,7 +347,7 @@ function generateNewLevel() {
 
 class Actor {
     static allActors = [];
-    constructor(type, x, y, scheduler, engine, messageList, inspector) {
+    constructor(type, x, y, scheduler, engine) {
         this.isDead = false;
         this.type = type;
         this.x = x;
@@ -357,14 +357,12 @@ class Actor {
         this.sprite = {}; 
         this.scheduler = scheduler;
         this.engine = engine;
-        this.messageList = messageList;
-        this.inspector = inspector;
         this.inventory = [];
         this.blood = 100;
         this.isFlammable = true;
         this.isBurning = false;
         this.burningTurns = 0;
-        if (!this.messageList) {
+        if (!messageList) {
             console.error('messageList is not assigned in Actor');
         }
         Actor.allActors.push(this);
@@ -409,13 +407,13 @@ class Actor {
         }
         if (item.type === ItemType.BOW || item.type === ItemType.ARROW) {
             this.arrows = (this.arrows || 0) + 1;
-        } 
+        }
         if (item.type === ItemType.FLOWER) {
-            this.flowers++;
+            this.flowers = (this.flowers || 0) + 1;
             if (this.flowers >= 15) {
                 window.api.navigate('patterns.html');  
             } 
-        }
+        } 
 
         // Log a message about the item picked up
         let message = '';
@@ -431,7 +429,7 @@ class Actor {
         // Add a check to ensure message is not undefined or empty
         if (message && message.length > 0) {
             console.log('Adding message to messageList:', message);
-            this.messageList.addMessage(message);
+            messageList.addMessage(message);
         }
     }
 }
@@ -460,15 +458,14 @@ function resetPlayerStates() {
     });
 }
 class Player extends Actor{
-    constructor(type, x, y, scheduler, engine, messageList, inspector) {
-        super(type, x, y, scheduler, engine, messageList, inspector);
+    constructor(type, x, y, scheduler, engine) {
+        super(type, x, y, scheduler, engine);
         this.inactiveTurns = 0;
         this.zeroPlayerMode = false; // Flag for zero-player mode
         this.failedMoveAttempts = 0; // Counter for failed move attempts
         this.name = "You";
         this.isSkeletonized = false;
         this.isTargeting = false;
-        this.messageList = messageList;
         //players are made of two tiles, a head and feet, they also have some shadow tiles
         //that do complex stuff to show or hide on walls and floors
         this.footprintTile;
@@ -626,18 +623,18 @@ class Player extends Actor{
         else {
             // Make sure the click is inside the map
             if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
-                this.messageList.addMessage("Walking.");
+                messageList.addMessage("Walking.");
                 this.moveTo(x, y);
             }
         }
     }
     
     checkUIBoxes() {
-        if (this.y <= this.messageList.height + 1 && this.messageList.position === "top") {
+        if (this.y <= messageList.height + 1 && messageList.position === "top") {
             console.log("Player is near the message list.");
-            this.messageList.moveToBottom();
-        } else if (this.y > this.messageList.height + 1 && this.messageList.position === "bottom") {
-            this.messageList.moveToTop();
+            messageList.moveToBottom();
+        } else if (this.y > messageList.height + 1 && messageList.position === "bottom") {
+            messageList.moveToTop();
         }
 
         if (this.y <= inspector.height + 1 && inspector.position === "top") {
@@ -672,10 +669,10 @@ class Player extends Actor{
                 // Move the other actor to the next tile
                 otherActor.updatePosition(nextTileX, nextTileY);
                 otherActor.updateSpritePosition();
-                this.messageList.addMessage(`You shove the ${otherActor.name}.`);
+                messageList.addMessage(`You shove the ${otherActor.name}.`);
             } else {
                 // If next tile is not walkable or occupied, prevent movement
-                this.messageList.addMessage(`You can't move there; ${otherActor.name} blocks the way.`);
+                messageList.addMessage(`You can't move there; ${otherActor.name} blocks the way.`);
                 return;
             }
         }
@@ -747,7 +744,7 @@ class Player extends Actor{
     }
     
     die(){
-        this.messageList.addMessage("You are dead!");
+        messageList.addMessage("You are dead!");
         this.type = PlayerType.SKELETON;
         this.isDead = true;
         this.isSkeletonized = true;
@@ -817,11 +814,11 @@ class Player extends Actor{
                 door.unlock();
                 this.removeItem(keyItem);
                 sound.play('lock');
-                this.messageList.addMessage(`You unlocked the ${door.name} with your key.`);
+                messageList.addMessage(`You unlocked the ${door.name} with your key.`);
                 return false;
             } else {
                 // Player doesn't have the right key
-                this.messageList.addMessage(`The ${door.name} is locked.`);
+                messageList.addMessage(`The ${door.name} is locked.`);
                 playBumpSound()
                 return true;
             }
@@ -859,13 +856,13 @@ class Player extends Actor{
         } else if (atmosphereTileValue === 300 && !this.attemptingFireEntry) {  
             this.attemptingFireEntry = true;
             this.fireEntryDirection = direction;
-            this.messageList.addMessage("Walk into the fire?");
+            messageList.addMessage("Walk into the fire?");
         } else if (atmosphereTileValue === 300 && this.attemptingFireEntry && this.fireEntryDirection === direction) {
             this.x = newTileX;
             this.y = newTileY;
             this.isBurning = true;
             this.burningTurns = 0;
-            this.messageList.addMessage("You stepped into fire!");
+            messageList.addMessage("You stepped into fire!");
             this.attemptingFireEntry = false;
             this.fireEntryDirection = null;
         }
@@ -940,7 +937,7 @@ class Player extends Actor{
         return new Promise(resolve => {
             setTimeout(() => {
                 this.move(direction);
-                this.messageList.addDotToEndOfLastMessage();
+                messageList.addDotToEndOfLastMessage();
                 resolve();
             }, delay);
         });
@@ -963,7 +960,7 @@ class Player extends Actor{
 
         if (path.length === 0) {
             if (!this.zeroPlayerMode) {
-                this.messageList.addMessage("You're not sure how to get there.");
+                messageList.addMessage("You're not sure how to get there.");
             } else {
                 this.failedMoveAttempts++;
                 console.log(`Failed move attempts: ${this.failedMoveAttempts}`);
@@ -981,7 +978,7 @@ class Player extends Actor{
                 break;
             }
             if (this.canSeeMonster(Monster.allMonsters)) { 
-                this.messageList.addMessage("You see a monster!");
+                messageList.addMessage("You see a monster!");
                 break;
             }
             let direction;
@@ -1001,7 +998,7 @@ class Player extends Actor{
                 direction = 'up';
             } else if (y > this.y) {
                 direction = 'down';
-            } 
+            }
     
             // Save old position
             let oldX = this.x;
@@ -1019,7 +1016,7 @@ class Player extends Actor{
     
                 // If the player hasn't moved for 3 consecutive turns, assume it's stuck
                 if (stuckCounter >= 3) {
-                    this.messageList.addMessage("You can't move further in this direction.");
+                    messageList.addMessage("You can't move further in this direction.");
                     break;  // Break the loop
                 }
             } else {
@@ -1064,7 +1061,7 @@ class Player extends Actor{
         // If the player is in targeting mode, any keypress should cancel the targeting
         if (this.isTargeting) {
             this.isTargeting = false;
-            this.messageList.addMessage("Shot cancelled.");
+            messageList.addMessage("Shot cancelled.");
             this.removeTargetingSprite();
             return;
         }
@@ -1124,6 +1121,7 @@ class Player extends Actor{
             case 'c':
                 newDirection = 'down-right';
                 break;
+            
             case '}':
                 window.location.href = 'abyss.html';
                 break;
@@ -1131,7 +1129,7 @@ class Player extends Actor{
                 window.location.href = 'home.html';
                 break;
             default:
-                this.messageList.addMessage('Time passes.');
+                messageList.addMessage('Time passes.');
                 break;
             
         }
@@ -1158,14 +1156,14 @@ class Player extends Actor{
             console.log("try close door");
         }
         if (event.key === 'i' || event.code === 'KeyI') {
-            this.messageList.hideBox(); 
+            messageList.hideBox(); 
             player.printStats();
             inspector.showBox();  
             inspector.render();  
         } else if (event.key !== 'i'|| event.code !== 'KeyI'){
             inspector.hideBox(); 
-            this.messageList.showBox(); 
-            this.messageList.render();  
+            messageList.showBox(); 
+            messageList.render();  
         }
         if (event.key === 'm' || event.code === 'KeyM') {
             this.handleMine();
@@ -1182,9 +1180,9 @@ class Player extends Actor{
         const hasBow = this.inventory.some(item => item.type === ItemType.BOW);
         if (hasBow) {
             this.isTargeting = true;
-            this.messageList.addMessage("Aim bow at?");
+            messageList.addMessage("Aim bow at?");
         } else {
-            this.messageList.addMessage("You have no bow to shoot with.");
+            messageList.addMessage("You have no bow to shoot with.");
         }
     }
 
@@ -1198,7 +1196,7 @@ class Player extends Actor{
     performArrowAttack(targetX, targetY) {
         // Check if player has enough arrows
         if (this.arrows <= 0) {
-            this.messageList.addMessage("You have no arrows left.");
+            messageList.addMessage("You have no arrows left.");
             return;
         }
     
@@ -1226,7 +1224,7 @@ class Player extends Actor{
                 monsterHit = monster;
                 console.log("Monster hit: " + monster.name);
                 inspector.hideBox(); 
-                this.messageList.addMessage("You hit the " + monster.name + "!");
+                messageList.addMessage("You hit the " + monster.name + "!");
                 monster.bleeding = true;
                 arrowX = x;
                 arrowY = y;
@@ -1241,7 +1239,7 @@ class Player extends Actor{
             arrowY = y;
         }
         if (fireHit) {
-            new Fire(arrowX, arrowY,this.scheduler, this.messageList, '0xFFCC33');
+            new Fire(arrowX, arrowY,this.scheduler, '0xFFCC33');
         }
         // Create the arrow sprite at the final position
         setTimeout(function() {
@@ -1258,7 +1256,7 @@ class Player extends Actor{
             monsterHit.takeDamage(10);  // Use the takeDamage method
             playArrowSound(true);
         } else {
-            this.messageList.addMessage("You missed.");
+            messageList.addMessage("You missed.");
             playArrowSound(false);
         }
     }
@@ -1269,9 +1267,9 @@ class Player extends Actor{
         const hasMattock = this.inventory.some(item => item.type === ItemType.MATTOCK);
         if (hasMattock) {
            this.isMining = true;
-           this.messageList.addMessage("Mine where?");
+           messageList.addMessage("Mine where?");
         } else {
-            this.messageList.addMessage("You have no mattock to mine with.");
+            messageList.addMessage("You have no mattock to mine with.");
         }
     }
 
@@ -1279,7 +1277,7 @@ class Player extends Actor{
         console.log("Mining at", targetX, targetY);
         if (floorMap[targetY][targetX]?.value != null) {
             if (this.isOutOfBounds(targetX, targetY)) {
-                this.messageList.addMessage("You've reached the edge of the underworld.");
+                messageList.addMessage("You've reached the edge of the underworld.");
                 return;
             }
         
@@ -1292,26 +1290,26 @@ class Player extends Actor{
                 // Create a floor at the mined location
                 createRoughFloor(targetX, targetY);
                 playBumpSound();
-                this.messageList.addMessage("You mined the wall.");
+                messageList.addMessage("You mined the wall.");
         
                 // Random chance to place Uranium
                 if (Math.random() < 1/5) {
                     let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
                     this.scheduler.add(uranium, true); // Add Uranium to the scheduler
-                    this.messageList.addMessage("You found Uranium!");
+                    messageList.addMessage("You found Uranium!");
                 }
         
                 // Chance to break the mattock
                 if (Math.random() < 1/20) {
                     this.removeItemOfType(ItemType.MATTOCK);
-                    this.messageList.addMessage("Your mattock broke!");
+                    messageList.addMessage("Your mattock broke!");
                     this.isMining = false;
                 }
             } else {
-                this.messageList.addMessage("There is no wall to mine.");
+                messageList.addMessage("There is no wall to mine.");
             }
         } else {
-            this.messageList.addMessage("You can't mine here.");
+            messageList.addMessage("You can't mine here.");
         }
         this.isMining = false; // Exit mining mode regardless of outcome
     }
@@ -1343,7 +1341,7 @@ class Player extends Actor{
     }
     handleCloseDoor() {
         this.isClosingDoor = true;
-        this.messageList.addMessage("Close which direction?");
+        messageList.addMessage("Close which direction?");
     }
 
     attemptCloseDoor(direction) {
@@ -1352,7 +1350,7 @@ class Player extends Actor{
         let targetY = this.y + dy;
     
         if (this.isOutOfBounds(targetX, targetY)) {
-            this.messageList.addMessage("No door there.");
+            messageList.addMessage("No door there.");
             return;
         }
     
@@ -1361,18 +1359,18 @@ class Player extends Actor{
             // Check for an actor on the same tile as the door
             let actor = Actor.allActors.find(actor => actor.x === targetX && actor.y === targetY && !actor.isDead);
             if (actor) {
-                this.messageList.addMessage("The "+ actor.name + " is in the way, you can't close the door.");
+                messageList.addMessage("The "+ actor.name + " is in the way, you can't close the door.");
                 return;
             }
     
             if (!door.isLocked && door.isOpen) {
                 door.close();
-                this.messageList.addMessage("You close the door.");
+                messageList.addMessage("You close the door.");
             } else {
-                this.messageList.addMessage("No door there.");
+                messageList.addMessage("No door there.");
             }
         } else {
-            this.messageList.addMessage("No door there.");
+            messageList.addMessage("No door there.");
         }
         this.isClosingDoor = false; // Exit closing door mode
     }
@@ -1421,12 +1419,12 @@ class Player extends Actor{
             this.blood -= 20;
             sound.play('ouch');
             this.burningTurns++;
-            this.messageList.addMessage("You are on fire!");
+            messageList.addMessage("You are on fire!");
             
             // Increase chance of burning ending after 4 turns, with a guarantee to stop after 6 turns
             if (this.burningTurns > 3 || (this.burningTurns > 3 && Math.random() < 0.5) || this.burningTurns > 5 && atmosphereMap[this.y][this.x].value != 300) {
                 this.isBurning = false;
-                this.messageList.addMessage("You are no longer on fire.");
+                messageList.addMessage("You are no longer on fire.");
             }
             if (Math.random() < 0.7) {
                 let newY = this.y - 1; // the tile above the current one
@@ -1437,7 +1435,7 @@ class Player extends Actor{
             }
         }
         if (atmosphereMap[this.y][this.x] == 400 && Math.random() < 0.7 && !this.isDead){
-            this.messageList.addMessage("You cough through the thick smoke.");
+            messageList.addMessage("You cough through the thick smoke.");
             this.blood --;
         }
         if (this.blood < 1 && this.blood > -100 && this.isSkeletonized == false) {
@@ -1510,28 +1508,28 @@ class Player extends Actor{
         this.sprite.overlay.texture = overlayTexture;
     };
     printStats() {
-        this.inspector.clearMessages();
-        this.inspector.addMessage( "Name: " + this.name);
-        this.inspector.addMessage( "Blood: " + this.blood);
+        inspector.clearMessages();
+        inspector.addMessage( "Name: " + this.name);
+        inspector.addMessage( "Blood: " + this.blood);
         // Print inventory items
         if (this.inventory.length === 0) {
-            this.inspector.addMessage("Inventory: Empty");
+            inspector.addMessage("Inventory: Empty");
         } else {
-            this.inspector.addMessage("Inventory:");
+            inspector.addMessage("Inventory:");
             for (let item of this.inventory) {
-                this.inspector.addMessage("- " + item.name);
+                inspector.addMessage("- " + item.name);
             }
         }
-        this.inspector.addMessage( "Arrows: " + this.arrows);
-        this.inspector.addMessage( "Flowers: " + this.flowers);
-        this.inspector.addMessage( "" );
-        this.inspector.addMessage( "Controls: ");
-        this.inspector.addMessage( "   Arrow keys/WASD: Move");
-        this.inspector.addMessage( "   B: Aim bow (mouse aim)");
-        this.inspector.addMessage( "   X: Close door");
-        this.inspector.addMessage( "   M: Mine");
-        this.inspector.addMessage( "   I: Character Info");
-        this.inspector.addMessage( "   R: Suicide");
+        inspector.addMessage( "Arrows: " + this.arrows);
+        inspector.addMessage( "Flowers: " + this.flowers);
+        inspector.addMessage( "" );
+        inspector.addMessage( "Controls: ");
+        inspector.addMessage( "   Arrow keys/WASD: Move");
+        inspector.addMessage( "   B: Aim bow (mouse aim)");
+        inspector.addMessage( "   X: Close door");
+        inspector.addMessage( "   M: Mine");
+        inspector.addMessage( "   I: Character Info");
+        inspector.addMessage( "   R: Suicide");
     }
 
     getDirectionFromKey(key) {
@@ -1581,7 +1579,7 @@ function createPlayerSprite(player) {
     
     spriteFootprint.interactive = true;  // Make the footprint sprite respond to interactivity
     spriteFootprint.on('mouseover', () => {
-        this.messageList.hideBox(); 
+        messageList.hideBox(); 
         player.printStats();
         inspector.showBox();  
         inspector.render();  
@@ -1589,19 +1587,19 @@ function createPlayerSprite(player) {
 
     spriteOverlay.interactive = true;  
     spriteOverlay.on('mouseover', () => {
-        this.messageList.hideBox();  
+        messageList.hideBox();  
         player.printStats();
         inspector.showBox();  
         inspector.render();  
     });
     spriteFootprint.on('mouseout', () => {
         inspector.hideBox();
-        this.messageList.showBox();
+        messageList.showBox();
     });
     
     spriteOverlay.on('mouseout', () => {
         inspector.hideBox();
-        this.messageList.showBox();
+        messageList.showBox();
     });
     player.sprite = { footprint: spriteFootprint, overlay: spriteOverlay };
     let shadowTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
@@ -1740,7 +1738,7 @@ const Attacks = {
     FIREBREATH: function(monster, target) {
         target.isBurning = true;
         let fireTilesCount = Math.floor(Math.random() * 4) + 2; // 2 to 5 fire tiles
-        let fire1 = new Fire(target.x, target.y, monster.scheduler, monster.messageList, '0xFF0000');//one fire directly on the player
+        let fire1 = new Fire(target.x, target.y, monster.scheduler, '0xFF0000');//one fire directly on the player
         monster.scheduler.add(fire1, true);
         while (fireTilesCount-- > 0) {
             let dx = Math.floor(Math.random() * 7) - 3; // -3 to 3
@@ -1748,16 +1746,16 @@ const Attacks = {
             let newX = target.x + dx;
             let newY = target.y + dy;
             if (newX >= 0 && newY >= 0 && newX < MAP_WIDTH && newY < MAP_HEIGHT && floorMap[newY][newX].value === 157) {
-                let fire = new Fire(newX, newY, monster.scheduler, monster.messageList, '0xFF0000');
+                let fire = new Fire(newX, newY, monster.scheduler, '0xFF0000');
                 monster.scheduler.add(fire, true);
             }
         }
         sound.play('fireball');
-        monster.messageList.addMessage("The {0} breathes flames!", [monster.name]);
+        messageList.addMessage("The {0} breathes flames!", [monster.name]);
     },
     CLAW: function(monster, target) {
         if (monster.isAdjacent(target) && target.isDead == false) {
-            monster.messageList.addMessage(`The ${monster.name} claws at you!`);
+            messageList.addMessage(`The ${monster.name} claws at you!`);
             if (target.isDead == false){
                 sound.play('ouch');
             } else {
@@ -1772,8 +1770,8 @@ const Attacks = {
 
 class Monster extends Actor{
     static allMonsters = [];
-    constructor(type, x, y, scheduler, engine, messageList, inspector) {
-        super(type, x, y, scheduler, engine, messageList, inspector);
+    constructor(type, x, y, scheduler, engine) {
+        super(type, x, y, scheduler, engine);
         this.name = "beast";
         //console.log("ROAR");
         this.upright = true;
@@ -1787,8 +1785,6 @@ class Monster extends Actor{
         this.firstShadowTile.zIndex = 1.5;
         this.scheduler = scheduler;
         this.engine = engine;
-        this.messageList = messageList;
-        this.inspector = inspector;
         this.inventory = [];
         this.blood = 100;
         this.isBurning = false;
@@ -1878,7 +1874,7 @@ class Monster extends Actor{
                     let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
                     if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
                         doorOnTile.open();
-                        this.messageList.addMessage("You hear a crashing noise.");
+                        messageList.addMessage("You hear a crashing noise.");
                     }
         
                     this.updateSpritePosition();
@@ -1913,7 +1909,7 @@ class Monster extends Actor{
                     let doorOnTile = Door.totalDoors().find(door => door.x === this.x && door.y === this.y);
                     if (doorOnTile && !doorOnTile.isLocked && !doorOnTile.isOpen) {
                         doorOnTile.open();
-                        this.messageList.addMessage("You hear a crashing noise.");
+                        messageList.addMessage("You hear a crashing noise.");
                     }
         
                     this.updateSpritePosition();
@@ -1938,14 +1934,14 @@ class Monster extends Actor{
                                 // Create a floor at the mined location
                                 createRoughFloor(targetX, targetY);
             
-                                //this.messageList.addMessage("A " + this.name + " chisels away at a wall.");
+                                //messageList.addMessage("A " + this.name + " chisels away at a wall.");
                                 playBumpSound();
             
                                 // Random chance to place Uranium
                                 if (Math.random() < 1/8) {
                                     let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
                                     this.scheduler.add(uranium, true); // Add Uranium to the scheduler
-                                    this.messageList.addMessage("The robot found Uranium!");
+                                    messageList.addMessage("The robot found Uranium!");
                                 }
             
                                 break; // Break after one successful mine action
@@ -2241,7 +2237,7 @@ class Monster extends Actor{
             if (this.isFlammable && !this.isBurning) {
                 this.isBurning = true;
                 this.burningTurns = 0;
-                this.messageList.addMessage(`${this.name} stepped into fire!`);
+                messageList.addMessage(`${this.name} stepped into fire!`);
                 this.takeDamage(10);
             }
         }
@@ -2252,18 +2248,18 @@ class Monster extends Actor{
         if (this.isBurning) {
             this.blood -= 20;  // Or whatever damage value is appropriate
             this.burningTurns++;
-            this.messageList.addMessage(`${this.name} is on fire!`);
+            messageList.addMessage(`${this.name} is on fire!`);
 
             if (this.burningTurns > 3 || (this.burningTurns > 3 && Math.random() < 0.5) || this.burningTurns > 5 && atmosphereMap[this.y][this.x].value != 300) {
                 this.isBurning = false;
-                this.messageList.addMessage(`${this.name} is no longer on fire.`);
+                messageList.addMessage(`${this.name} is no longer on fire.`);
             }
         }
     }
     printStats() {
-        this.inspector.clearMessages();
-        this.inspector.addMessage( "Name: " + this.name);
-        this.inspector.addMessage( "Blood: " + this.blood);
+        inspector.clearMessages();
+        inspector.addMessage( "Name: " + this.name);
+        inspector.addMessage( "Blood: " + this.blood);
     }
     
     act() {
@@ -2454,13 +2450,12 @@ function generateColorVariation(color, variation) {
 }
 
 class Entity {
-    constructor(x, y, scheduler, frames, zIndex, map, messageList) {
+    constructor(x, y, scheduler, frames, zIndex, map) {
         activeEntities.push(this);
         this.x = x;
         this.y = y;
         this.scheduler = scheduler;
         this.map = map;
-        this.messageList = messageList; // Ensure this.messageList is properly assigned
         this.name = "Entity";
         this.isFlammable = false;
         if (frames.length > 0) {
@@ -2474,14 +2469,14 @@ class Entity {
 
             this.sprite.interactive = true;
             this.sprite.on('mouseover', () => {
-                this.messageList.hideBox(); 
+                messageList.hideBox(); 
                 this.showInspectorInfo();
                 inspector.showBox();  
                 inspector.render();  
             });
             this.sprite.on('mouseout', () => {
                 inspector.hideBox();
-                this.messageList.showBox();
+                messageList.showBox();
             });
         } else {
             this.sprite = null;
@@ -2507,21 +2502,16 @@ class Entity {
         inspector.addMessage(`${this.name}`);
     }
 
-    act() {
-        // This method should be implemented by subclasses
-    }
 }
 
 
 class Fire extends Entity {
-    constructor(x, y, scheduler, messageList, color='0xFFA500') {
-        super(x, y, scheduler, fireFrames, 2, undefined, messageList); // Pass messageList to Entity constructor
+    constructor(x, y, scheduler, color='0xFFA500') {
+        super(x, y, scheduler, fireFrames, 2, undefined); // Pass messageList to Entity constructor
         this.name = "Fire";
         this.turnsLeft = 5; 
         this.color = color;
         this.isFlammable = true;
-        this.messageList = messageList; // Redundant but ensures messageList is set
-
         this.sprite.tint = this.color;  
         this.sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 
@@ -2571,7 +2561,7 @@ class Fire extends Entity {
                     (!atmosphereMap[newY][newX] || atmosphereMap[newY][newX].value !== 300)) {
                     
                     this.checkAndDestroyFlammable(newX, newY);
-                    let fire = new Fire(newX, newY, this.scheduler, this.messageList, '0xFFCC33');
+                    let fire = new Fire(newX, newY, this.scheduler, '0xFFCC33');
                     atmosphereMap[newY][newX].value = 300;
                                     
                     if (direction[0] !== 0) { 
@@ -2589,7 +2579,7 @@ class Fire extends Entity {
         if (Math.random() < 0.7) {
             let newY = this.y - 1;
             if (newY >= 0 && floorMap[newY][this.x].value !== 177 && atmosphereMap[newY][this.x] === null) {
-                let smoke = new Smoke(this.x, newY, this.scheduler, this.messageList);
+                let smoke = new Smoke(this.x, newY, this.scheduler);
                 this.scheduler.add(smoke, true);
             }
         }
@@ -2607,7 +2597,7 @@ class Fire extends Entity {
             let item = objectMap[y][x].item;
             if (item && item.sprite && item.sprite.texture) {
                 item.destroy();
-                this.messageList.addMessage(`The ${item.name} disappears in flames.`);
+                messageList.addMessage(`The ${item.name} disappears in flames.`);
             }
         }
 
@@ -2618,9 +2608,8 @@ class Fire extends Entity {
 }
 
 class Smoke extends Entity {
-    constructor(x, y, scheduler, messageList) {
-        super(x, y, scheduler, smokeFrames, 2.5, undefined, messageList); // Pass messageList to Entity constructor
-        this.messageList = messageList; // Redundant but ensures messageList is set
+    constructor(x, y, scheduler) {
+        super(x, y, scheduler, smokeFrames, 2.5, undefined); // Pass messageList to Entity constructor
         this.name = "Smoke";
         if (!atmosphereMap[this.y]) {
             atmosphereMap[this.y] = [];
@@ -2642,13 +2631,12 @@ class Smoke extends Entity {
 }
 
 class Kudzu extends Entity {
-    constructor(x, y, scheduler, messageList, parentDirection = null) {
-        super(x, y, scheduler, [], 2, undefined, messageList); // Pass messageList to Entity constructor
+    constructor(x, y, scheduler, parentDirection = null) {
+        super(x, y, scheduler, [], 2, undefined); 
         this.name = "Kudzu";
         this.hasFlower = false;
         scheduler.add(this, true);
         this.parentDirection = parentDirection;
-        this.messageList = messageList; // Redundant but ensures messageList is set
         this.spriteData = createSprite(this.x, this.y, this.getBoxTileBasedOnDirection(parentDirection), growthMap);
         this.sprite = this.spriteData.sprite;
         this.sprite.isFlammable = true;
@@ -2657,14 +2645,14 @@ class Kudzu extends Entity {
             this.sprite.interactive = true;
             this.sprite.on('mouseover', () => {
                 console.log("Kudzu mouseover triggered");
-                this.messageList.hideBox(); 
+                messageList.hideBox(); 
                 this.showInspectorInfo();
                 inspector.showBox();  
                 inspector.render();  
             });
             this.sprite.on('mouseout', () => {
                 inspector.hideBox();
-                this.messageList.showBox();
+                messageList.showBox();
             });
         }
     }
@@ -2702,7 +2690,7 @@ class Kudzu extends Entity {
     }
 
     spreadTo(x, y, direction) {
-        new Kudzu(x, y, this.scheduler, this.messageList, direction);
+        new Kudzu(x, y, this.scheduler, direction);
     }
 
     addFlower() {
@@ -2732,14 +2720,12 @@ class Kudzu extends Entity {
 }
 
 class Uranium extends Entity {
-    constructor(x, y, scheduler, messageList, color = '0xE0FF00') {
-        super(x, y, scheduler, [], 2, growthMap, messageList); // Pass messageList to Entity constructor
+    constructor(x, y, scheduler, color = '0xE0FF00') {
+        super(x, y, scheduler, [], 2, growthMap); // Pass messageList to Entity constructor
         this._tileIndex = {x: 8, y: 0};
         this.name = "Uranium";
         this.color = color;
         this.isFlammable = false;
-        this.messageList = messageList; // Redundant but ensures messageList is set
-
         this.spriteData = createSprite(this.x, this.y, this._tileIndex, growthMap);
         this.sprite = this.spriteData.sprite;
 
@@ -2777,7 +2763,7 @@ class Uranium extends Entity {
             if (!this.isOutOfBounds(newX, newY) && player.x === newX && player.y === newY) {
                 if (Math.random() < 1 / 3) {
                     player.takeDamage(1);
-                    this.messageList.addMessage("You feel sick.");
+                    messageList.addMessage("You feel sick.");
                 }
             }
         }
@@ -2890,7 +2876,7 @@ class Item {
         this.sprite.interactive = true;
         this.sprite.on('mouseover', () => {
             messageList.hideBox(); 
-            showInspectorInfo();
+            this.showInspectorInfo();
             inspector.showBox();  
             inspector.render();  
         });
@@ -2966,11 +2952,10 @@ function capitalizeFirstLetter(string) {
 
 class Door {
     static allDoors = [];
-    constructor(id, x, y, colorValue, messageList, isLocked = false) {
+    constructor(id, x, y, colorValue, isLocked = false) {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.messageList = messageList;
         this.colorValue = colorValue;
         this.name = ''; 
         this.isLocked = isLocked;
@@ -3006,7 +2991,7 @@ class Door {
             // Interactivity
             sprite.interactive = true;
             sprite.on('mouseover', () => {
-                this.messageList.hideBox(); 
+                messageList.hideBox(); 
                 this.showInspectorInfo();
                 inspector.showBox();  
                 inspector.render();  
@@ -3014,7 +2999,7 @@ class Door {
 
             sprite.on('mouseout', () => {
                 inspector.hideBox();
-                this.messageList.showBox();
+                messageList.showBox();
             });
 
             sprite.on('click', () => {
@@ -3025,10 +3010,10 @@ class Door {
                         if (keyItem) {
                             this.unlock();
                             player.removeItem(keyItem); // Assuming the Player class has a removeItem method
-                            this.messageList.addMessage(`You unlocked the ${this.name} with your key.`);
+                            messageList.addMessage(`You unlocked the ${this.name} with your key.`);
                         } else {
                             // Player doesn't have the right key
-                            this.messageList.addMessage(`The ${this.name} is locked.`);
+                            messageList.addMessage(`The ${this.name} is locked.`);
                             return;
                         }
                     }
@@ -3072,12 +3057,12 @@ class Door {
     toggleDoor() {
         if (this.isOpen) {
             this.close();
-            this.messageList.addMessage("You close a door.")
+            messageList.addMessage("You close a door.")
             this.updateDoorStateInMap(100);
             playDoorSound();
         } else {
             this.open();
-            this.messageList.addMessage("You open a door.")
+            messageList.addMessage("You open a door.")
             this.updateDoorStateInMap(null);
             playDoorSound();
         }
@@ -3379,7 +3364,7 @@ async function addDoors() {
     treasureRoom.getDoors((x, y) => {
         const colorIndex = Math.floor(Math.random() * colors.length); 
         const colorValue = parseInt(colors[colorIndex].hex.slice(1), 16);
-        let door = new Door(globalDoorCounter++, x, y, colorValue, messageList, true);  // Locked door with unique ID
+        let door = new Door(globalDoorCounter++, x, y, colorValue, true);  // Locked door with unique ID
         door.name = capitalizeFirstLetter(colors[colorIndex].color) + " door ";
         placeKeyForDoor(door, colors[colorIndex].color);  // Add a key for this door
     });
@@ -3391,7 +3376,7 @@ async function addDoors() {
                 if (Math.random() >= 0.5) {  // 50% chance for a door
                     const colorIndex = Math.floor(Math.random() * colors.length); 
                     const colorValue = parseInt(colors[colorIndex].hex.slice(1), 16);
-                    new Door(globalDoorCounter++, x, y, colorValue, messageList);  // Unlocked door with unique ID
+                    new Door(globalDoorCounter++, x, y, colorValue);  // Unlocked door with unique ID
                     //console.log("door color " + colorValue);
                 }
             });
@@ -3690,6 +3675,7 @@ class UIBox {
     drawUIBox() {
         if (this.hidden) return;
 
+        console.log('Drawing UIBox');
         this.maskBox();
         createSprite(0, this.yOffset, BOX_TOP_LEFT, uiMap, 214);
         for (let x = 1; x < this.width - 1; x++) {
@@ -3697,12 +3683,15 @@ class UIBox {
         }
         createSprite(this.width - 1, this.yOffset, BOX_TOP_RIGHT, uiMap, 191);
 
+        console.log('Current textBuffer before drawing:', this.textBuffer);
+
         for (let y = 1; y < this.height; y++) {
             createSprite(0, y + this.yOffset, BOX_VERTICAL, uiMap, 179);
             createSprite(this.width - 1, y + this.yOffset, BOX_VERTICAL, uiMap, 179);
 
             let message = this.textBuffer[y - 1];
             if (message) {
+                console.log(`Drawing message at line ${y - 1}: ${message}`);
                 for (let i = 0; i < message.length; i++) {
                     let spriteLocation = this.charToSpriteLocation(message.charAt(i));
                     createSprite(i + 1, y + this.yOffset, spriteLocation, uiMap, message.charCodeAt(i));
@@ -3748,11 +3737,11 @@ class UIBox {
     }
 
     render() {
+        console.log('Rendering UIBox');
         this.clearBox();
         this.drawUIBox();
     }
 
-    // Other existing methods unchanged
     showUIContainer() {
         createjs.Tween.get(uiMaskContainer).to({alpha: 1}, 100).call(() => {
             uiContainerShown = true;
@@ -3796,8 +3785,15 @@ class UIBox {
         for (let i = 0; i < parameters.length; i++) {
             message = message.replace(`{${i}}`, parameters[i]);
         }
-        this.clearText();
+        console.log(`Adding message: ${message}`);
         this.textBuffer.push(message);
+
+        // Scroll off old messages if textBuffer exceeds height
+        while (this.textBuffer.length > this.height - 1) {
+            this.textBuffer.shift();
+        }
+
+        console.log('Current textBuffer:', this.textBuffer);
         this.render();
     }
 
@@ -3812,20 +3808,7 @@ class UIBox {
             }
         }
     }
-    charToSpriteLocation(char) {
-        let charCode = char.charCodeAt(0);
-        let tileNumber = charCode; 
-        let spriteColumn = tileNumber % globalVars.SPRITESHEET_COLS;
-        let spriteRow = Math.floor(tileNumber / globalVars.SPRITESHEET_COLS);
-        
-        if(spriteColumn >= globalVars.SPRITESHEET_COLS) {
-            spriteColumn = 0;
-            spriteRow++;
-        }
 
-        //console.log(`Character ${char}, sprite coordinates: ${spriteColumn}, ${spriteRow}`);
-        return { x: spriteColumn, y: spriteRow };
-    }
     clearMessages() {
         this.textBuffer = [];
     }
@@ -3841,10 +3824,6 @@ class UIBox {
 
     toggleActive() {
         this.active = !this.active;
-    }
-
-    toggleVisibility() {
-        this.hidden = !this.hidden;
     }
 }
 
@@ -3890,7 +3869,7 @@ async function setup() {
     let randomTile9 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     let randomTile10 = publicTiles[Math.floor(Math.random() * publicTiles.length)];
     
-    messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 5, false, "top");
+    messageList = new UIBox(["Welcome to the Dungeon of Doom!"], MAP_WIDTH, 8, false, "top");
     inspector = new UIBox([], 30, 15, true, "top");
 
     messageList.showBox();
@@ -3920,48 +3899,48 @@ async function setup() {
 
         let scheduler = new ROT.Scheduler.Simple();
         engine = new ROT.Engine(scheduler);
-        player = new Player(PlayerType.HUMAN, randomTile.x, randomTile.y, scheduler, engine,messageList, inspector);
+        player = new Player(PlayerType.HUMAN, randomTile.x, randomTile.y, scheduler, engine);
         createPlayerSprite(player);
         keyHoleZoom(player);
         scheduler.add(player, true); // the player takes turns
 
-        /* player2 = new Player(PlayerType.ROBOT, randomTile5.x, randomTile5.y, scheduler, engine, messageList, inspector);
+        /* player2 = new Player(PlayerType.ROBOT, randomTile5.x, randomTile5.y, scheduler, engine);
         createPlayerSprite(player2);
         scheduler.add(player2, true); */
 
-        let basilisk = new Monster(MonsterType.BASILISK, randomTile2.x, randomTile2.y, scheduler, engine, messageList, inspector);
+        let basilisk = new Monster(MonsterType.BASILISK, randomTile2.x, randomTile2.y, scheduler, engine);
         createMonsterSprite(basilisk);
         scheduler.add(basilisk, true);
-        let skeleton1 = new Monster(MonsterType.SKELETON, randomTile6.x, randomTile6.y, scheduler, engine,messageList, inspector);
+        let skeleton1 = new Monster(MonsterType.SKELETON, randomTile6.x, randomTile6.y, scheduler, engine);
         createMonsterSprite(skeleton1);
         scheduler.add(skeleton1, true);
-        let skeleton2 = new Monster(MonsterType.SKELETON, randomTile7.x, randomTile7.y, scheduler, engine,messageList, inspector);
+        let skeleton2 = new Monster(MonsterType.SKELETON, randomTile7.x, randomTile7.y, scheduler, engine);
         createMonsterSprite(skeleton2);
         scheduler.add(skeleton2, true);
-        let skeleton3 = new Monster(MonsterType.SKELETON, randomTile8.x, randomTile8.y, scheduler, engine,messageList, inspector);
+        let skeleton3 = new Monster(MonsterType.SKELETON, randomTile8.x, randomTile8.y, scheduler, engine);
         createMonsterSprite(skeleton3);
         scheduler.add(skeleton3, true);
-        let robot1 = new Monster(MonsterType.ROBOT, randomTile9.x, randomTile9.y, scheduler, engine,messageList, inspector);
+        let robot1 = new Monster(MonsterType.ROBOT, randomTile9.x, randomTile9.y, scheduler, engine);
         createMonsterSprite(robot1);
         scheduler.add(robot1, true);
         new Item(ItemType.BOW,randomTile3.x, randomTile3.y, 0xFFFFFF, 1);
         new Item(ItemType.ARROW,randomTile4.x, randomTile4.y, 0xFFFFFF, 3);
         //new Item(ItemType.CRADLE,randomTile5.x, randomTile5.y, 0xFFFF00, 2);
         new Item(ItemType.MATTOCK,randomTile10.x, randomTile10.y, 0xFFFFFF, 2);
-        /* let chimera = new Monster(MonsterType.CHIMERA, randomTile3.x, randomTile3.y, scheduler, engine, messageList);
+        /* let chimera = new Monster(MonsterType.CHIMERA, randomTile3.x, randomTile3.y, scheduler, engine);
         createMonsterSprite(chimera);
         scheduler.add(chimera, true); */
 
         //add some fire
         for (let i = 0; i < 3; i++) {
             let randomFireTile = walkableTiles[Math.floor(Math.random() * walkableTiles.length)];
-            let fire = new Fire(randomFireTile.x, randomFireTile.y, scheduler, messageList, '0xFFCC33');
+            let fire = new Fire(randomFireTile.x, randomFireTile.y, scheduler, '0xFFCC33');
             scheduler.add(fire, true); // the fire takes turns
         }
 
         for (let i = 0; i < 3; i++) {
             let randomKudzuTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
-            let kudzu = new Kudzu(randomKudzuTile.x, randomKudzuTile.y, scheduler, messageList, 'left');
+            let kudzu = new Kudzu(randomKudzuTile.x, randomKudzuTile.y, scheduler, 'left');
             scheduler.add(kudzu, true); // the fire takes turns
         }
  
