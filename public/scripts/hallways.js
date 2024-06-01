@@ -75,7 +75,7 @@ function setCurrentTile(tileIndex, isTextTile = false) {
     advanceCursor();
     tilesDisplayed++;
     if (tilesDisplayed >= globalVars.MAX_TILES - 100) {
-      window.api.navigate('mirror.html');
+      window.api.navigate('automata.html');
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -176,7 +176,7 @@ function draw() {
   }
   
   if (frameCount > 8000) {
-    window.api.navigate('mirror.html');
+    window.api.navigate('automata.html');
   }
 
   // Draw text tiles on top of everything else
@@ -268,7 +268,7 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'mirror.html';
+    window.location.href = 'automata.html';
   } else if (event.key === '{') {
     window.location.href = 'keyboard.html';
   } else if (event.key === 'Escape') {

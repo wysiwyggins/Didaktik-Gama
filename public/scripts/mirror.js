@@ -6,14 +6,18 @@ let wordBuffer = "";
 let fileIndex;
 let cursorX = 0;
 let cursorY = 0;
-let currentPenColor = '#FFFFFF'; // Fixed typo: currentPenColor was missing 'let'
+let currentPenColor = '#FFFFFF';
 let tilesDisplayed = 0;
-let typingPaused = false; // Declare typingPaused at the top level
+let typingPaused = false; 
 let lastUserInputTime = 0;
 const pauseDuration = 5000;
 
 let textIndex = 0;
 let textTimer;
+
+let randomColor;
+let complementaryColor;
+let useRandomColor = true;
 
 function mapAltCharacterToTileName(char) {
   return altCharToTileName[char]; 
@@ -60,6 +64,10 @@ function setup() {
   wave2.amp(0.5);
   wave2.setType('triangle');
   reverb = new p5.Reverb();
+
+  // Initialize colors
+  randomColor = color(random(100,255), random(100,255), random(100,255));
+  complementaryColor = color(255 - red(randomColor), 255 - green(randomColor), 255 - blue(randomColor));
 }
 
 function speak(text) {
@@ -121,14 +129,15 @@ function penColor(hexValue) {
 }
 
 function drawCursor() {
-  stroke(10, 10, 10);
+  noStroke();
   noFill();
   rect(cursorX * globalVars.TILE_HALF_WIDTH, cursorY * globalVars.TILE_HALF_HEIGHT, globalVars.TILE_HALF_WIDTH, globalVars.TILE_HALF_HEIGHT);
 }
 
 function setCurrentTile(tileIndex) {
   if (cursorY >= 0 && cursorY < tileMap.length && cursorX >= 0 && cursorX < tileMap[cursorY].length) {
-      tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: null };
+      tileMap[cursorY][cursorX] = { tile: tileIndex, bgColor: useRandomColor ? randomColor : complementaryColor };
+      useRandomColor = !useRandomColor;
       if (tileIndex === getTileIndex("BLANK") || tileIndex === getTileIndex("WHITE_FULL_BLOCK")) {
           if (wordBuffer.length > 0) {
               speak(wordBuffer);
