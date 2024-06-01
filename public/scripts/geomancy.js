@@ -26,7 +26,7 @@ function setup() {
     console.error('Socket connection failed.', error);
   }
   createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_HALF_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HALF_HEIGHT);
-  frameRate(24); // Set the frame rate so that draw() is called once per second
+  frameRate(30); // Set the frame rate so that draw() is called once per second
   socket.on('connect', () => {
     console.log('Connected to server');
   });
@@ -68,7 +68,7 @@ function draw() {
   
   image(backgroundImage, 0, 0, width, height);
 
-  if (frameCount > 20) {
+  if (frameCount > 10) {
     for (let i = 0; i <= currentFigure; i++) {
       let pos = getPositionForFigure(i);
       let booleansIndex = i * 4;

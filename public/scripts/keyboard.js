@@ -147,7 +147,7 @@ function setCurrentTile(tileIndex) {
     advanceCursor();
     tilesDisplayed++;
     if (tilesDisplayed >= globalVars.MAX_TILES) {
-      window.api.navigate('automata.html');
+      window.api.navigate('automata2.html');
     }
   } else {
     console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -238,7 +238,7 @@ function keyPressed() {
       return false;
   }
   if (key === '}') { 
-    window.location.href = 'automata.html';
+    window.location.href = 'automata2.html';
   } else if (event.key === '{') {
     window.location.href = 'abyss.html';
   } else if (event.key === 'Escape') {

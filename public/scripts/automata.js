@@ -136,13 +136,37 @@ function getTileIndex(tileName) {
 }
 
 function drawTile(i, j, val) {
-  fill((val % 2 === 0 && val !== 0) ? (i * 10 + thisJudgeName.length) : 10, (year * 10) ? (j * judgeName.length) : 255, 100);
+  if (val % 2 === 0 && val !== 0) {
+    fill(i*thisJudgeName.length + season, val*10+ season, val*20+ season); 
+  } else {
+    fill(255);  // White color
+  }
   noStroke();
   rect(i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+  
+  // Draw the tile on the canvas
+  // Calculate the position of the tile in the spritesheet
   let x = (val % globalVars.SPRITESHEET_COLS) * globalVars.TILE_WIDTH;
   let y = floor(val / globalVars.SPRITESHEET_COLS) * globalVars.TILE_HEIGHT;
   image(auto2Spritesheet, i * globalVars.TILE_WIDTH, j * globalVars.TILE_HEIGHT, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, x, y, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
 }
+function canConnect(i, j) {
+  const directions = [
+    {dx: 1, dy: 0},
+    {dx: -1, dy: 0},
+    {dx: 0, dy: 1},
+    {dx: 0, dy: -1}
+  ];
+  for (const dir of directions) {
+    let ni = i + dir.dx;
+    let nj = j + dir.dy;
+    if (ni >= 0 && nj >= 0 && ni < GRID_WIDTH && nj < GRID_HEIGHT && !isBoxTile(grid[ni][nj])) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 
 

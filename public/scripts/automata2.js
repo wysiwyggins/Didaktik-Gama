@@ -308,7 +308,7 @@ function draw() {
   }
   if (year >= MAX_YEAR) {  
     year = 0;
-    window.location.href = 'home.html';
+    window.location.href = 'patterns.html';
   }
 
 
@@ -453,9 +453,9 @@ function keyPressed() {
     console.log("KeyPressed detected: Key = " + key + ", keyCode = " + keyCode);
   
     if (key === '}') { 
-      window.location.href = 'home.html';
+      window.location.href = 'patterns.html';
     } else if (event.key === '{') {
-      window.location.href = 'hallways.html';
+      window.location.href = 'keyboard.html';
     } else if (event.key === 'Escape') {
       if (window.api) {
         window.api.quitApp();

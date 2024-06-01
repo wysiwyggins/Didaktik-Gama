@@ -241,7 +241,7 @@ function keyPressed(event) {
   if (event.key === '}') { 
     window.api.navigate('hallways.html');
   } else if (event.key === '{') {
-    window.api.navigate('keyboard.html');
+    window.api.navigate('automata2.html');
   } else if (event.key === 'Escape') {
     if (window.api) {
       window.api.quitApp();

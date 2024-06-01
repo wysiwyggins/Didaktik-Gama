@@ -137,7 +137,7 @@ function setCurrentTile(tileIndex) {
       }
       advanceCursor();
       tilesDisplayed++;
-      if (tilesDisplayed >= globalVars.MAX_TILES - 100) {
+      if (tilesDisplayed >= globalVars.MAX_TILES - 180) {
         window.api.navigate('automata.html');
       }
   } else {
@@ -375,7 +375,7 @@ function handleSpecialCharacters(char) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.api.navigate('hallways.html');
+    window.api.navigate('automata.html');
   } else if (event.key === '{') {
     window.api.navigate('patterns.html');
   } else if (event.key === 'Escape') {
