@@ -283,7 +283,7 @@ function is3x3BlockAllSix(x, y) {
 
 function draw() {
   if (year < 1) {
-    displayMessage('Photosensitive Epilepsy Warning, Flashing Images 10 minutes', 2);
+    displayMessage('Photosensitive Epilepsy Warning, Flashing Images', 2);
   }
   if (year >= 1 && year < 2) {
     displayMessage('Season: ' + season + ' Day: ' + day + ' Year: ' + year, 2);
