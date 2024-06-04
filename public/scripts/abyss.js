@@ -169,7 +169,7 @@ function draw() {
   if (abysses > 20) {
     console.log('Abysses:', abysses);
     if (window.api) {
-      window.api.navigate('keyboard.html');
+      window.api.navigate('mirror.html');
     } else {
       console.error('api is not available');
     }
@@ -308,7 +308,7 @@ function draw() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.api.navigate('keyboard.html');
+    window.api.navigate('mirror.html');
   } else if (event.key === '{') {
     window.api.navigate('game.html');
   } else if (event.key === 'Escape') {

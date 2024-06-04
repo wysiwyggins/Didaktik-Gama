@@ -33,7 +33,7 @@ function getTileIndexFromChar(char) {
 
 function preload() {
   spriteSheet = loadImage(globalVars.SPRITESHEET_PATH);
-  fileIndex = floor(random(1, 11));
+  fileIndex = floor(random(1, 20));
   backgroundImage = loadImage(`./assets/images/${fileIndex}.png`);
   fileText = loadStrings(`./data/texts/${fileIndex}.txt`);
   spriteData = loadJSON(globalVars.SPRITE_DATA_PATH);
@@ -147,7 +147,7 @@ function setCurrentTile(tileIndex) {
       advanceCursor();
       tilesDisplayed++;
       if (tilesDisplayed >= globalVars.MAX_TILES - 180) {
-        window.api.navigate('automata.html');
+        window.api.navigate('automata2.html');
       }
   } else {
       console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -384,9 +384,9 @@ function handleSpecialCharacters(char) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.api.navigate('automata.html');
+    window.api.navigate('automata2.html');
   } else if (event.key === '{') {
-    window.api.navigate('patterns.html');
+    window.api.navigate('abyss.html');
   } else if (event.key === 'Escape') {
     if (window.api) {
       window.api.quitApp();

@@ -97,6 +97,8 @@ function draw() {
 
   // Check if 10 seconds have passed since the last figure was displayed
   if (finalFigureDisplayedTime && millis() - finalFigureDisplayedTime > 12000) {
+    console.log ('Current figure:', currentFigure);
+    socket.emit('sendJudgeName', { name: geomanticNames[nameIndex] });
     window.location.href = 'home.html';
   }
 }

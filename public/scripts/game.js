@@ -3683,7 +3683,7 @@ class UIBox {
         }
         createSprite(this.width - 1, this.yOffset, BOX_TOP_RIGHT, uiMap, 191);
 
-        console.log('Current textBuffer before drawing:', this.textBuffer);
+        //console.log('Current textBuffer before drawing:', this.textBuffer);
 
         for (let y = 1; y < this.height; y++) {
             createSprite(0, y + this.yOffset, BOX_VERTICAL, uiMap, 179);

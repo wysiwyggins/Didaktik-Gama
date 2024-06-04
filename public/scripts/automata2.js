@@ -455,7 +455,7 @@ function keyPressed() {
     if (key === '}') { 
       window.location.href = 'patterns.html';
     } else if (event.key === '{') {
-      window.location.href = 'keyboard.html';
+      window.location.href = 'mirror.html';
     } else if (event.key === 'Escape') {
       if (window.api) {
         window.api.quitApp();
