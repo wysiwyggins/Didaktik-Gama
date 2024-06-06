@@ -151,7 +151,9 @@ function drawSpritePattern() {
 
 function keyPressed(event) {
   if (event.key === 'Escape') {
-    ipcRenderer.send('quit-app');
+    if (window.api) {
+      window.api.quitApp();
+    }
   } else {
     window.api.navigate('geomancy.html');
   }
