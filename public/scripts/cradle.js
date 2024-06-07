@@ -426,7 +426,7 @@ function keyPressed(event) {
   if (event.key === '}') { 
     window.location.href = 'abyss.html';
   } else if (event.key === '{') {
-    window.location.href = 'patterns2.html';
+    window.location.href = 'game.html';
   } else if (event.key === 'Escape') {
     if (window.api) {
       window.api.quitApp();

@@ -255,7 +255,7 @@ function keyPressed() {
   if (key === '}') { 
     window.location.href = 'home.html';
   } else if (event.key === '{') {
-    window.location.href = 'hallways.html';
+    window.location.href = 'patterns2.html';
   } else if (event.key === 'Escape') {
     if (window.api) {
       window.api.quitApp();

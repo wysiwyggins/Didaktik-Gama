@@ -45,7 +45,7 @@ function generateBaseAndComplementaryColors() {
 
 function draw() {
   if (reloads > 40) {
-    window.api.navigate('mirror.html');
+    window.api.navigate('automata.html');
   }
 
   drawColorPattern();
@@ -240,9 +240,9 @@ function drawSpritePattern() {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.api.navigate('hallways.html');
+    window.api.navigate('automata.html');
   } else if (event.key === '{') {
-    window.api.navigate('automata2.html');
+    window.api.navigate('hallways.html');
   } else if (event.key === 'Escape') {
     if (window.api) {
       window.api.quitApp();
