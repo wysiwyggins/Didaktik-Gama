@@ -4,6 +4,10 @@ html, body {
   background-color: black;
   overflow: hidden;
 }
+
+main {
+  background-color: #fff;
+}
 canvas#defaultCanvas0 {
   height: 100vh !important; 
   width: auto !important; 

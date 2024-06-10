@@ -1,7 +1,7 @@
 {
-  "name": "Didaktik Gama",
-  "version": "1.0b",
-  "description": "This repository aims to unify several disparate JavaScript projects, envisioning them as different programs on an imaginary (haunted) alternate history computing device. Each sketch utilizes the 'Libuše' tileset in unique ways.",
+  "name": "Didaktik Gama Zero Player",
+  "version": "1.1b",
+  "description": "Projection version of didaktik Gama (no roguelike section)",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
