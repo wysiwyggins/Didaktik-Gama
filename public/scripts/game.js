@@ -1121,13 +1121,16 @@ class Player extends Actor{
             case 'c':
                 newDirection = 'down-right';
                 break;
-            
             case '}':
                 window.location.href = 'abyss.html';
                 break;
             case '{':
                 window.location.href = 'home.html';
                 break;
+            case 'Escape':
+                if (window.api) {
+                    window.api.quitApp();
+                }
             default:
                 messageList.addMessage('Time passes.');
                 break;

@@ -20,6 +20,7 @@ function setup() {
 }
 
 function drawBoxes() {
+    background(255);
     // Draw text description box
     drawBox(0, 0, textBoxWidth, textBoxHeight);
     // Draw room map box
