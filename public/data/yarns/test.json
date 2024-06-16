@@ -1,0 +1,22 @@
+[
+	{
+		"title": "Start",
+		"tags": "",
+		"body": "Yarn Spinner is a language for writing conversations in games!\nYou can use it to write branching dialogue, and use that in a game engine!\n\nFor example, here's a choice between some options!\n\n-> Wow, some options!\n    You got it, pal!\n-> Can I put text inside options?\n    You sure can!\n    For example, here's some lines inside an option.\n    You can even put options inside OTHER options!\n    -> Like this!\n        Wow!\n    -> Or this!\n        Incredible!\n\n// Comments start with two slashes, and won't show up in your conversation.\n// They're good for leaving notes!\n\nYou can also write 'commands', which represent things that happen in the game!\n\nIn this editor, they'll appear as text:\n\n<<fade_up 1.0>>\n\n-> Nice!\n    Right??\n-> But it didn't actually fade!\n    That's because this page doesn't know about 'fading', or any other feature. \n    When you're testing your script on this page, we'll just show you your commands as text.\n    In a real game, you can define custom commands that do useful work!\n\nYou can also use variables, which store information!\n\nLet's set a variable called \"$name\".\n\n<<set $name to \"Yarn\">>\n\nDone! You can see it appear in the list of variables at the bottom of the screen.\n\nWe can use \"$name\" in lines: My name's {$name}!\n\n-> What can I store in variables?\n    You can store text, numbers, and true/false values!\n-> Where do variables get stored?\n    In this page, we store them in memory. When you use Yarn Spinner in a game engine, like Unity, you can store them in memory, or write custom code that stores them on disk alongside the rest of your saved game!\n\nWe can also use 'if' statements to change what happens!\n\nLet's set a variable called '$gold' to 5.\n\n<<set $gold to 5>>\n\nNext, let's run different lines depending on what's stored inside '$gold':\n\n<<if $gold > 5>>\n    The '$gold' variable is bigger than 5!\n<<else>>\n    The '$gold' variable is 5 or less!\n<<endif>>\n\nFinally, we can use the \"jump\" command to go to a different node! Let's do that now!\n\n<<jump OtherNode>>",
+		"position": {
+			"x": 614,
+			"y": 195
+		},
+		"colorID": 0
+	},
+	{
+		"title": "OtherNode",
+		"tags": "",
+		"body": "Here we are in a different node! Nodes let you divide up your content into different blocks, which makes it easier to manage.\n\nWe're all done! Try changing the text in the editor to the left, and clicking Test again!",
+		"position": {
+			"x": 617,
+			"y": 425
+		},
+		"colorID": 8
+	}
+]
