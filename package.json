@@ -22,6 +22,7 @@
   "dependencies": {
     "@serialport/bindings": "^8.0.8",
     "express": "^4.17.1",
+    "inkjs": "^2.2.4",
     "node-osc": "^4.0.2",
     "onoff": "^6.0.0",
     "open": "^8.0.4",
@@ -32,5 +33,4 @@
     "electron": "^30.0.3",
     "electron-packager": "^17.1.2"
   }
-  
 }

@@ -1,12 +1,32 @@
 let textBoxWidth, textBoxHeight, mapBoxWidth, mapBoxHeight, inputBoxWidth, inputBoxHeight;
-let yarnData;
-let currentNode;
-let currentOptions = [];
-let inputReceived = false;
+let inkStory;
+let currentText = "";
+let currentChoices = [];
+let assetsLoaded = false;
+let needsRedraw = true;
 
 function preload() {
-    spritesheet = loadImage(globalVars.SPRITESHEET_PATH);
-    spritesheetData = loadJSON(globalVars.SPRITE_DATA_PATH);
+    let spritesheetPromise = new Promise((resolve, reject) => {
+        spritesheet = loadImage(globalVars.SPRITESHEET_PATH, resolve, reject);
+    });
+
+    let spritesheetDataPromise = new Promise((resolve, reject) => {
+        spritesheetData = loadJSON(globalVars.SPRITE_DATA_PATH, resolve, reject);
+    });
+
+    let inkStoryPromise = new Promise((resolve, reject) => {
+        loadJSON("data/ink/testInk.json", (data) => {
+            inkStory = new inkjs.Story(data);
+            resolve();
+        }, reject);
+    });
+
+    Promise.all([spritesheetPromise, spritesheetDataPromise, inkStoryPromise]).then(() => {
+        assetsLoaded = true;
+        needsRedraw = true;
+    }).catch((error) => {
+        console.error("Error loading assets:", error);
+    });
 }
 
 function setup() {
@@ -19,14 +39,23 @@ function setup() {
     inputBoxHeight = globalVars.CANVAS_ROWS - textBoxHeight;
     background(255);
     drawBoxes();
-    
-    loadYarnData("data/yarns/test.json");
+
+    if (assetsLoaded) {
+        continueStory();
+    }
 }
 
 function draw() {
-    if (inputReceived) {
-        displayCurrentNode();
-        inputReceived = false;
+    if (needsRedraw && assetsLoaded) {
+        background(255); // Clear the entire canvas
+        drawBoxes();
+        if (currentText) {
+            displayCurrentText();
+        }
+        if (currentChoices.length > 0) {
+            displayChoices();
+        }
+        needsRedraw = false; // Reset the redraw flag
     }
 }
 
@@ -88,7 +117,11 @@ function clearBox(x, y, w, h) {
 }
 
 function displayTile(tileName, col, row) {
+    if (!spritesheet || !spritesheetData) return;
+
     let [tileX, tileY] = spritesheetData.tiles[tileName];
+    if (tileX === undefined || tileY === undefined) return;
+
     let imgX = tileX * globalVars.TILE_WIDTH;
     let imgY = tileY * globalVars.TILE_HEIGHT;
     let canvasX = col * globalVars.TILE_WIDTH;
@@ -145,25 +178,39 @@ function displayTileForCharacter(char, col, row) {
     }
 }
 
-function loadYarnData(filename) {
+function loadInkStory(filename) {
     loadJSON(filename, (data) => {
-        yarnData = new DialogueTree(data);
-        currentNode = yarnData.nodes[Object.keys(yarnData.nodes)[0]]; // Start with the first node
-        displayCurrentNode();
+        inkStory = new inkjs.Story(data);
+        if (assetsLoaded) {
+            continueStory();
+        }
     });
 }
 
-function displayCurrentNode() {
-    fillTextBox(currentNode.body);
-    currentOptions = currentNode.links.map(link => link.displayText);
-    fillOptionsBox(currentOptions);
+function continueStory() {
+    if (!inkStory) return;
+
+    currentText = "";
+    while (inkStory.canContinue) {
+        currentText += inkStory.Continue();
+    }
+
+    currentChoices = inkStory.currentChoices.map(choice => choice.text);
+    needsRedraw = true;
+}
+
+function displayCurrentText() {
+    fillTextBox(currentText);
+}
+
+function displayChoices() {
+    fillOptionsBox(currentChoices);
 }
 
 function keyPressed() {
-    if (key >= '1' && key <= String(currentOptions.length)) {
-        let optionIndex = int(key) - 1;
-        let selectedOption = currentNode.links[optionIndex];
-        currentNode = yarnData.nodes[selectedOption.nodeTitle];
-        inputReceived = true;
+    if (key >= '1' && key <= String(currentChoices.length)) {
+        let choiceIndex = int(key) - 1;
+        inkStory.ChooseChoiceIndex(choiceIndex);
+        continueStory();
     }
 }
