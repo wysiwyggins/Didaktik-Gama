@@ -146,6 +146,8 @@ function displayTileForCharacter(char, col, row) {
         switch (char) {
             case '!': displayTile("EXCLAMATION_MARK", col, row); break;
             case '@': displayTile("COMMERCIAL_AT", col, row); break;
+            case 'Š': displayTile("LATIN_SMALL_LETTER_S_WITH_CARON", col, row); break;
+            case 'š': displayTile("LATIN_SMALL_LETTER_S_WITH_CARON", col, row); break;
             case '#': displayTile("NUMBER_SIGN", col, row); break;
             case '$': displayTile("DOLLAR_SIGN", col, row); break;
             case '%': displayTile("PERCENT_SIGN", col, row); break;
