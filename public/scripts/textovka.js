@@ -82,15 +82,23 @@ function drawBox(x, y, w, h) {
 
 function fillTextBox(text) {
     clearBox(1, 1, textBoxWidth - 2, textBoxHeight - 2);
+    let words = text.split(' ');
     let x = 1, y = 1;
-    for (let i = 0; i < text.length; i++) {
-        if (x >= textBoxWidth - 1) {
+
+    for (let word of words) {
+        if (x + word.length >= textBoxWidth - 1) {
             x = 1;
             y++;
         }
         if (y >= textBoxHeight - 1) break;
-        displayTileForCharacter(text.charAt(i), x, y);
-        x++;
+        for (let char of word) {
+            displayTileForCharacter(char, x, y);
+            x++;
+        }
+        if (x < textBoxWidth - 1) {
+            displayTileForCharacter(' ', x, y);
+            x++;
+        }
     }
 }
 
@@ -144,10 +152,10 @@ function displayTileForCharacter(char, col, row) {
         displayTile(tileName, col, row);
     } else {
         switch (char) {
+            case 'š': displayTile("LATIN_SMALL_LETTER_S_WITH_CARON", col, row); break;
+            case 'Š': displayTile("LATIN_SMALL_LETTER_S_WITH_CARON", col, row); break;
             case '!': displayTile("EXCLAMATION_MARK", col, row); break;
             case '@': displayTile("COMMERCIAL_AT", col, row); break;
-            case 'Š': displayTile("LATIN_SMALL_LETTER_S_WITH_CARON", col, row); break;
-            case 'š': displayTile("LATIN_SMALL_LETTER_S_WITH_CARON", col, row); break;
             case '#': displayTile("NUMBER_SIGN", col, row); break;
             case '$': displayTile("DOLLAR_SIGN", col, row); break;
             case '%': displayTile("PERCENT_SIGN", col, row); break;
