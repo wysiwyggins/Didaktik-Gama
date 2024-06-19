@@ -4,6 +4,9 @@ let currentText = "";
 let currentChoices = [];
 let assetsLoaded = false;
 let needsRedraw = true;
+let tileMap;
+
+let tileMapData;
 
 function preload() {
     let spritesheetPromise = new Promise((resolve, reject) => {
@@ -21,13 +24,21 @@ function preload() {
         }, reject);
     });
 
-    Promise.all([spritesheetPromise, spritesheetDataPromise, inkStoryPromise]).then(() => {
+    let tileMapPromise = new Promise((resolve, reject) => {
+        loadJSON("data/maps/map.tmj", (data) => {
+            tileMapData = data;
+            resolve();
+        }, reject);
+    });
+
+    Promise.all([spritesheetPromise, spritesheetDataPromise, inkStoryPromise, tileMapPromise]).then(() => {
         assetsLoaded = true;
         needsRedraw = true;
     }).catch((error) => {
         console.error("Error loading assets:", error);
     });
 }
+
 
 function setup() {
     createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT);
@@ -45,6 +56,42 @@ function setup() {
     }
 }
 
+function drawTileMap() {
+    if (!tileMapData || !spritesheet || !spritesheetData) return;
+
+    let layers = tileMapData.layers;
+    for (let layer of layers) {
+        if (layer.type === "tilelayer") {
+            let data = layer.data;
+            for (let row = 0; row < layer.height; row++) {
+                for (let col = 0; col < layer.width; col++) {
+                    let tileId = data[row * layer.width + col];
+                    if (tileId > 0) {
+                        let tileName = `TILE_${tileId}`;
+                        if (spritesheetData.tiles[tileName]) {
+                            displayTileInMapBox(tileName, col, row);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function displayTileInMapBox(tileName, col, row) {
+    if (!spritesheet || !spritesheetData) return;
+
+    let [tileX, tileY] = spritesheetData.tiles[tileName];
+    if (tileX === undefined || tileY === undefined) return;
+
+    let imgX = tileX * globalVars.TILE_WIDTH;
+    let imgY = tileY * globalVars.TILE_HEIGHT;
+    let canvasX = (textBoxWidth + col) * globalVars.TILE_WIDTH;
+    let canvasY = row * globalVars.TILE_HEIGHT;
+    image(spritesheet, canvasX, canvasY, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, imgX, imgY, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+}
+
+
 function draw() {
     if (needsRedraw && assetsLoaded) {
         background(255); // Clear the entire canvas
@@ -55,9 +102,11 @@ function draw() {
         if (currentChoices.length > 0) {
             displayChoices();
         }
+        drawTileMap();
         needsRedraw = false; // Reset the redraw flag
     }
 }
+
 
 function drawBoxes() {
     drawBox(0, 0, textBoxWidth, textBoxHeight);
@@ -82,25 +131,36 @@ function drawBox(x, y, w, h) {
 
 function fillTextBox(text) {
     clearBox(1, 1, textBoxWidth - 2, textBoxHeight - 2);
-    let words = text.split(' ');
+    let words = text.split(/(\s+|\n)/); // Split by spaces and newlines, keeping the delimiters
     let x = 1, y = 1;
 
     for (let word of words) {
+        if (word === "\n") {
+            x = 1;
+            y = y + 2;
+            continue;
+        }
+
         if (x + word.length >= textBoxWidth - 1) {
             x = 1;
             y++;
         }
         if (y >= textBoxHeight - 1) break;
+        
         for (let char of word) {
-            displayTileForCharacter(char, x, y);
-            x++;
-        }
-        if (x < textBoxWidth - 1) {
-            displayTileForCharacter(' ', x, y);
-            x++;
+            if (char !== " ") {
+                displayTileForCharacter(char, x, y);
+                x++;
+            } else {
+                if (x < textBoxWidth - 1) {
+                    displayTileForCharacter(' ', x, y);
+                    x++;
+                }
+            }
         }
     }
 }
+
 
 function fillOptionsBox(options) {
     clearBox(1, textBoxHeight + 1, inputBoxWidth - 2, inputBoxHeight - 2);
