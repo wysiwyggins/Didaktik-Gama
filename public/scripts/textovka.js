@@ -4,29 +4,40 @@ let currentText = "";
 let currentChoices = [];
 let assetsLoaded = false;
 let needsRedraw = true;
-let tileMap;
-
 let tileMapData;
+let currentLayerIndex = 0;
+
+const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
+const FLIPPED_VERTICALLY_FLAG = 0x40000000;
+const FLIPPED_DIAGONALLY_FLAG = 0x20000000;
 
 function preload() {
     let spritesheetPromise = new Promise((resolve, reject) => {
-        spritesheet = loadImage(globalVars.SPRITESHEET_PATH, resolve, reject);
+        spritesheet = loadImage(globalVars.SPRITESHEET_PATH, () => {
+            console.log("Spritesheet loaded");
+            resolve();
+        }, reject);
     });
 
     let spritesheetDataPromise = new Promise((resolve, reject) => {
-        spritesheetData = loadJSON(globalVars.SPRITE_DATA_PATH, resolve, reject);
+        spritesheetData = loadJSON(globalVars.SPRITE_DATA_PATH, () => {
+            console.log("Spritesheet data loaded");
+            resolve();
+        }, reject);
     });
 
     let inkStoryPromise = new Promise((resolve, reject) => {
         loadJSON("data/ink/testInk.json", (data) => {
             inkStory = new inkjs.Story(data);
+            console.log("Ink story loaded");
             resolve();
         }, reject);
     });
 
     let tileMapPromise = new Promise((resolve, reject) => {
-        loadJSON("data/maps/map.tmj", (data) => {
+        loadJSON("assets/maps/libuse.tmj", (data) => {
             tileMapData = data;
+            console.log("Tilemap data loaded");
             resolve();
         }, reject);
     });
@@ -34,11 +45,11 @@ function preload() {
     Promise.all([spritesheetPromise, spritesheetDataPromise, inkStoryPromise, tileMapPromise]).then(() => {
         assetsLoaded = true;
         needsRedraw = true;
+        console.log("All assets loaded");
     }).catch((error) => {
         console.error("Error loading assets:", error);
     });
 }
-
 
 function setup() {
     createCanvas(globalVars.CANVAS_COLS * globalVars.TILE_WIDTH, globalVars.CANVAS_ROWS * globalVars.TILE_HEIGHT);
@@ -56,41 +67,97 @@ function setup() {
     }
 }
 
-function drawTileMap() {
-    if (!tileMapData || !spritesheet || !spritesheetData) return;
-
-    let layers = tileMapData.layers;
-    for (let layer of layers) {
+function parseTMJ(tmj) {
+    let layers = [];
+    tmj.layers.forEach(layer => {
         if (layer.type === "tilelayer") {
-            let data = layer.data;
-            for (let row = 0; row < layer.height; row++) {
-                for (let col = 0; col < layer.width; col++) {
-                    let tileId = data[row * layer.width + col];
-                    if (tileId > 0) {
-                        let tileName = `TILE_${tileId}`;
-                        if (spritesheetData.tiles[tileName]) {
-                            displayTileInMapBox(tileName, col, row);
-                        }
-                    }
+            let parsedLayer = [];
+            for (let i = 0; i < layer.data.length; i++) {
+                let col = i % layer.width;
+                let row = Math.floor(i / layer.width);
+                if (!parsedLayer[row]) {
+                    parsedLayer[row] = [];
+                }
+                parsedLayer[row][col] = layer.data[i];
+            }
+            layers.push(parsedLayer);
+        }
+    });
+    console.log("Parsed TMJ layers:", layers);
+    return layers;
+}
+
+function getTileCoordinates(tileId, tilesetCols) {
+    let tileX = (tileId - 1) % tilesetCols;
+    let tileY = Math.floor((tileId - 1) / tilesetCols);
+    return [tileX, tileY];
+}
+
+function drawTileMap() {
+    if (!tileMapData || !spritesheet || !spritesheetData) {
+        console.log("Tilemap data, spritesheet, or spritesheet data not loaded");
+        return;
+    }
+
+    let layers = parseTMJ(tileMapData);
+    let tilesetCols = Math.floor(spritesheet.width / globalVars.TILE_WIDTH); // Number of columns in the tileset
+
+    if (currentLayerIndex < layers.length) {
+        let layer = layers[currentLayerIndex];
+        for (let row = 0; row < layer.length; row++) {
+            for (let col = 0; col < layer[row].length; col++) {
+                let tileId = layer[row][col];
+                if (tileId > 0) {
+                    let flippedHorizontally = (tileId & FLIPPED_HORIZONTALLY_FLAG) !== 0;
+                    let flippedVertically = (tileId & FLIPPED_VERTICALLY_FLAG) !== 0;
+                    let flippedDiagonally = (tileId & FLIPPED_DIAGONALLY_FLAG) !== 0;
+
+                    tileId = tileId & ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG);
+
+                    let [tileX, tileY] = getTileCoordinates(tileId, tilesetCols);
+                    console.log(`Displaying tile ID ${tileId} at (${col}, ${row}) with coordinates (${tileX}, ${tileY}), flippedH: ${flippedHorizontally}, flippedV: ${flippedVertically}, flippedD: ${flippedDiagonally}`);
+                    displayTileInMapBox(tileX, tileY, col, row, flippedHorizontally, flippedVertically, flippedDiagonally);
                 }
             }
         }
     }
 }
 
-function displayTileInMapBox(tileName, col, row) {
-    if (!spritesheet || !spritesheetData) return;
-
-    let [tileX, tileY] = spritesheetData.tiles[tileName];
-    if (tileX === undefined || tileY === undefined) return;
+function displayTileInMapBox(tileX, tileY, col, row, flippedH, flippedV, flippedD) {
+    if (!spritesheet) {
+        console.log("Spritesheet not available for displayTileInMapBox");
+        return;
+    }
 
     let imgX = tileX * globalVars.TILE_WIDTH;
     let imgY = tileY * globalVars.TILE_HEIGHT;
     let canvasX = (textBoxWidth + col) * globalVars.TILE_WIDTH;
     let canvasY = row * globalVars.TILE_HEIGHT;
-    image(spritesheet, canvasX, canvasY, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, imgX, imgY, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+    
+    push(); // Start a new drawing state
+    translate(canvasX, canvasY);
+    
+    if (flippedH) {
+        translate(globalVars.TILE_WIDTH, 0);
+        scale(-1, 1);
+    }
+    if (flippedV) {
+        translate(0, globalVars.TILE_HEIGHT);
+        scale(1, -1);
+    }
+    if (flippedD) {
+        // This diagonal flip requires a more complex transformation
+        // It can be either a 90 or 270 degree rotation with a flip
+        translate(globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+        rotate(HALF_PI);
+        scale(1, -1);
+    }
+    
+    console.log(`Drawing tile at canvas position (${canvasX}, ${canvasY}) with image coordinates (${imgX}, ${imgY}), flippedH: ${flippedH}, flippedV: ${flippedV}, flippedD: ${flippedD}`);
+    image(spritesheet, 0, 0, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, imgX, imgY, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+    
+    pop(); // Restore original state
 }
-
 
 function draw() {
     if (needsRedraw && assetsLoaded) {
@@ -106,7 +173,6 @@ function draw() {
         needsRedraw = false; // Reset the redraw flag
     }
 }
-
 
 function drawBoxes() {
     drawBox(0, 0, textBoxWidth, textBoxHeight);
@@ -137,7 +203,7 @@ function fillTextBox(text) {
     for (let word of words) {
         if (word === "\n") {
             x = 1;
-            y = y + 2;
+            y=y+2;
             continue;
         }
 
@@ -160,7 +226,6 @@ function fillTextBox(text) {
         }
     }
 }
-
 
 function fillOptionsBox(options) {
     clearBox(1, textBoxHeight + 1, inputBoxWidth - 2, inputBoxHeight - 2);
@@ -266,6 +331,19 @@ function continueStory() {
     }
 
     currentChoices = inkStory.currentChoices.map(choice => choice.text);
+    
+    // Check for tags to update the current layer index
+    let tags = inkStory.currentTags;
+    for (let tag of tags) {
+        if (tag.startsWith("layer")) {
+            let layerIndex = parseInt(tag.substring(5)) - 1; // Assuming tags are like "layer1", "layer2", etc.
+            if (!isNaN(layerIndex)) {
+                currentLayerIndex = layerIndex;
+                console.log(`Switching to layer index: ${currentLayerIndex}`);
+            }
+        }
+    }
+
     needsRedraw = true;
 }
 
