@@ -12,7 +12,8 @@ const FLIPPED_VERTICALLY_FLAG = 0x40000000;
 const FLIPPED_DIAGONALLY_FLAG = 0x20000000;
 
 function fetchJudgeName() {
-    fetch('/judgeName')
+    const serverUrl = 'http://localhost:3000/judgeName';
+    fetch(serverUrl)
         .then(response => response.json())
         .then(data => {
             console.log('Fetched judgeName:', data.judgeName);
@@ -329,6 +330,7 @@ function displayTileForCharacter(char, col, row) {
     }
 }
 
+
 function loadInkStory(filename) {
     loadJSON(filename, (data) => {
         inkStory = new inkjs.Story(data);
@@ -336,7 +338,7 @@ function loadInkStory(filename) {
             continueStory();
         }
     });
-    fetchJudgeName();
+    fetchJudgeName(); // Ensure judgeName is fetched after loading the story
 }
 
 function continueStory() {
