@@ -172,7 +172,7 @@ function draw() {
   }
   if (year >= MAX_YEAR) {  
     year = 0;
-    window.location.href = 'home.html';
+    window.location.href = 'textovka.html';
   }
 
   let updatedGrid = [];
@@ -253,7 +253,7 @@ function keyPressed() {
   console.log("KeyPressed detected: Key = " + key + ", keyCode = " + keyCode);
 
   if (key === '}') { 
-    window.location.href = 'home.html';
+    window.location.href = 'textovka.html';
   } else if (event.key === '{') {
     window.location.href = 'patterns2.html';
   } else if (event.key === 'Escape') {

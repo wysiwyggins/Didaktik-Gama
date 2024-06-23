@@ -3678,7 +3678,7 @@ class UIBox {
     drawUIBox() {
         if (this.hidden) return;
 
-        console.log('Drawing UIBox');
+        //console.log('Drawing UIBox');
         this.maskBox();
         createSprite(0, this.yOffset, BOX_TOP_LEFT, uiMap, 214);
         for (let x = 1; x < this.width - 1; x++) {
@@ -3694,7 +3694,7 @@ class UIBox {
 
             let message = this.textBuffer[y - 1];
             if (message) {
-                console.log(`Drawing message at line ${y - 1}: ${message}`);
+                //console.log(`Drawing message at line ${y - 1}: ${message}`);
                 for (let i = 0; i < message.length; i++) {
                     let spriteLocation = this.charToSpriteLocation(message.charAt(i));
                     createSprite(i + 1, y + this.yOffset, spriteLocation, uiMap, message.charCodeAt(i));

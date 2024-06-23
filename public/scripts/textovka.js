@@ -5,11 +5,24 @@ let currentChoices = [];
 let assetsLoaded = false;
 let needsRedraw = true;
 let tileMapData;
-let currentLayerIndex = 0;
+let currentLayerName = "libuse";
 
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
 const FLIPPED_VERTICALLY_FLAG = 0x40000000;
 const FLIPPED_DIAGONALLY_FLAG = 0x20000000;
+
+function fetchJudgeName() {
+    fetch('/judgeName')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Fetched judgeName:', data.judgeName);
+            if (inkStory) {
+                inkStory.variablesState.$('judgeName', data.judgeName);
+                console.log('Set judgeName in Ink:', data.judgeName);
+            }
+        })
+        .catch(error => console.error('Error fetching judgeName:', error));
+}
 
 function preload() {
     let spritesheetPromise = new Promise((resolve, reject) => {
@@ -46,6 +59,9 @@ function preload() {
         assetsLoaded = true;
         needsRedraw = true;
         console.log("All assets loaded");
+
+        // Fetch judgeName after assets are loaded
+        fetchJudgeName();
     }).catch((error) => {
         console.error("Error loading assets:", error);
     });
@@ -68,7 +84,7 @@ function setup() {
 }
 
 function parseTMJ(tmj) {
-    let layers = [];
+    let layers = {};
     tmj.layers.forEach(layer => {
         if (layer.type === "tilelayer") {
             let parsedLayer = [];
@@ -80,7 +96,7 @@ function parseTMJ(tmj) {
                 }
                 parsedLayer[row][col] = layer.data[i];
             }
-            layers.push(parsedLayer);
+            layers[layer.name] = parsedLayer;
         }
     });
     console.log("Parsed TMJ layers:", layers);
@@ -102,8 +118,8 @@ function drawTileMap() {
     let layers = parseTMJ(tileMapData);
     let tilesetCols = Math.floor(spritesheet.width / globalVars.TILE_WIDTH); // Number of columns in the tileset
 
-    if (currentLayerIndex < layers.length) {
-        let layer = layers[currentLayerIndex];
+    let layer = layers[currentLayerName];
+    if (layer) {
         for (let row = 0; row < layer.length; row++) {
             for (let col = 0; col < layer[row].length; col++) {
                 let tileId = layer[row][col];
@@ -115,7 +131,7 @@ function drawTileMap() {
                     tileId = tileId & ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG);
 
                     let [tileX, tileY] = getTileCoordinates(tileId, tilesetCols);
-                    console.log(`Displaying tile ID ${tileId} at (${col}, ${row}) with coordinates (${tileX}, ${tileY}), flippedH: ${flippedHorizontally}, flippedV: ${flippedVertically}, flippedD: ${flippedDiagonally}`);
+                    //console.log(`Displaying tile ID ${tileId} at (${col}, ${row}) with coordinates (${tileX}, ${tileY}), flippedH: ${flippedHorizontally}, flippedV: ${flippedVertically}, flippedD: ${flippedDiagonally}`);
                     displayTileInMapBox(tileX, tileY, col, row, flippedHorizontally, flippedVertically, flippedDiagonally);
                 }
             }
@@ -153,7 +169,7 @@ function displayTileInMapBox(tileX, tileY, col, row, flippedH, flippedV, flipped
         scale(1, -1);
     }
     
-    console.log(`Drawing tile at canvas position (${canvasX}, ${canvasY}) with image coordinates (${imgX}, ${imgY}), flippedH: ${flippedH}, flippedV: ${flippedV}, flippedD: ${flippedD}`);
+    //console.log(`Drawing tile at canvas position (${canvasX}, ${canvasY}) with image coordinates (${imgX}, ${imgY}), flippedH: ${flippedH}, flippedV: ${flippedV}, flippedD: ${flippedD}`);
     image(spritesheet, 0, 0, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT, imgX, imgY, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
     
     pop(); // Restore original state
@@ -320,6 +336,7 @@ function loadInkStory(filename) {
             continueStory();
         }
     });
+    fetchJudgeName();
 }
 
 function continueStory() {
@@ -332,15 +349,12 @@ function continueStory() {
 
     currentChoices = inkStory.currentChoices.map(choice => choice.text);
     
-    // Check for tags to update the current layer index
+    // Check for tags to update the current layer
     let tags = inkStory.currentTags;
     for (let tag of tags) {
         if (tag.startsWith("layer")) {
-            let layerIndex = parseInt(tag.substring(5)) - 1; // Assuming tags are like "layer1", "layer2", etc.
-            if (!isNaN(layerIndex)) {
-                currentLayerIndex = layerIndex;
-                console.log(`Switching to layer index: ${currentLayerIndex}`);
-            }
+            currentLayerName = tag.slice(1); // Remove the leading '#' character
+            console.log(`Switching to layer: ${currentLayerName}`);
         }
     }
 
