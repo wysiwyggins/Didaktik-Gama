@@ -3740,7 +3740,7 @@ class UIBox {
     }
 
     render() {
-        console.log('Rendering UIBox');
+        //console.log('Rendering UIBox');
         this.clearBox();
         this.drawUIBox();
     }

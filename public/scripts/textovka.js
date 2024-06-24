@@ -6,6 +6,14 @@ let assetsLoaded = false;
 let needsRedraw = true;
 let tileMapData;
 let currentLayerName = "libuse";
+let textDisplayIndex = 0;
+let optionDisplayIndex = 0;
+let textFullyDisplayed = false;
+let skipTextAnimation = false;
+let textTimer;
+let optionTimer;
+
+
 
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
 const FLIPPED_VERTICALLY_FLAG = 0x40000000;
@@ -216,33 +224,104 @@ function fillTextBox(text) {
     clearBox(1, 1, textBoxWidth - 2, textBoxHeight - 2);
     let words = text.split(/(\s+|\n)/); // Split by spaces and newlines, keeping the delimiters
     let x = 1, y = 1;
+    let displayIndex = 0;
 
-    for (let word of words) {
+    clearInterval(textTimer); // Clear any existing timer
+    textFullyDisplayed = false;
+    skipTextAnimation = false;
+
+    textTimer = setInterval(() => {
+        if (displayIndex >= words.length || skipTextAnimation) {
+            if (skipTextAnimation) {
+                // If skipping, display all text immediately
+                for (; displayIndex < words.length; displayIndex++) {
+                    let word = words[displayIndex];
+                    if (word === "\n") {
+                        x = 1;
+                        y = y + 2;
+                    } else {
+                        if (x + word.length >= textBoxWidth - 1) {
+                            x = 1;
+                            y++;
+                        }
+                        if (y >= textBoxHeight - 1) break;
+
+                        for (let char of word) {
+                            if (char !== " ") {
+                                displayTileForCharacter(char, x, y);
+                                x++;
+                            } else {
+                                if (x < textBoxWidth - 1) {
+                                    displayTileForCharacter(' ', x, y);
+                                    x++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            clearInterval(textTimer); // Stop the timer when all text is displayed
+            textFullyDisplayed = true;
+            fillOptionsBox(currentChoices); // Fill options box after text box
+            return;
+        }
+
+        let word = words[displayIndex];
         if (word === "\n") {
             x = 1;
-            y=y+2;
-            continue;
-        }
+            y = y + 2;
+        } else {
+            if (x + word.length >= textBoxWidth - 1) {
+                x = 1;
+                y++;
+            }
+            if (y >= textBoxHeight - 1) return;
 
-        if (x + word.length >= textBoxWidth - 1) {
-            x = 1;
-            y++;
-        }
-        if (y >= textBoxHeight - 1) break;
-        
-        for (let char of word) {
-            if (char !== " ") {
-                displayTileForCharacter(char, x, y);
-                x++;
-            } else {
-                if (x < textBoxWidth - 1) {
-                    displayTileForCharacter(' ', x, y);
+            for (let char of word) {
+                if (char !== " ") {
+                    displayTileForCharacter(char, x, y);
                     x++;
+                } else {
+                    if (x < textBoxWidth - 1) {
+                        displayTileForCharacter(' ', x, y);
+                        x++;
+                    }
                 }
             }
         }
-    }
+        displayIndex++;
+    }, 100); // Display a character every 100 milliseconds
 }
+
+function continueStory() {
+    if (!inkStory) return;
+
+    currentText = "";
+    while (inkStory.canContinue) {
+        currentText += inkStory.Continue();
+    }
+
+    currentChoices = inkStory.currentChoices.map(choice => choice.text);
+    
+    // Check for tags to update the current layer
+    let tags = inkStory.currentTags;
+    for (let tag of tags) {
+        if (tag.startsWith("layer")) {
+            currentLayerName = tag.slice(1); // Remove the leading '#' character
+            console.log(`Switching to layer: ${currentLayerName}`);
+        }
+    }
+
+    // Reset indices for display
+    textFullyDisplayed = false;
+    skipTextAnimation = false;
+
+    // Display text with timing
+    fillTextBox(currentText);
+
+    needsRedraw = true;
+}
+
 
 function fillOptionsBox(options) {
     clearBox(1, textBoxHeight + 1, inputBoxWidth - 2, inputBoxHeight - 2);
@@ -360,8 +439,19 @@ function continueStory() {
         }
     }
 
+    // Reset indices for display
+    textDisplayIndex = 0;
+    optionDisplayIndex = 0;
+    textFullyDisplayed = false;
+    skipTextAnimation = false;
+
+    // Display text with timing
+    fillTextBox(currentText);
+
     needsRedraw = true;
 }
+
+
 
 function displayCurrentText() {
     fillTextBox(currentText);
@@ -372,7 +462,9 @@ function displayChoices() {
 }
 
 function keyPressed() {
-    if (key >= '1' && key <= String(currentChoices.length)) {
+    if (!textFullyDisplayed) {
+        skipTextAnimation = true;
+    } else if (key >= '1' && key <= String(currentChoices.length)) {
         let choiceIndex = int(key) - 1;
         inkStory.ChooseChoiceIndex(choiceIndex);
         continueStory();
