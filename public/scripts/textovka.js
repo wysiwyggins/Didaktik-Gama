@@ -227,6 +227,7 @@ function fillTextBox(text) {
     let displayIndex = 0;
 
     clearInterval(textTimer); // Clear any existing timer
+    clearInterval(optionTimer); // Clear any existing option timer
     textFullyDisplayed = false;
     skipTextAnimation = false;
 
@@ -290,7 +291,7 @@ function fillTextBox(text) {
             }
         }
         displayIndex++;
-    }, 100); // Display a character every 100 milliseconds
+    }, 150); // Display a character every 100 milliseconds
 }
 
 function continueStory() {
@@ -312,7 +313,15 @@ function continueStory() {
         }
     }
 
+    // If there are no more choices and the story can't continue, navigate to home
+    if (currentChoices.length === 0 && !inkStory.canContinue) {
+        window.api.navigate('home.html');
+        return;
+    }
+
     // Reset indices for display
+    textDisplayIndex = 0;
+    optionDisplayIndex = 0;
     textFullyDisplayed = false;
     skipTextAnimation = false;
 
@@ -322,20 +331,31 @@ function continueStory() {
     needsRedraw = true;
 }
 
-
 function fillOptionsBox(options) {
     clearBox(1, textBoxHeight + 1, inputBoxWidth - 2, inputBoxHeight - 2);
     let x = 1, y = textBoxHeight + 1;
-    for (let i = 0; i < options.length; i++) {
-        let optionText = (i + 1) + ": " + options[i];
+    let displayIndex = 0;
+
+    clearInterval(optionTimer); // Clear any existing timer
+
+    optionTimer = setInterval(() => {
+        if (displayIndex >= options.length) {
+            clearInterval(optionTimer); // Stop the timer when all options are displayed
+            return;
+        }
+
+        let optionText = (displayIndex + 1) + ": " + options[displayIndex];
         for (let j = 0; j < optionText.length; j++) {
             displayTileForCharacter(optionText.charAt(j), x, y);
             x++;
         }
         y++;
         x = 1;
-    }
+
+        displayIndex++;
+    }, 1000); // Display an option every second
 }
+
 
 function clearBox(x, y, w, h) {
     for (let i = x; i < x + w; i++) {
@@ -409,7 +429,6 @@ function displayTileForCharacter(char, col, row) {
     }
 }
 
-
 function loadInkStory(filename) {
     loadJSON(filename, (data) => {
         inkStory = new inkjs.Story(data);
@@ -451,8 +470,6 @@ function continueStory() {
     needsRedraw = true;
 }
 
-
-
 function displayCurrentText() {
     fillTextBox(currentText);
 }
@@ -461,9 +478,46 @@ function displayChoices() {
     fillOptionsBox(currentChoices);
 }
 
+function continueStory() {
+    if (!inkStory) return;
+
+    currentText = "";
+    while (inkStory.canContinue) {
+        currentText += inkStory.Continue();
+    }
+
+    currentChoices = inkStory.currentChoices.map(choice => choice.text);
+    
+    // Check for tags to update the current layer
+    let tags = inkStory.currentTags;
+    for (let tag of tags) {
+        if (tag.startsWith("layer")) {
+            currentLayerName = tag.slice(1); // Remove the leading '#' character
+            console.log(`Switching to layer: ${currentLayerName}`);
+        }
+    }
+
+    // Reset indices for display
+    textFullyDisplayed = false;
+    skipTextAnimation = false;
+
+    // Display text with timing
+    fillTextBox(currentText);
+
+    needsRedraw = true;
+}
+
 function keyPressed() {
     if (!textFullyDisplayed) {
         skipTextAnimation = true;
+    } else if (event.key === '}') { 
+        window.api.navigate('home.html');
+    } else if (event.key === '{') {
+        window.api.navigate('automata.html');
+    } else if (event.key === 'Escape') {
+        if (window.api) {
+          window.api.quitApp();
+        }
     } else if (key >= '1' && key <= String(currentChoices.length)) {
         let choiceIndex = int(key) - 1;
         inkStory.ChooseChoiceIndex(choiceIndex);

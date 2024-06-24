@@ -1,5 +1,5 @@
 
-Libuše, the prophetess, cloaked in a green sheet of symbols, stood in the shaded valley rather than on the bald hill where leered the stone idol of Perun. She counted notches on a shield. This was the first reading. Her eyes, deep and knowing, gazed into the future. She turned to her people, gathered around in anticipation.
+The prophetess, cloaked in a green sheet of symbols, stood in the shaded valley rather than on the bald hill where leered the stone idol with mossy eyes. She counted notches on a shield. This was the first reading. Her eyes, deep and knowing, gazed into the future. She turned to her people, gathered around in anticipation.
 LIBUŠE: (calmly) Have you reached the Kingdom of Pluto? The sand is thrown. Gilded copper articles are moistened with water. Shoemakers blacking the term. Nevertheless therein lies the cupriferous stratum, black coloured silver granules.
 
 VAR judgeName = "Via"
@@ -13,12 +13,9 @@ VAR judgeName = "Via"
 
 == ore_mountains ==
 LIBUŠE: (with conviction) rope. pulley.
-of the yearlings to strěžibor ot sázavy ladny after samorod with mže silver bearing
-after all the peasants march under lechs and lords
-even after chrudoš even after staglav brothers divorce
 about villages where even lords lie in the snow
 in vyšegrad in joachimsthal he crosses the steps of birth
-according to his own a princess in a white flowing dress rises
+according to his own a princess in a white flowing dress sank
 he steps on the table often in the famous assembly
 The invention of death, the excavation of it
 
@@ -58,7 +55,7 @@ Their virtues are greatly hardened by the former are smelted in order that we do
 Washer who washes it in writing.
 
 #rocks
-+ Tell us more about the Ore Mountains.
++ Tell us more about the Mountains.
     -> ore_mountains
 + What else do you see, great prophetess?
     -> creation_of_peasantry
@@ -69,11 +66,11 @@ Acid mine drainage in Animas river following the Gold King Mine Spill.
 Kidneys are unable to filter uranium out of the bloodstream.
 
 #falling
-+ How will this new class come to be?
++ Where are we falling?
     -> rise_of_peasantry
 + What will their lives be like?
     -> lives_of_peasantry
-+ Tell us more about the Ore Mountains.
++ Tell us more about the Mountains.
     -> ore_mountains
 
 == rise_of_peasantry ==
