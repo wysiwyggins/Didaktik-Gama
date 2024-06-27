@@ -12,6 +12,7 @@ let textFullyDisplayed = false;
 let skipTextAnimation = false;
 let textTimer;
 let optionTimer;
+let autoSelectOptionTimer;
 
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
 const FLIPPED_VERTICALLY_FLAG = 0x40000000;
@@ -30,6 +31,7 @@ function fetchJudgeName() {
         })
         .catch(error => console.error('Error fetching judgeName:', error));
 }
+
 
 function preload() {
     let spritesheetPromise = new Promise((resolve, reject) => {
@@ -218,7 +220,7 @@ function drawBox(x, y, w, h) {
     displayTile("BOX_BOTTOM_RIGHT", x + w - 1, y + h - 1);
 }
 
-function fillTextBox(text) {
+function fillTextBox(text, callback) {
     clearBox(1, 1, textBoxWidth - 2, textBoxHeight - 2);
     let words = text.split(/(\s+|\n)/); // Split by spaces and newlines, keeping the delimiters
     let x = 1, y = 1;
@@ -261,7 +263,7 @@ function fillTextBox(text) {
             }
             clearInterval(textTimer); // Stop the timer when all text is displayed
             textFullyDisplayed = true;
-            fillOptionsBox(currentChoices); // Fill options box after text box
+            if (callback) callback(); // Trigger the callback if provided
             return;
         }
 
@@ -289,7 +291,13 @@ function fillTextBox(text) {
             }
         }
         displayIndex++;
-    }, 150); // Display a character every 100 milliseconds
+    }, 150); // Display a character every 150 milliseconds
+}
+
+function displayChoicesWithDelay() {
+    setTimeout(() => {
+        fillOptionsBox(currentChoices);
+    }, 500); // Delay before displaying choices
 }
 
 function fillOptionsBox(options) {
@@ -302,6 +310,7 @@ function fillOptionsBox(options) {
     optionTimer = setInterval(() => {
         if (displayIndex >= options.length) {
             clearInterval(optionTimer); // Stop the timer when all options are displayed
+            startAutoSelectOptionTimer(); // Start the auto-select option timer
             return;
         }
 
@@ -315,6 +324,17 @@ function fillOptionsBox(options) {
 
         displayIndex++;
     }, 1000); // Display an option every second
+}
+
+function startAutoSelectOptionTimer() {
+    clearInterval(autoSelectOptionTimer); // Clear any existing timer
+
+    autoSelectOptionTimer = setTimeout(() => {
+        if (currentChoices.length > 0) {
+            inkStory.ChooseChoiceIndex(0); // Automatically select the first option
+            continueStory();
+        }
+    }, 5000); // Automatically select an option after 5 seconds
 }
 
 function clearBox(x, y, w, h) {
@@ -408,7 +428,7 @@ function continueStory() {
     }
 
     currentChoices = inkStory.currentChoices.map(choice => choice.text);
-    
+
     // Check for tags to update the current layer
     let tags = inkStory.currentTags;
     for (let tag of tags) {
@@ -422,19 +442,10 @@ function continueStory() {
     textFullyDisplayed = false;
     skipTextAnimation = false;
 
-    // Display text with timing
-    fillTextBox(currentText);
-
-    // Check if there are no more options and the story cannot continue
-    if (currentChoices.length === 0 && !inkStory.canContinue) {
-        setTimeout(() => {
-            window.api.navigate('video.html');
-            console.log('Navigating to video.html');
-        }, 1000); // Delay to allow the last text to be displayed
-    } else {
-        // Display choices if there are any
+    // Display text with timing and pass fillOptionsBox as a callback
+    fillTextBox(currentText, () => {
         fillOptionsBox(currentChoices);
-    }
+    });
 
     needsRedraw = true;
 }
@@ -459,6 +470,7 @@ function keyPressed() {
           window.api.quitApp();
         }
     } else if (key >= '1' && key <= String(currentChoices.length)) {
+        clearTimeout(autoSelectOptionTimer); // Clear the auto-select option timer when a key is pressed
         let choiceIndex = int(key) - 1;
         inkStory.ChooseChoiceIndex(choiceIndex);
         continueStory();
