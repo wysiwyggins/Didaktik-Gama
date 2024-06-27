@@ -24,6 +24,6 @@ canvas#defaultCanvas0 {
 .fullscreen {
   width: 100vw;
   height: 100vh;
-  object-fit: fit;
+  object-fit: contain;
   background-color: black;
 }

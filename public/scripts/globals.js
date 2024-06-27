@@ -5,6 +5,7 @@ let spritesheetData;
 let baseColor;
 let colors = []; 
 let sounds = [];
+let videoCounter = 0;
 // Function to convert x, y coordinates to an index
 function xyToIndex(x, y) {
   return y * 23 + x;
@@ -22,7 +23,7 @@ const globalVars = {
   CANVAS_ROWS: 60,
   SPRITESHEET_COLS: 23,
   SPRITESHEET_ROWS: 11,
-  MAX_TILES: 65 * 60, // CANVAS_COLS * CANVAS_ROWS
+  MAX_TILES: 65 * 60 // CANVAS_COLS * CANVAS_ROWS
 };
 
 const altCharToTileName = {

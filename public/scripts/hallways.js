@@ -176,6 +176,7 @@ function draw() {
   }
   
   if (frameCount > 8000) {
+    console.log(frameCount);
     window.api.navigate('patterns2.html');
   }
 
@@ -190,6 +191,10 @@ function drawTextTiles() {
     let x = tile.x * globalVars.TILE_WIDTH / 2 + globalVars.TILE_WIDTH / 4;
     let y = tile.y * globalVars.TILE_HEIGHT / 2 + globalVars.TILE_HEIGHT / 4;
     image(spriteSheet, x, y, globalVars.TILE_WIDTH / 2, globalVars.TILE_HEIGHT / 2, sx, sy, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
+  }
+  if (frameCount > 7000) {
+    console.log(frameCount);
+    window.api.navigate('patterns2.html');
   }
 }
 
@@ -224,10 +229,10 @@ function displayCenteredWord(word) {
     let char = word[i];
     let tileIndex = getTileIndexFromChar(char);
     if (tileIndex !== null) {
-      console.log(`Displaying character: ${char} at index ${tileIndex}`);
+      //console.log(`Displaying character: ${char} at index ${tileIndex}`);
       setCurrentTile(tileIndex, true);
     } else {
-      console.log(`No tile index found for character: ${char}`);
+      // /console.log(`No tile index found for character: ${char}`);
       advanceCursor(); // Skip to the next position if no tile index is found
     }
   }

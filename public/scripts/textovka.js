@@ -13,8 +13,6 @@ let skipTextAnimation = false;
 let textTimer;
 let optionTimer;
 
-
-
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
 const FLIPPED_VERTICALLY_FLAG = 0x40000000;
 const FLIPPED_DIAGONALLY_FLAG = 0x20000000;
@@ -108,7 +106,7 @@ function parseTMJ(tmj) {
             layers[layer.name] = parsedLayer;
         }
     });
-    console.log("Parsed TMJ layers:", layers);
+    //console.log("Parsed TMJ layers:", layers);
     return layers;
 }
 
@@ -294,43 +292,6 @@ function fillTextBox(text) {
     }, 150); // Display a character every 100 milliseconds
 }
 
-function continueStory() {
-    if (!inkStory) return;
-
-    currentText = "";
-    while (inkStory.canContinue) {
-        currentText += inkStory.Continue();
-    }
-
-    currentChoices = inkStory.currentChoices.map(choice => choice.text);
-    
-    // Check for tags to update the current layer
-    let tags = inkStory.currentTags;
-    for (let tag of tags) {
-        if (tag.startsWith("layer")) {
-            currentLayerName = tag.slice(1); // Remove the leading '#' character
-            console.log(`Switching to layer: ${currentLayerName}`);
-        }
-    }
-
-    // If there are no more choices and the story can't continue, navigate to home
-    if (currentChoices.length === 0 && !inkStory.canContinue) {
-        window.api.navigate('home.html');
-        return;
-    }
-
-    // Reset indices for display
-    textDisplayIndex = 0;
-    optionDisplayIndex = 0;
-    textFullyDisplayed = false;
-    skipTextAnimation = false;
-
-    // Display text with timing
-    fillTextBox(currentText);
-
-    needsRedraw = true;
-}
-
 function fillOptionsBox(options) {
     clearBox(1, textBoxHeight + 1, inputBoxWidth - 2, inputBoxHeight - 2);
     let x = 1, y = textBoxHeight + 1;
@@ -355,7 +316,6 @@ function fillOptionsBox(options) {
         displayIndex++;
     }, 1000); // Display an option every second
 }
-
 
 function clearBox(x, y, w, h) {
     for (let i = x; i < x + w; i++) {
@@ -459,13 +419,22 @@ function continueStory() {
     }
 
     // Reset indices for display
-    textDisplayIndex = 0;
-    optionDisplayIndex = 0;
     textFullyDisplayed = false;
     skipTextAnimation = false;
 
     // Display text with timing
     fillTextBox(currentText);
+
+    // Check if there are no more options and the story cannot continue
+    if (currentChoices.length === 0 && !inkStory.canContinue) {
+        setTimeout(() => {
+            window.api.navigate('video.html');
+            console.log('Navigating to video.html');
+        }, 1000); // Delay to allow the last text to be displayed
+    } else {
+        // Display choices if there are any
+        fillOptionsBox(currentChoices);
+    }
 
     needsRedraw = true;
 }
@@ -478,40 +447,11 @@ function displayChoices() {
     fillOptionsBox(currentChoices);
 }
 
-function continueStory() {
-    if (!inkStory) return;
-
-    currentText = "";
-    while (inkStory.canContinue) {
-        currentText += inkStory.Continue();
-    }
-
-    currentChoices = inkStory.currentChoices.map(choice => choice.text);
-    
-    // Check for tags to update the current layer
-    let tags = inkStory.currentTags;
-    for (let tag of tags) {
-        if (tag.startsWith("layer")) {
-            currentLayerName = tag.slice(1); // Remove the leading '#' character
-            console.log(`Switching to layer: ${currentLayerName}`);
-        }
-    }
-
-    // Reset indices for display
-    textFullyDisplayed = false;
-    skipTextAnimation = false;
-
-    // Display text with timing
-    fillTextBox(currentText);
-
-    needsRedraw = true;
-}
-
 function keyPressed() {
     if (!textFullyDisplayed) {
         skipTextAnimation = true;
     } else if (event.key === '}') { 
-        window.api.navigate('home.html');
+        window.api.navigate('video.html');
     } else if (event.key === '{') {
         window.api.navigate('automata.html');
     } else if (event.key === 'Escape') {

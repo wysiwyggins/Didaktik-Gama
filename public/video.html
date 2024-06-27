@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self'; img-src 'self'; media-src 'self'; worker-src 'self' blob:">
     <title>Video Player</title>
+    <script src="scripts/globals.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>

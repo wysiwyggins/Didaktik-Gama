@@ -1299,7 +1299,7 @@ class Player extends Actor{
                 if (Math.random() < 1/5) {
                     let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
                     this.scheduler.add(uranium, true); // Add Uranium to the scheduler
-                    messageList.addMessage("You found Uranium!");
+                    messageList.addMessage("You found Autunite!");
                 }
         
                 // Chance to break the mattock
@@ -1944,7 +1944,7 @@ class Monster extends Actor{
                                 if (Math.random() < 1/8) {
                                     let uranium = new Uranium(targetX, targetY, this.scheduler, '0xADFF2F');
                                     this.scheduler.add(uranium, true); // Add Uranium to the scheduler
-                                    messageList.addMessage("The robot found Uranium!");
+                                    messageList.addMessage("The robot found Autunite!");
                                 }
             
                                 break; // Break after one successful mine action
