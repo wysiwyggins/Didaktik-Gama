@@ -146,8 +146,17 @@ function setCurrentTile(tileIndex) {
       }
       advanceCursor();
       tilesDisplayed++;
+      if (cursorY >= 59) {
+        window.api.navigate('automata2.html');
+        console.log("Time to switch sketches, cursorY is " + cursorY);
+      }
+      if (tilesDisplayed >= 480) {
+        window.api.navigate('automata2.html');
+        console.log("Really need to switch sketches! " + tilesDisplayed);
+      }
       if (tilesDisplayed >= globalVars.MAX_TILES - 180) {
         window.api.navigate('automata2.html');
+        console.log("Really need to switch sketches! " + tilesDisplayed);
       }
   } else {
       console.log("Cursor position out of bounds:", cursorX, cursorY);
@@ -194,6 +203,7 @@ function advanceCursor() {
         }
     }
   }
+  console.log("Cursor position:", cursorX, cursorY);
   wave1.freq((50 + cursorX * cursorY) % random(50, 260));
   wave2.freq((50 + cursorY - cursorX) / random(50, 260));
 }

@@ -7,7 +7,7 @@ const SPRITESHEET_ROWS = 11;
 let season = 0;
 let day = 0;
 let year = 0;
-let MAX_YEAR = 30;
+let MAX_YEAR = 24;
 
 
 const BOX_TOP_LEFT = xyToIndex(8, 9);
@@ -308,7 +308,9 @@ function draw() {
   }
   if (year >= MAX_YEAR) {  
     year = 0;
-    window.location.href = 'hallways.html';
+    if (window.api) {
+      window.api.navigate('patterns.html');
+    }
   }
 
 
@@ -453,7 +455,7 @@ function keyPressed() {
     console.log("KeyPressed detected: Key = " + key + ", keyCode = " + keyCode);
   
     if (key === '}') { 
-      window.location.href = 'hallways.html';
+      window.location.href = 'patterns.html';
     } else if (event.key === '{') {
       window.location.href = 'mirror.html';
     } else if (event.key === 'Escape') {

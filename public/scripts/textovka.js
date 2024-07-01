@@ -32,7 +32,6 @@ function fetchJudgeName() {
         .catch(error => console.error('Error fetching judgeName:', error));
 }
 
-
 function preload() {
     let spritesheetPromise = new Promise((resolve, reject) => {
         spritesheet = loadImage(globalVars.SPRITESHEET_PATH, () => {
@@ -108,7 +107,7 @@ function parseTMJ(tmj) {
             layers[layer.name] = parsedLayer;
         }
     });
-    //console.log("Parsed TMJ layers:", layers);
+    console.log("Parsed TMJ layers:", layers);
     return layers;
 }
 
@@ -191,7 +190,7 @@ function draw() {
         if (currentText) {
             displayCurrentText();
         }
-        if (currentChoices.length > 0) {
+        if (currentChoices.length > 0 && textFullyDisplayed) {
             displayChoices();
         }
         drawTileMap();
@@ -231,6 +230,8 @@ function fillTextBox(text, callback) {
     textFullyDisplayed = false;
     skipTextAnimation = false;
 
+    console.log('Starting to fill text box with story content');
+
     textTimer = setInterval(() => {
         if (displayIndex >= words.length || skipTextAnimation) {
             if (skipTextAnimation) {
@@ -263,6 +264,8 @@ function fillTextBox(text, callback) {
             }
             clearInterval(textTimer); // Stop the timer when all text is displayed
             textFullyDisplayed = true;
+            fillOptionsBox(currentChoices);
+            console.log('Text fully displayed');
             if (callback) callback(); // Trigger the callback if provided
             return;
         }
@@ -294,11 +297,6 @@ function fillTextBox(text, callback) {
     }, 150); // Display a character every 150 milliseconds
 }
 
-function displayChoicesWithDelay() {
-    setTimeout(() => {
-        fillOptionsBox(currentChoices);
-    }, 500); // Delay before displaying choices
-}
 
 function fillOptionsBox(options) {
     clearBox(1, textBoxHeight + 1, inputBoxWidth - 2, inputBoxHeight - 2);
@@ -307,9 +305,12 @@ function fillOptionsBox(options) {
 
     clearInterval(optionTimer); // Clear any existing timer
 
+    console.log('Starting to fill options box');
+
     optionTimer = setInterval(() => {
         if (displayIndex >= options.length) {
             clearInterval(optionTimer); // Stop the timer when all options are displayed
+            console.log('Options fully displayed, starting auto-select timer');
             startAutoSelectOptionTimer(); // Start the auto-select option timer
             return;
         }
@@ -331,10 +332,11 @@ function startAutoSelectOptionTimer() {
 
     autoSelectOptionTimer = setTimeout(() => {
         if (currentChoices.length > 0) {
+            console.log('Auto-selecting the first option');
             inkStory.ChooseChoiceIndex(0); // Automatically select the first option
             continueStory();
         }
-    }, 5000); // Automatically select an option after 5 seconds
+    }, 15000); // Automatically select an option after 5 seconds
 }
 
 function clearBox(x, y, w, h) {
@@ -442,7 +444,7 @@ function continueStory() {
     textFullyDisplayed = false;
     skipTextAnimation = false;
 
-    // Display text with timing and pass fillOptionsBox as a callback
+    // Display text with timing and pass displayChoicesWithDelay as a callback
     fillTextBox(currentText, () => {
         fillOptionsBox(currentChoices);
     });
@@ -462,7 +464,7 @@ function keyPressed() {
     if (!textFullyDisplayed) {
         skipTextAnimation = true;
     } else if (event.key === '}') { 
-        window.api.navigate('video.html');
+        window.api.navigate('geomancy.html');
     } else if (event.key === '{') {
         window.api.navigate('automata.html');
     } else if (event.key === 'Escape') {

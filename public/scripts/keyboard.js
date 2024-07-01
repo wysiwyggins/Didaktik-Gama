@@ -146,7 +146,7 @@ function setCurrentTile(tileIndex) {
     }
     advanceCursor();
     tilesDisplayed++;
-    if (tilesDisplayed >= globalVars.MAX_TILES) {
+    if (tilesDisplayed >= globalVars.MAX_TILES - 180) {
       window.api.navigate('automata2.html');
     }
   } else {

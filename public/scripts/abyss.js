@@ -310,7 +310,7 @@ function keyPressed(event) {
   if (event.key === '}') { 
     window.api.navigate('mirror.html');
   } else if (event.key === '{') {
-    window.api.navigate('game.html');
+    window.api.navigate('home.html');
   } else if (event.key === 'Escape') {
     if (window.api) {
       window.api.quitApp();

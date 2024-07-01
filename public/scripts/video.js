@@ -15,5 +15,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Set video to fullscreen
     videoPlayer.requestFullscreen().catch(err => {
         console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-    });
+    });  // Add keydown event listener for hotkeys
+    document.addEventListener('keydown', keyPressed);
 });
+
+function keyPressed(event) {
+  if (event.key === '}') { 
+    window.location.href = 'geomancy.html';
+  } else if (event.key === '{') {
+    window.location.href = 'automata.html';
+  } else if (event.key === 'c') {
+    window.location.href = 'cradle.html';
+  } else if (event.key === 'v') {
+    window.location.href = 'video.html';
+  } else if (event.key === 't') {
+    window.location.href = 'textovka.html';
+  } else if (event.key === 'Escape') {
+    if (window.api) {
+      window.api.quitApp();
+    }
+  }
+}
