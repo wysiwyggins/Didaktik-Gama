@@ -20,7 +20,8 @@ const FLIPPED_DIAGONALLY_FLAG = 0x20000000;
 
 function fetchJudgeName() {
     const serverUrl = 'http://localhost:3000/judgeName';
-    fetch(serverUrl)
+    try {
+        fetch(serverUrl)
         .then(response => response.json())
         .then(data => {
             console.log('Fetched judgeName:', data.judgeName);
@@ -30,6 +31,10 @@ function fetchJudgeName() {
             }
         })
         .catch(error => console.error('Error fetching judgeName:', error));
+    } catch (error) {
+        judgeName = "Via";
+     }
+    
 }
 
 function preload() {

@@ -9,6 +9,7 @@ const TILE_HEIGHT = 30; // height of one tile in pixels
 const MAP_WIDTH = Math.floor(displayWidth / TILE_WIDTH);
 const MAP_HEIGHT = Math.floor(displayHeight / TILE_HEIGHT);
 
+
 // Create a new Pixi Application
 let app = new PIXI.Application({
     width: displayWidth,
