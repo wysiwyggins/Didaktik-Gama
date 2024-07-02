@@ -2,12 +2,15 @@
 const devicePixelRatio = window.devicePixelRatio || 1;
 const displayWidth = Math.floor(window.innerWidth * devicePixelRatio);
 const displayHeight = Math.floor(window.innerHeight * devicePixelRatio);
+console.log(`Display Width: ${displayWidth}, Display Height: ${displayHeight}, Device Pixel Ratio: ${devicePixelRatio}`);
+
 
 // Calculate map dimensions based on tile size
 const TILE_WIDTH = 40; // width of one tile in pixels
 const TILE_HEIGHT = 30; // height of one tile in pixels
 const MAP_WIDTH = Math.floor(displayWidth / TILE_WIDTH);
 const MAP_HEIGHT = Math.floor(displayHeight / TILE_HEIGHT);
+console.log(`Map Width: ${MAP_WIDTH}, Map Height: ${MAP_HEIGHT}`);
 
 
 // Create a new Pixi Application
@@ -18,7 +21,7 @@ let app = new PIXI.Application({
     autoDensity: true,
     resolution: 1
 });
-
+console.log("Pixi Application created successfully.");
 
 app.stage.sortableChildren = true;
 // pixi uses this to switch zIndex layering within one of it's containers
@@ -27,7 +30,7 @@ let uiContainer = new PIXI.Container();
 let uiContainerShown = true;
 let uiMaskContainer = new PIXI.Container();
 let gameContainer = new PIXI.Container();
-
+console.log("Containers created.");
 //I've currently only got three pixi containers to render sprites to the screen,
 //gameContainer has the game stage, uiMask is a translucent white background for UIBoxes
 //and uiContainer has the uiBox borders and content
@@ -36,16 +39,16 @@ app.stage.addChild(gameContainer);
 gameContainer.sortableChildren = true;
 app.stage.addChild(uiMaskContainer);
 app.stage.addChild(uiContainer);
+console.log("Containers added to the stage.");
 
-//adding a global stub for the player. This kind of precludes fun things like multiple players, but oh well
-// there is an array of players still from when I thought I'd have multiple players
-let player = null;
 
 // Add the app view to our HTML document
 document.getElementById('game').appendChild(app.view);
-
+console.log("App view added to HTML document.");
 let turnTimeout; // timer for passing turns 
-
+//adding a global stub for the player. This kind of precludes fun things like multiple players, but oh well
+// there is an array of players still from when I thought I'd have multiple players
+let player = null;
 // Set up some constants
 const rect = app.view.getBoundingClientRect();
 const SCALE_FACTOR = 1; // Scaling factor for HiDPI displays
@@ -54,8 +57,10 @@ const SCALE_FACTOR = 1; // Scaling factor for HiDPI displays
 let dungeon = null;
 let currentTreasureRoom; // right now one room has locked doors.
 let globalDoorCounter = 0;
-let currentLevelIndex = 1;
 
+console.log("Key game elements initialized.");
+
+let currentLevelIndex = 1; //not using this yet since level saving and loading doesn't work
 let walkableTiles = [];
 let publicTiles = [];
 
