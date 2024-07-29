@@ -187,8 +187,15 @@ function passTurn() {
 
 
 function resetTurnTimer() {
-    clearTimeout(turnTimeout);  // Clear the existing timer
+    try {
+        clearTimeout(turnTimeout);
+        console.log('Turn timeout cleared.');
+    } catch (error) {   
+        console.error('Error clearing turn timeout:', error);
+    }
+   
     turnTimeout = setTimeout(passTurn, 5000); //5 sec timer
+    console.log('Turn timeout set.');
 }
 
 //var audio = new Audio('assets/sound/grottoAudiosprite.mp3');
@@ -203,7 +210,9 @@ function createEmptyMap() {
             map[y][x] = 0;
         }
     }
+    console.log('Empty map created.');
     return map;
+
 }
 
 //loading animated sprite tiles for fire and smoke
@@ -219,6 +228,7 @@ PIXI.Loader.shared
 
 
 PIXI.Loader.shared.onComplete.add(() => {
+    console.log('Spritesheet loaded successfully.');
     for (let i = 0; i < 7; i++) {
         let rect = new PIXI.Rectangle(i * globalVars.TILE_WIDTH, 0, globalVars.TILE_WIDTH, globalVars.TILE_HEIGHT);
         let texture = new PIXI.Texture(PIXI.Loader.shared.resources.fire.texture.baseTexture, rect);
@@ -229,6 +239,7 @@ PIXI.Loader.shared.onComplete.add(() => {
         let texture = new PIXI.Texture(PIXI.Loader.shared.resources.smoke.texture.baseTexture, rect);
         smokeFrames.push(texture);
     }
+    console.log('Fire and smoke frames loaded.');
 });
 //console.log(smokeFrames);
 
@@ -313,7 +324,7 @@ class Level {
         this.activeItems = [];
         this.upExitPosition = {x: 0, y: 0};
         this.downExitPosition = {x: 0, y: 0};
-
+        console.log('Level created.');
     }
 }
 
@@ -321,6 +332,7 @@ function saveLevel(levelIndex) {
     const saveState = levels[levelIndex];  // Assumes you've populated this level with data
     const saveData = JSON.stringify(saveState);
     localStorage.setItem(`levelSave_${levelIndex}`, saveData);
+    console.log(`Level ${levelIndex} saved.`);
 }
 
 function loadLevel(levelIndex) {
@@ -329,6 +341,7 @@ function loadLevel(levelIndex) {
 
     const saveState = JSON.parse(saveData);
     levels[levelIndex] = Object.assign(new Level(), saveState);  // Restore level data
+    console.log(`Level ${levelIndex} loaded.`);
 }
 
 function goToNextLevel(currentLevelIndex) {
@@ -1689,51 +1702,69 @@ function findNearestItem(px, py) {
 }
 
 function keyHoleZoom(player) {
-   
-    const BLANK_TILE = { x: 0, y: 0 };
-    for (let y = 0; y < MAP_HEIGHT; y++) {
-        for (let x = 0; x < MAP_WIDTH; x++) {
-            createSprite(x, y, {x: 9, y: 9}, overlayMap, 0);
+    try {
+        console.log('keyHoleZoom function started');
+        
+        const BLANK_TILE = { x: 0, y: 0 };
+        console.log('Initializing the overlay map with blank tiles...');
+        for (let y = 0; y < MAP_HEIGHT; y++) {
+            for (let x = 0; x < MAP_WIDTH; x++) {
+                createSprite(x, y, {x: 9, y: 9}, overlayMap, 0);
+            }
         }
-    }
+        console.log('Overlay map initialized.');
 
-    // Step 2: Locate the player
-    let playerX = player.x;
-    let playerY = player.y;
+        // Step 2: Locate the player
+        let playerX = player.x;
+        let playerY = player.y;
+        console.log(`Player located at (${playerX}, ${playerY})`);
 
-    // Step 3: Clear the tile at the player's position
-    createSprite(playerX, playerY, BLANK_TILE, overlayMap, 0);
+        // Step 3: Clear the tile at the player's position
+        createSprite(playerX, playerY, BLANK_TILE, overlayMap, 0);
+        console.log('Cleared tile at player position');
 
-    // Step 4: Gradually clear the tiles in a growing circle
-    let radius = 1;
-    let maxRadius = Math.max(MAP_WIDTH, MAP_HEIGHT);
-    sound.play('levelout');
-    function revealCircle() {
-        let tilesCleared = false;
-        for (let dy = -radius; dy <= radius; dy++) {
-            for (let dx = -radius; dx <= radius; dx++) {
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance <= radius) {
-                    let x = playerX + dx;
-                    let y = playerY + dy;
-                    if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
-                        if (overlayMap[y][x] !== BLANK_TILE) {
-                            createSprite(x, y, BLANK_TILE, overlayMap, 0);
-                            tilesCleared = true;
+        // Step 4: Gradually clear the tiles in a growing circle
+        let radius = 1;
+        let maxRadius = Math.max(MAP_WIDTH, MAP_HEIGHT);
+        console.log('Starting sound effect for level out');
+        sound.play('levelout');
+
+        function revealCircle() {
+            try {
+                console.log(`Revealing circle with radius ${radius}`);
+                let tilesCleared = false;
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        let distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance <= radius) {
+                            let x = playerX + dx;
+                            let y = playerY + dy;
+                            if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+                                if (overlayMap[y][x] !== BLANK_TILE) {
+                                    createSprite(x, y, BLANK_TILE, overlayMap, 0);
+                                    tilesCleared = true;
+                                }
+                            }
                         }
                     }
                 }
+                if (radius < maxRadius && tilesCleared) {
+                    radius = radius * 2;
+                    console.log(`Circle radius increased to ${radius}`);
+                    setTimeout(revealCircle, 50); // Adjust the speed of the reveal here
+                } else {
+                    console.log('Revealing circle completed');
+                }
+            } catch (innerError) {
+                console.error('Error during revealCircle:', innerError);
             }
         }
-        if (radius < maxRadius && tilesCleared) {
-            radius = radius * 2;
-            setTimeout(revealCircle, 50); // Adjust the speed of the reveal here
-        }
+
+        revealCircle();
+    } catch (error) {
+        console.error('Error in keyHoleZoom:', error);
     }
-
-    revealCircle();
 }
-
 
 
 const MonsterType = Object.freeze({
@@ -2328,6 +2359,7 @@ Monster.prototype.canSeeTarget = function(target) {
 };
 
 function createMonsterSprite(monster) {
+    console.log("Creating monster sprite for " + monster.name);
     activeEntities.push(this);
     let baseTexture = PIXI.BaseTexture.from(PIXI.Loader.shared.resources.tiles.url);
     let firstTileTexture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(
@@ -2933,6 +2965,7 @@ class Item {
                 activeEntities.splice(index, 1);
             }
         };
+        console.log("Item " + this._name + " created");
     }
 
     get name() {
@@ -3841,6 +3874,7 @@ class UIBox {
 async function setup() {
     try {
         socket = io.connect('http://localhost:3000');
+        console.log('Socket connection successful.');
     } catch (error) {
         console.error('Socket connection failed.', error);
     }
@@ -3883,20 +3917,30 @@ async function setup() {
 
     messageList.showBox();
     messageList.showUIContainer();
-    if (socket) {
-        fetch('http://localhost:3000/judgeName')
-            .then(response => response.json())
-            .then(data => {
-                const judgeName = data.judgeName;
-                console.log('Judge name:', judgeName);
-                if (judgeName != ""){
-                    messageList.addMessage(`Your judge is ${judgeName}.`);
-                }
-            })
-            .catch(error => console.error('Error fetching judge name:', error));
+
+   /*  if (socket) {
+        try {
+            console.log('Fetching judge name...');
+            fetch('http://localhost:3000/judgeName')
+                .then(response => response.json())
+                .then(data => {
+                    const judgeName = data.judgeName;
+                    console.log('Judge name:', judgeName);
+                    if (judgeName != ""){
+                        messageList.addMessage(`Your judge is ${judgeName}.`);
+                        console.log(`Your judge is ${judgeName}.`);
+                    }
+                })
+                .catch(error => console.error('Error fetching judge name:', error));
+        }
+        catch (error) {
+            console.error('Error fetching judge name:', error);
+        }
     } else {
         messageList.addMessage('You are not connected to the server.');
-    }
+    } */
+    
+   
     messageList.addMessage(`Press 'i' for key commands.`);
 
     PIXI.Loader.shared.onComplete.add(() => {
@@ -3945,15 +3989,22 @@ async function setup() {
             let randomFireTile = walkableTiles[Math.floor(Math.random() * walkableTiles.length)];
             let fire = new Fire(randomFireTile.x, randomFireTile.y, scheduler, '0xFFCC33');
             scheduler.add(fire, true); // the fire takes turns
+            console.log("fire " + i + " added");
         }
 
         for (let i = 0; i < 3; i++) {
             let randomKudzuTile = publicTiles[Math.floor(Math.random() * publicTiles.length)];
             let kudzu = new Kudzu(randomKudzuTile.x, randomKudzuTile.y, scheduler, 'left');
             scheduler.add(kudzu, true); // the fire takes turns
+            console.log("kudzu " + i + " added");
         }
- 
-        engine.start(); // start the engine
+        
+        try {
+            engine.start();
+        } catch (error) {
+            console.error('Error starting engine:', error);
+        }
+        
         resetTurnTimer();
     });
 

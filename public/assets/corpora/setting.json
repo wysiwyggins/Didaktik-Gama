@@ -1,0 +1,245 @@
+{
+    "description": "Setting and location archetypes.",
+    "settings": [
+        {
+            "name": "void",
+            "synonyms": ["nowhere","nothingness"],
+            "qualities": ["empty","quiet","lonesome"],
+            "nature": "neutral"
+        },
+        {
+            "name": "tavern",
+            "synonyms": ["pub","inn","bar"],
+            "qualities": ["social","educational","inspiring","busy"],
+            "nature": "neutral"
+        },
+        {
+            "name": "library",
+            "synonyms": ["study"],
+            "qualities": ["educational","enlightening","inspiring"],
+            "nature": "good"
+        },
+        {
+            "name": "office",
+            "synonyms": ["workplace","workshop"],
+            "qualities": ["mundane","routine","productive","busy"],
+            "nature": "neutral"
+        },
+        {
+            "name": "dungeon",
+            "synonyms": ["pit","trap","jail"],
+            "qualities": ["dark","hopeless","trapped"],
+            "nature": "evil"
+        },
+        {
+            "name": "haven",
+            "synonyms": ["home","safety","sanctuary","asylum","refuge","shelter"],
+            "qualities": ["restful","peaceful","pleasant","light","recovery"],
+            "nature": "good"
+        },
+        {
+            "name": "shop",
+            "synonyms": ["store","market","bazaar"],
+            "qualities": ["mundane","productive"],
+            "nature": "neutral"
+        },
+        {
+            "name": "church",
+            "synonyms": ["temple","mosque","chapel","cathedral","parish","shrine","synagogue"],
+            "qualities": ["spiritual","welcoming","peaceful","enlightening","inspiring","hopeful","healing"],
+            "nature": "good"
+        },
+        {
+            "name": "tower",
+            "synonyms": ["spire","belfry","lookout","minaret","pillar","skyscraper","turret"],
+            "qualities": ["lofty","thoughtful","watchful","isolated"],
+            "nature": "good"
+        },
+        {
+            "name": "bridge",
+            "synonyms": ["arch","connection","walkway"],
+            "qualities": ["connecting","joining","healing","linking","meeting"],
+            "nature": "neutral"
+        },
+        {
+            "name": "plaza",
+            "synonyms": ["clearing","field","square","meadow"],
+            "qualities": ["open","exposed","spacious","clear"],
+            "nature": "good"
+        },
+        {
+            "name": "road",
+            "synonyms": ["path","street","trail","lane","passage"],
+            "qualities": ["inspiring","mundane","moving","productive","progress"],
+            "nature": "good"
+        },
+        {
+            "name": "crossroads",
+            "synonyms": ["intersection","fork"],
+            "qualities": ["transitional","thoughtful","progress"],
+            "nature": "neutral"
+        },
+        {
+            "name": "forest",
+            "synonyms": ["jungle","wilderness","woods"],
+            "qualities": ["mysterious","dark","dangerous","wild","uncontrollable","tangled","difficult"],
+            "nature": "evil"
+        },
+        {
+            "name": "cave",
+            "synonyms": ["hideout","tunnel"],
+            "qualities": ["deepness","dark","dangerous","mysterious","inside"],
+            "nature": "evil"
+        },
+        {
+            "name": "shore",
+            "synonyms": ["beach","bank","edge","cliff"],
+            "qualities": ["transitional","changing","impeding"],
+            "nature": "neutral"
+        },
+        {
+            "name": "river",
+            "synonyms": ["stream","creek","brook"],
+            "qualities": ["dangerous","uncontrollable","flowing","moving"],
+            "nature": "neutral"
+        },
+        {
+            "name": "water",
+            "synonyms": ["lake","pond","pool"],
+            "qualities": ["spiritual","cleansing","purifying"],
+            "nature": "good"
+        },
+        {
+            "name": "ocean",
+            "synonyms": ["sea"],
+            "qualities": ["timeless","eternal","mysterious","expansive","unknowable","immense"],
+            "nature": "neutral"
+        },
+        {
+            "name": "garden",
+            "synonyms": ["park","yard"],
+            "qualities": ["safe","orderly","controlled","happy","nurturing","growing"],
+            "nature": "good"
+        },
+        {
+            "name": "desert",
+            "synonyms": ["wasteland"],
+            "qualities": ["arid","empty","hopeless","isolated","lonesome","harsh","dangerous","changing"],
+            "nature": "evil"
+        },
+        {
+            "name": "island",
+            "synonyms": ["ship","boat","airplane","enclave"],
+            "qualities": ["isolated","safe"],
+            "nature": "good"
+        },
+        {
+            "name": "mountain",
+            "synonyms": ["hill","peak","crag"],
+            "qualities": ["dangerous","transitional","challenging"],
+            "nature": "neutral"
+        },
+        {
+            "name": "labyrinth",
+            "synonyms": ["maze"],
+            "qualities": ["confusing","challenging","difficult"],
+            "nature": "evil"
+        },
+        {
+            "name": "day",
+            "synonyms": ["daytime","sunlight"],
+            "qualities": ["ordered","safe","enlightening","productive"],
+            "nature": "good"
+        },
+        {
+            "name": "night",
+            "synonyms": ["darkness","twilight"],
+            "qualities": ["dark","dangerous","chaotic","mysterious","playful"],
+            "nature": "evil"
+        },
+        {
+            "name": "fortress",
+            "synonyms": ["citadel","abbey","hold","hideout","base","castle","keep"],
+            "qualities": ["strong","safe","protected"],
+            "nature": "neutral"
+        },
+        {
+            "name": "heaven",
+            "synonyms": ["paradise","nirvana","afterlife","eternity","bliss","promised land"],
+            "qualities": ["safe","peaceful","happy","eternal","spiritual","enlightening"],
+            "nature": "good"
+        },
+        {
+            "name": "hell",
+            "synonyms": ["underworld","abyss","inferno","damnation","perdition","purgatory","tartarus"],
+            "qualities": ["dark","dangerous","chaotic","eternal","punishing","hopeless"],
+            "nature": "evil"
+        },
+        {
+            "name": "world",
+            "synonyms": ["earth","planet","globe","cosmos","universe"],
+            "qualities": [],
+            "nature": "neutral"
+        },
+        {
+            "name": "city",
+            "synonyms": ["town","metropolis","village","settlement","municipality","community"],
+            "qualities": ["busy","productive","progressive","social","inspiring","mundane"],
+            "nature": "neutral"
+        },
+        {
+            "name": "country",
+            "synonyms": ["nation","state","kingdom","empire","realm","territory"],
+            "qualities": ["expansive","open","wild","free","productive","progressive"],
+            "nature": "neutral"
+        },
+        {
+            "name": "world",
+            "synonyms": ["earth","planet","globe","cosmos","universe"],
+            "qualities": [],
+            "nature": "neutral"
+        },
+        {
+            "name": "dream",
+            "synonyms": ["nightmare","fantasy","vision","hallucination","illusion","reverie"],
+            "qualities": ["mysterious","confusing","inspiring","hopeful","frightening","playful"],
+            "nature": "neutral"
+        },       
+        {
+            "name": "void",
+            "synonyms": ["nowhere","nothingness"],
+            "qualities": ["empty","quiet","lonesome"],
+            "nature": "neutral"
+        },
+        {
+            "name": "heavens",
+            "synonyms": ["sky","firmament","celestial sphere","space","cosmos","universe"],
+            "qualities": ["eternal","mysterious","expansive","unknowable","immense"],
+            "nature": "good"
+        },
+        {
+            "name": "underworld",  
+            "synonyms": ["hell","abyss","inferno","damnation","perdition","purgatory","tartarus"],
+            "qualities": ["dark","dangerous","chaotic","eternal","punishing","hopeless"],
+            "nature": "evil"
+        },
+        {
+            "name": "wilderness",
+            "synonyms": ["forest","jungle","woods","desert","wasteland"],
+            "qualities": ["mysterious","dark","dangerous","wild","uncontrollable","tangled","difficult"],
+            "nature": "evil"
+        },
+        {
+            "name": "home",
+            "synonyms": ["haven","safety","sanctuary","asylum","refuge","shelter"],
+            "qualities": ["restful","peaceful","pleasant","light","recovery"],
+            "nature": "good"
+        },
+        {
+            "name": "meeting",
+            "synonyms": ["crossroads","intersection","fork"],
+            "qualities": ["transitional","thoughtful","progress"],
+            "nature": "neutral"
+        }
+    ]
+}

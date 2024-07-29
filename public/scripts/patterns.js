@@ -34,11 +34,11 @@ function setup() {
 }
 
 function generateBaseAndComplementaryColors() {
-  baseColor = color(random(255), random(255), random(255));
+  baseColor = color(random(100, 255), random(100, 255), random(100, 255));
   colors.push(baseColor);
   for (let i = 1; i <= 3; i++) {
-    colors.push(complementColor(baseColor, i * 90)); // Generate and push complementary colors
-    
+    //colors.push(complementColor(baseColor, i * 90)); // Generate and push complementary colors
+    colors.push(color(300 - red(baseColor), 300 - green(baseColor), 300 - blue(baseColor)));//
   }
 }
 

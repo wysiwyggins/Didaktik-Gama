@@ -10,10 +10,9 @@ function preload() {
   // Load the spritesheet
   auto2Spritesheet = loadImage("assets/spritesheets/libuse40x30-cp437.png");
   //noLoop();
+  backgroundImage = loadImage("./assets/images/falling.png");
   // Load the Tiled data
-  loadJSON("data/ruins.json", function (data) {
-    tiledData = data;
-  });
+
 }
 
 function isBoxTile(index) {
@@ -56,6 +55,7 @@ function setup() {
 
     reverb.process(wave1, 2, 4);
     //noLoop();
+    image(backgroundImage, 0, 0, width, height);
 }
 
 function generateColorPalette(baseColor) {

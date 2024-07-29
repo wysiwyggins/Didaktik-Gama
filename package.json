@@ -1,6 +1,6 @@
 {
   "name": "Didaktik Gama Zero Player",
-  "version": "1.2b",
+  "version": "1.3b",
   "description": "Projection version of didaktik Gama (no roguelike section)",
   "main": "main.js",
   "scripts": {

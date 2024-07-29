@@ -1,0 +1,119 @@
+{
+    "description": "Artifact archetypes.",
+    "artifacts": [
+        {
+            "name": "book",
+            "synonyms": ["tome","scroll","tablet"],
+            "qualities": ["educational","wise"],
+            "nature": "neutral"
+        },
+        {
+            "name": "uranium vase",
+            "synonyms": ["vase"],
+            "qualities": ["beautiful","dangerous"],
+            "nature": "neutral"
+        },
+        {
+            "name": "candle",
+            "synonyms": ["torch","lamp","flashlight","light","beacon"],
+            "qualities": ["enlightening","revealing","illuminating","opening"],
+            "nature": "good"
+        },
+        {
+            "name": "bell",
+            "synonyms": ["signal","chime","warning"],
+            "qualities": ["clear","truthful"],
+            "nature": "good"
+        },
+        {
+            "name": "staff",
+            "synonyms": ["stick","cane","crook","pole"],
+            "qualities": ["strong","steady","supporting"],
+            "nature": "good"
+        },
+        {
+            "name": "blade",
+            "synonyms": ["knife","sword","axe"],
+            "qualities": ["damaging","forceful"],
+            "nature": "evil"
+        },
+        {
+            "name": "seed",
+            "synonyms": ["bean"],
+            "qualities": ["growth","renewal","creation","transitional"],
+            "nature": "good"
+        },
+        {
+            "name": "cloak",
+            "synonyms": ["hood","mask","disguise","robe"],
+            "qualities": ["protective","mysterious","warmth"],
+            "nature": "neutral"
+        },
+        {
+            "name": "map",
+            "synonyms": ["compass","guide"],
+            "qualities": ["helpful","moving","transitional"],
+            "nature": "good"
+        },
+        {
+            "name": "killing-jar",
+            "synonyms": ["jar"],
+            "qualities": ["deadly","dangerous"],
+            "nature": "evil"
+        },
+        {
+            "name": "mask",
+            "synonyms": ["disguise","face","veil"],
+            "qualities": ["mysterious","protective","deceptive"],
+            "nature": "neutral"
+        },
+        {
+            "name": "key",
+            "synonyms": ["lock","unlock"],
+            "qualities": ["opening","closing","revealing","protective"],
+            "nature": "neutral"
+        },
+        {
+            "name": "mirror",
+            "synonyms": ["reflection","glass"],
+            "qualities": ["revealing","truthful","reflective"],
+            "nature": "neutral"
+        },
+        {
+            "name": "rope",
+            "synonyms": ["cord","string","thread"],
+            "qualities": ["binding","connecting","restraining"],
+            "nature": "neutral"
+        },
+        {
+            "name": "ledger",
+            "synonyms": ["book","record","journal"],
+            "qualities": ["truthful","revealing","educational"],
+            "nature": "neutral"
+        },
+        {   
+            "name": "chalise",
+            "synonyms": [""],
+            "qualities": [""],
+            "nature": "good"
+        },
+        {
+            "name": "scepter",
+            "synonyms": [""],
+            "qualities": [""],
+            "nature": "good"
+        },
+        {
+            "name": "cradle",
+            "synonyms": [""],
+            "qualities": [""],
+            "nature": "good"
+        },
+        {
+            "name": "linden leaf",
+            "synonyms": [""],
+            "qualities": [""],
+            "nature": "good"
+        }
+    ]
+}

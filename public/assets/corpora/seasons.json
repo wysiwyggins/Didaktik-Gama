@@ -1,0 +1,14 @@
+{
+  "description": "seasons",
+  "seasons": [
+    "spring",
+    "summer",
+    "autumn",
+    "winter",
+    "dusk",
+    "dawn",
+    "night",
+    "the past",
+    "the future"
+  ]
+}

@@ -99,7 +99,7 @@ function draw() {
   }
   if (loopCounter > 3) {
     console.log('loops' + loopCounter);
-    window.api.navigate('game.html');
+    window.api.navigate('abyss.html');
   }
 
 }
@@ -164,7 +164,7 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.api.navigate('game.html');
+    window.api.navigate('abyss.html');
   } else if (event.key === '{') {
     window.api.navigate('geomancy.html');
   } else if (event.key === 'c') {

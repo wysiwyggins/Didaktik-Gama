@@ -177,7 +177,7 @@ function draw() {
   
   if (frameCount > 8000) {
     console.log(frameCount);
-    window.api.navigate('patterns2.html');
+    window.api.navigate('judge.html');
   }
 
   // Draw text tiles on top of everything else
@@ -194,7 +194,7 @@ function drawTextTiles() {
   }
   if (frameCount > 7000) {
     console.log(frameCount);
-    window.api.navigate('patterns2.html');
+    window.api.navigate('judge.html');
   }
 }
 
@@ -273,7 +273,7 @@ function drawFrame(frame) {
 
 function keyPressed(event) {
   if (event.key === '}') { 
-    window.location.href = 'patterns2.html';
+    window.location.href = 'judge.html';
   } else if (event.key === '{') {
     window.location.href = 'patterns.html';
   } else if (event.key === 'Escape') {
